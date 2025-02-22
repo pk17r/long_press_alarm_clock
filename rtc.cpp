@@ -13,7 +13,7 @@ RTC::RTC() {
   // setup DS3231 rtc
   Ds3231RtcSetup();
 
-  PrintLn("RTC Initialized!");
+  PrintLn(__func__, kInitializedStr);
 }
 
 // setup DS3231 rtc
@@ -93,7 +93,7 @@ void RTC::Ds3231RtcSetup() {
 
 
   // Check if time is up to date
-  PrintLn("Lost power status: ");
+  // Lost power status:
   if (rtc_hw_.lostPower()) {
     #ifdef MORE_LOGS
     PrintLn("POWER FAILED. Clearing flag...");
@@ -102,8 +102,9 @@ void RTC::Ds3231RtcSetup() {
     delay(100);
   }
   #ifdef MORE_LOGS
-  else
+  else {
     PrintLn("POWER OK");
+  }
   #endif
 
   #ifdef MORE_LOGS
@@ -224,13 +225,22 @@ void RTC::SetTodaysMinutes() {
   todays_minutes = todays_minutes_temp;
 }
 
-void RTC::DaysMinutesToClockTime(uint16_t todays_minutes_val, uint8_t &hour_mode_and_am_pm, uint8_t &hr, uint8_t &min) {
+  /**
+  * \brief Converts Minute of the day into HH:MM XM (Only for 12 hour mode)
+  * todays_minutes_val = Minute of the day 0-1439 minutes
+  * @return 
+  * hour_mode_and_am_pm_flag = 1 = 12 hour mode AM hours (1-12 hours)
+  *                       2 = 12 hour mode PM hours (1-12 hours)
+  * hr = Hour
+  * min = Minute
+  */
+void RTC::MinutesToHHMMXM(uint16_t todays_minutes_val, uint8_t &hour_mode_and_am_pm_flag, uint8_t &hr, uint8_t &min) {
   if(todays_minutes_val >= 60 * 12) {
-    hour_mode_and_am_pm = 2;
+    hour_mode_and_am_pm_flag = 2;
     todays_minutes_val -= 60 * 12;
   }
   else
-    hour_mode_and_am_pm = 1;
+    hour_mode_and_am_pm_flag = 1;
 
   min = todays_minutes_val % 60;
 
@@ -242,9 +252,18 @@ void RTC::DaysMinutesToClockTime(uint16_t todays_minutes_val, uint8_t &hour_mode
     hr = hr_temp;
 }
 
-uint16_t RTC::ClockTimeToDaysMinutes(uint8_t hour_mode_and_am_pm, uint8_t hr, uint8_t min) {
+  /**
+  * \brief Converts HH:MM XM into Minute of the day
+  * hour_mode_and_am_pm_flag = 0 = 24 hour mode (0-23 hours)
+  *                       1 = 12 hour mode AM hours (1-12 hours)
+  *                       2 = 12 hour mode PM hours (1-12 hours)
+  * hr = Hour
+  * min = Minute
+  * @return Minute of the day 0-1439 minutes
+  */
+uint16_t RTC::HHMMXMToMinutes(uint8_t hour_mode_and_am_pm_flag, uint8_t hr, uint8_t min) {
   uint16_t todays_minutes_temp = min;
-  if(hour_mode_and_am_pm == 0) {
+  if(hour_mode_and_am_pm_flag == 0) {
     // 24 hour mode
     todays_minutes_temp += hr * 60;
   }
@@ -252,7 +271,7 @@ uint16_t RTC::ClockTimeToDaysMinutes(uint8_t hour_mode_and_am_pm, uint8_t hr, ui
     // 12 hour mode
     if(hr != 12)
       todays_minutes_temp += hr * 60;
-    if(hour_mode_and_am_pm == 2)
+    if(hour_mode_and_am_pm_flag == 2)
       todays_minutes_temp += 12 * 60;
   }
   return todays_minutes_temp;

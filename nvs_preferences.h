@@ -13,9 +13,6 @@ class NvsPreferences {
 public:
 
   NvsPreferences();
-  void SaveDefaults();
-  void SaveDataModelVersion();
-  void PrintSavedData();
 
   void RetrieveLongPressSeconds(uint8_t &long_press_seconds);
   void SaveLongPressSeconds(uint8_t long_press_seconds);
@@ -28,7 +25,7 @@ public:
   void RetrieveWeatherLocationDetails(uint32_t &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial);
   void SaveWeatherLocationDetails(uint32_t location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial);
   void SaveWeatherUnits(bool weather_units_metric_not_imperial);
-  void RetrieveSavedFirmwareVersion(std::string &savedFirmwareVersion);
+  std::string RetrieveSavedFirmwareVersion();
   void SaveCurrentFirmwareVersion();
   uint8_t RetrieveSavedCpuSpeed();
   void SaveCpuSpeed();

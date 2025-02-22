@@ -40,7 +40,7 @@
   const uint8_t TOUCH_PIN_5 = 5;
   const uint8_t TOUCHSCREEN_XP = 19;
   const uint8_t TOUCHSCREEN_XM = 7;   // ADC1 GPIO
-  const uint8_t TOUCHSCREEN_YP = 6;   // ADC1 GPIO
+  const uint8_t TOUCHSCREEN_YP = 3;   // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YM = 20;
 
 

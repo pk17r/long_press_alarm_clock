@@ -26,7 +26,7 @@ void AlarmClock::Setup() {
   // setup buzzer timer
   SetupBuzzerTimer();
 
-  PrintLn("AlarmClock Initialized!");
+  PrintLn("AlarmClock", kInitializedStr);
 }
 
 void AlarmClock::SaveAlarm() {

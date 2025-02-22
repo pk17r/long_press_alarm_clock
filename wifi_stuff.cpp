@@ -24,7 +24,7 @@ WiFiStuff::WiFiStuff() {
 
   TurnWiFiOff();
 
-  PrintLn("WiFiStuff Initialized!");
+  PrintLn(__func__, kInitializedStr);
 }
 
 void WiFiStuff::SaveWiFiDetails() {
@@ -290,10 +290,7 @@ bool WiFiStuff::GetTimeFromNtpServer() {
       int seconds = ntpClient.getSeconds();
       int dayOfWeekSunday0 = ntpClient.getDay();
 
-      #ifdef MORE_LOGS
-      Serial.printf("\t\tNTP Time: %2d:%2d:%2d   DoW=%s  epoch_since_1970=%lu   ", hours, minutes, seconds, kDaysTable_[dayOfWeekSunday0], epoch_since_1970);
-      Serial.flush();
-      #endif
+      PrintLn("NTP Time:",(std::to_string(hours) + ":" + std::to_string(minutes) + ":" + std::to_string(seconds) + " gmt_offset_sec=" + std::to_string(gmt_offset_sec_) + " " + std::to_string(dayOfWeekSunday0) + kDaysTable_[dayOfWeekSunday0] + " epoch=" + std::to_string(epoch_since_1970)));
 
       int today, month, year;
       ConvertEpochIntoDate(epoch_since_1970, today, month, year);
@@ -392,9 +389,7 @@ void WiFiStuff::ConvertEpochIntoDate(unsigned long epoch_since_1970, int &today,
     }
   }
   today = ceil(day);
-  #ifdef MORE_LOGS
-  Serial.print(kMonthsTable[monthJan0]); Serial.print(" "); Serial.print(today); Serial.print(" "); Serial.println(year);
-  #endif
+  PrintLn(__func__, (std::to_string(epoch_since_1970) + " = " + std::to_string(monthJan0) + kMonthsTable[monthJan0] + " " + std::to_string(today) + " " + std::to_string(year)));
   month = monthJan0 + 1;
 }
 

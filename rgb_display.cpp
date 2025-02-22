@@ -87,11 +87,15 @@ void RGBDisplay::Setup() {
     // set display brightness
     CheckPhotoresistorAndSetBrightness();
   }
-  else
+  else {
     // set display brightness based on time of day
     CheckTimeAndSetBrightness();
+  }
 
-  PrintLn("Display Initialized!");
+  // set screensaver motion
+  screensaver_bounce_not_fly_horizontally_ = nvs_preferences->RetrieveScreensaverBounceNotFlyHorizontally();
+
+  PrintLn("Display", kInitializedStr);
 }
 
 void RGBDisplay::RotateScreen() {

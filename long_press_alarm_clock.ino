@@ -100,7 +100,7 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 SPIClass* spi_obj = NULL;
 
 // random afternoon hour and minute to update firmware
-uint16_t ota_update_days_minutes = 0;
+uint16_t ota_update_minute = 0;
 
 // RGB LED Strip Neopixels
 Adafruit_NeoPixel* rgb_led_strip = NULL;
@@ -128,6 +128,14 @@ void LedOnOffResponse();
 // setup core1
 void setup() {
 
+  // LED Pin High
+  pinMode(LED_PIN, OUTPUT);
+  ResponseLed(HIGH);
+
+  // WIFI_LED Low
+  pinMode(WIFI_LED, OUTPUT);
+  digitalWrite(WIFI_LED, LOW);
+
   // make all spi CS pins high
   pinMode(TFT_CS, OUTPUT);
   digitalWrite(TFT_CS, HIGH);
@@ -141,14 +149,6 @@ void setup() {
 
   // pullup debug pin
   pinMode(DEBUG_PIN, INPUT_PULLUP);
-
-  // LED Pin
-  pinMode(LED_PIN, OUTPUT);
-  ResponseLed(HIGH);
-
-  // BUILTIN LED - we use for WiFi Connect Notification
-  pinMode(WIFI_LED, OUTPUT);
-  digitalWrite(WIFI_LED, LOW);
 
   // TFT_RST - pull it low
   pinMode(TFT_RST, OUTPUT);
@@ -182,16 +182,20 @@ void setup() {
   inc_button = new PushButtonTaps(INC_BUTTON_PIN);
   dec_button = new PushButtonTaps(DEC_BUTTON_PIN);
 
+  // Firmware version and date on program
+  PrintLn("kFirmwareVersion:", kFirmwareVersion);
+  PrintLn("kFirmwareDate:", kFirmwareDate);
+
   // initialize modules
   // setup nvs preferences data (needs to be first)
   nvs_preferences = new NvsPreferences();
   // check if firmware was updated
-  std::string saved_firmware_version = "";
-  nvs_preferences->RetrieveSavedFirmwareVersion(saved_firmware_version);
+  std::string saved_firmware_version = nvs_preferences->RetrieveSavedFirmwareVersion();
   if(strcmp(saved_firmware_version.c_str(), kFirmwareVersion.c_str()) != 0) {
     firmware_updated_flag_user_information = true;
     nvs_preferences->SaveCurrentFirmwareVersion();
   }
+
   // setup ds3231 rtc (needs to be before alarm clock)
   rtc = new RTC();
   // setup alarm clock (needs to be before display)
@@ -211,6 +215,7 @@ void setup() {
   display = new RGBDisplay();
   // setup and populate display
   display->Setup();
+  // touchscreen type
   if(nvs_preferences->RetrieveTouchscreenType())
     ts = new Touchscreen();
 
@@ -218,28 +223,22 @@ void setup() {
   for (int i = 0; i < kNoTask; i++)
     second_core_task_added_flag_array[i] = false;
 
-  // initialize random seed
-  unsigned long seed = rtc->minute() * 60 + rtc->second();
-  randomSeed(seed);
-
   // pick random time between 10AM and 6PM for firmware OTA update
-  ota_update_days_minutes = random(600, 1080);
-  PrintLn("OTA", ota_update_days_minutes);
-  // uint8_t ota_update_hour_mode_and_am_pm, ota_update_hr, ota_update_min;
-  // rtc->DaysMinutesToClockTime(ota_update_days_minutes, ota_update_hour_mode_and_am_pm, ota_update_hr, ota_update_min);
-  // Serial.printf("OTA Update random 10AM-6PM time %02d:%02d %s\n", ota_update_hr, ota_update_min, (ota_update_hour_mode_and_am_pm == 1 ? kAmLabel : kPmLabel));
-  std::string temp_str = kFirmwareVersion;
-  PrintLn(temp_str);
-  temp_str = kFirmwareDate;
-  PrintLn(temp_str);
+  {
+    // initialize random seed
+    unsigned long seed = rtc->minute() * 60 + rtc->second();
+    randomSeed(seed);
+    // ota update minute
+    ota_update_minute = random(600, 1080);
+    uint8_t ota_update_hr, ota_update_min, ota_update_am_pm_flag;
+    rtc->MinutesToHHMMXM(ota_update_minute, ota_update_am_pm_flag, ota_update_hr, ota_update_min);
+    PrintLn("OTA Update at", (std::to_string(ota_update_hr) + ":" + std::to_string(ota_update_min) + " " + (ota_update_am_pm_flag == 1 ? kAmLabel : kPmLabel)));
+  }
 
   // set CPU Speed
   setCpuFrequencyMhz(nvs_preferences->RetrieveSavedCpuSpeed());
   cpu_speed_mhz = getCpuFrequencyMhz();
   nvs_preferences->SaveCpuSpeed();
-
-  // set screensaver motion
-  display->screensaver_bounce_not_fly_horizontally_ = nvs_preferences->RetrieveScreensaverBounceNotFlyHorizontally();
 
   // initialize rgb led strip neopixels
   InitializeRgbLed();
@@ -326,7 +325,7 @@ void loop() {
 
     // if time is lost because of power failure
     if((rtc->year() < 2024) && !(wifi_stuff->incorrect_wifi_details_) && !(wifi_stuff->incorrect_zip_code)) {
-      PrintLn("**** Update RTC HW Time from NTP Server ****");
+      // PrintLn("**** Update RTC HW Time from NTP Server ****");
       // update time from NTP server
       AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
       WaitForExecutionOfSecondCoreTask();
@@ -363,7 +362,6 @@ void loop() {
         // try to get weather info 5 mins before alarm time
         if(alarm_clock->alarm_ON_ && (inactivity_millis > kInactivityMillisLimit) && !(wifi_stuff->incorrect_zip_code) && (alarm_clock->MinutesToAlarm() == 5)) {
           AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
-          PrintLn("Get Weather Info!");
         }
 
         // reset time updated today to false at midnight, for auto update of time at 3:05AM
@@ -381,15 +379,13 @@ void loop() {
         }
 
         // check for firmware update everyday
-        if(rtc->todays_minutes == ota_update_days_minutes) {
-          PrintLn("**** Web OTA Firmware Update Check ****");
+        if(rtc->todays_minutes == ota_update_minute) {
           AddSecondCoreTaskIfNotThere(kFirmwareVersionCheck);
           WaitForExecutionOfSecondCoreTask();
         }
 
         // auto disconnect wifi if connected and inactivity millis is over limit
         if(wifi_stuff->wifi_connected_ && (inactivity_millis > kInactivityMillisLimit)) {
-          PrintLn("**** Auto disconnect WiFi ****");
           AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
         }
       #endif
@@ -430,7 +426,6 @@ void loop() {
         display->CheckTimeAndSetBrightness();
       // auto disconnect wifi if connected and inactivity millis is over limit
       if(wifi_stuff->wifi_connected_ && second_core_tasks_queue.empty()) {
-        PrintLn("**** Auto disconnect WiFi ****");
         AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
       }
       // turn screen saver On
@@ -513,14 +508,11 @@ void loop1() {
     else if(current_task == kUpdateTimeFromNtpServer) {       // && ((wifi_stuff->last_ntp_server_time_update_time_ms == 0) || (millis() - wifi_stuff->last_ntp_server_time_update_time_ms > 10*1000))) {
       // get time from NTP server
       success = wifi_stuff->GetTimeFromNtpServer();
-      PrintLn("loop1(): wifi_stuff->GetTimeFromNtpServer() success = ", success);
       // try once more if did not get info
       if(!success) {
         delay(1000);
         ResetWatchdog();
-        PrintLn("loop1(): wifi_stuff->GetTimeFromNtpServer() Trying again...");
         success = wifi_stuff->GetTimeFromNtpServer();
-        PrintLn("loop1(): wifi_stuff->GetTimeFromNtpServer() success = ", success);
       }
       if(success)
         display->redraw_display_ = true;

@@ -37,6 +37,7 @@ public:
   uint8_t day() { return rtc_hw_.day(); }
   uint8_t month() { return rtc_hw_.month(); }
   uint16_t year() { return rtc_hw_.year() + 2000; }
+
   /**
   * \brief Returns actual Day Of Week
   *
@@ -50,6 +51,7 @@ public:
   *   - #URTCLIB_WEEKDAY_SATURDAY = 7
   */
   uint8_t dayOfWeek() { return rtc_hw_.dayOfWeek(); }
+
   /**
   * \brief Returns whether clock is in 12 or 24 hour mode
   * and AM or PM if in 12 hour mode
@@ -71,9 +73,27 @@ public:
   */
   void set_12hour_mode(const bool twelveHrMode) { rtc_hw_.set_12hour_mode(twelveHrMode); }
 
-  void DaysMinutesToClockTime(uint16_t todays_minutes_val, uint8_t &hour_mode_and_am_pm, uint8_t &hr, uint8_t &min);
+  /**
+  * \brief Converts Minute of the day into HH:MM XM (Only for 12 hour mode)
+  * todays_minutes_val = Minute of the day 0-1439 minutes
+  * @return 
+  * hour_mode_and_am_pm_flag = 1 = 12 hour mode AM hours (1-12 hours)
+  *                       2 = 12 hour mode PM hours (1-12 hours)
+  * hr = Hour
+  * min = Minute
+  */
+  void MinutesToHHMMXM(uint16_t todays_minutes_val, uint8_t &hour_mode_and_am_pm_flag, uint8_t &hr, uint8_t &min);
 
-  uint16_t ClockTimeToDaysMinutes(uint8_t hour_mode_and_am_pm, uint8_t hr, uint8_t min);
+  /**
+  * \brief Converts HH:MM XM into Minute of the day
+  * hour_mode_and_am_pm_flag = 0 = 24 hour mode (0-23 hours)
+  *                       1 = 12 hour mode AM hours (1-12 hours)
+  *                       2 = 12 hour mode PM hours (1-12 hours)
+  * hr = Hour
+  * min = Minute
+  * @return Minute of the day 0-1439 minutes
+  */
+  uint16_t HHMMXMToMinutes(uint8_t hour_mode_and_am_pm_flag, uint8_t hr, uint8_t min);
 
 private:
 

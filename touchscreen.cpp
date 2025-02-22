@@ -24,7 +24,7 @@ Touchscreen::Touchscreen() {
   SetTouchscreenOrientation();
   touchscreen_flip = nvs_preferences->RetrieveTouchscreenFlip();
 
-  PrintLn("Touchscreen Initialized!");
+  PrintLn(__func__, kInitializedStr);
 }
 
 Touchscreen::~Touchscreen() {

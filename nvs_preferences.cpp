@@ -68,25 +68,7 @@ NvsPreferences::NvsPreferences() {
   // ADD NEW KEYS ABOVE
   preferences.end();
 
-  // nvs_preferences->PrintSavedData();
-
-  PrintLn(__func__);
-}
-
-void NvsPreferences::PrintSavedData() {
-  uint8_t long_press_seconds;
-  RetrieveLongPressSeconds(long_press_seconds);
-  uint8_t alarmHr, alarmMin;
-  bool alarmIsAm, alarmOn;
-  RetrieveAlarmSettings(alarmHr, alarmMin, alarmIsAm, alarmOn);
-  std::string wifi_ssid, wifi_password;
-  RetrieveWiFiDetails(wifi_ssid, wifi_password);
-  uint32_t location_zip_code;
-  std::string location_country_code;
-  bool weather_units_metric_not_imperial;
-  RetrieveWeatherLocationDetails(location_zip_code, location_country_code, weather_units_metric_not_imperial);
-  std::string savedFirmwareVersion;
-  RetrieveSavedFirmwareVersion(savedFirmwareVersion);
+  PrintLn(__func__, kInitializedStr);
 }
 
 void NvsPreferences::RetrieveLongPressSeconds(uint8_t &long_press_seconds) {
@@ -123,7 +105,7 @@ void NvsPreferences::RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, 
   alarmIsAm = preferences.getBool(kAlarmIsAmKey);
   alarmOn = preferences.getBool(kAlarmOnKey);
   preferences.end();
-  PrintLn(__func__, alarmOn);
+  PrintLn(__func__, (std::to_string(alarmHr) + ":" + std::to_string(alarmMin) + " " + (alarmIsAm ? kAmLabel : kPmLabel) + " " + (alarmOn ? "ON" : "OFF")));
 }
 
 void NvsPreferences::SaveAlarm(uint8_t alarmHr, uint8_t alarmMin, bool alarmIsAm, bool alarmOn) {
@@ -134,7 +116,7 @@ void NvsPreferences::SaveAlarm(uint8_t alarmHr, uint8_t alarmMin, bool alarmIsAm
   preferences.putBool(kAlarmOnKey, alarmOn);
   preferences.end();
   // Serial.printf("NVS Memory SaveAlarm %2d:%02d alarmIsAm=%d alarmOn=%d\n", alarmHr, alarmMin, alarmIsAm, alarmOn);
-  PrintLn(__func__, alarmOn);
+  PrintLn(__func__, (std::to_string(alarmHr) + ":" + std::to_string(alarmMin) + " " + (alarmIsAm ? kAmLabel : kPmLabel) + " " + (alarmOn ? "ON" : "OFF")));
 }
 
 void NvsPreferences::RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_password) {
@@ -163,12 +145,13 @@ void NvsPreferences::SaveWiFiDetails(std::string wifi_ssid, std::string wifi_pas
   PrintLn(__func__, wifi_ssid);
 }
 
-void NvsPreferences::RetrieveSavedFirmwareVersion(std::string &savedFirmwareVersion) {
+std::string NvsPreferences::RetrieveSavedFirmwareVersion() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   String savedFirmwareVersionString = preferences.getString(kFirmwareVersionKey);
   preferences.end();
-  savedFirmwareVersion = savedFirmwareVersionString.c_str();
+  std::string savedFirmwareVersion = savedFirmwareVersionString.c_str();
   PrintLn(__func__, savedFirmwareVersion);
+  return savedFirmwareVersion;
 }
 
 void NvsPreferences::SaveCurrentFirmwareVersion() {
@@ -187,9 +170,7 @@ void NvsPreferences::RetrieveWeatherLocationDetails(uint32_t &location_zip_code,
   location_country_code = kWeatherCountryCodeString.c_str();
   weather_units_metric_not_imperial = preferences.getBool(kWeatherUnitsMetricNotImperialKey);
   preferences.end();
-  PrintLn(__func__, location_zip_code);
-  PrintLn(__func__, location_country_code);
-  PrintLn(__func__, weather_units_metric_not_imperial);
+  PrintLn(__func__, (std::to_string(location_zip_code) + " " + location_country_code + " " + (weather_units_metric_not_imperial ? kMetricUnitStr : kImperialUnitStr)));
 }
 
 void NvsPreferences::SaveWeatherLocationDetails(uint32_t location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial) {
@@ -199,16 +180,14 @@ void NvsPreferences::SaveWeatherLocationDetails(uint32_t location_zip_code, std:
   preferences.putString(kWeatherCountryCodeKey, kWeatherCountryCodeString);
   preferences.putBool(kWeatherUnitsMetricNotImperialKey, weather_units_metric_not_imperial);
   preferences.end();
-  PrintLn(__func__, location_zip_code);
-  PrintLn(__func__, location_country_code);
-  PrintLn(__func__, weather_units_metric_not_imperial);
+  PrintLn(__func__, (std::to_string(location_zip_code) + " " + location_country_code + " " + (weather_units_metric_not_imperial ? kMetricUnitStr : kImperialUnitStr)));
 }
 
 void NvsPreferences::SaveWeatherUnits(bool weather_units_metric_not_imperial) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putBool(kWeatherUnitsMetricNotImperialKey, weather_units_metric_not_imperial);
   preferences.end();
-  PrintLn(__func__, weather_units_metric_not_imperial);
+  PrintLn(__func__, (weather_units_metric_not_imperial ? kMetricUnitStr : kImperialUnitStr));
 }
 
 uint8_t NvsPreferences::RetrieveSavedCpuSpeed() {
