@@ -68,7 +68,7 @@ public:
   bool manual_time_update_successful_ = false;   // flag used to know if manual time update fetch was success
   unsigned long last_ntp_server_time_update_time_ms = 0;
 
-  uint32_t location_zip_code_ = 92104;
+  std::string location_zip_code_ = "92104";
 
   std::string location_country_code_ = "US";     // https://developer.accuweather.com/countries-by-region
 

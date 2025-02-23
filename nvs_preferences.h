@@ -22,8 +22,8 @@ public:
   void SaveAlarm(uint8_t alarmHr, uint8_t alarmMin, bool alarmIsAm, bool alarmOn);
   void RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_password);
   void SaveWiFiDetails(std::string wifi_ssid, std::string wifi_password);
-  void RetrieveWeatherLocationDetails(uint32_t &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial);
-  void SaveWeatherLocationDetails(uint32_t location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial);
+  void RetrieveWeatherLocationForWiFiStuff(std::string &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial);
+  void SaveWeatherLocationFromWiFiStuff(std::string location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial);
   void SaveWeatherUnits(bool weather_units_metric_not_imperial);
   std::string RetrieveSavedFirmwareVersion();
   void SaveCurrentFirmwareVersion();
@@ -87,8 +87,9 @@ private:
     std::string kWiFiPasswd = "Enter Passwd";
   #endif
 
-  const char* kWeatherZipCodeKey = "WeatherZip";
-  const uint32_t kWeatherZipCode = 92104;
+  const char* kWeatherZipCodeNewKey = "LocationZip";
+  const char* kWeatherZipCodeOldKey = "WeatherZip";
+  const std::string kWeatherZipCode = "92104";
 
   const char* kWeatherCountryCodeKey = "WeatherCC";
   const std::string kWeatherCountryCode = "US";

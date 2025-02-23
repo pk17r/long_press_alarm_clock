@@ -20,7 +20,7 @@ WiFiStuff::WiFiStuff() {
 
   nvs_preferences->RetrieveWiFiDetails(wifi_ssid_, wifi_password_);
 
-  nvs_preferences->RetrieveWeatherLocationDetails(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
+  nvs_preferences->RetrieveWeatherLocationForWiFiStuff(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
 
   TurnWiFiOff();
 
@@ -48,7 +48,7 @@ std::string WiFiStuff::WiFiDetailsShortString() {
 }
 
 void WiFiStuff::SaveWeatherLocationDetails() {
-  nvs_preferences->SaveWeatherLocationDetails(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
+  nvs_preferences->SaveWeatherLocationFromWiFiStuff(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
   incorrect_zip_code = false;
 }
 
@@ -149,17 +149,13 @@ void WiFiStuff::GetTodaysWeatherInfo() {
 
   // Check WiFi connection status
   if(WiFi.status()== WL_CONNECTED) {
-    std::string location_zip_code_str = std::to_string(location_zip_code_);
-    while(location_zip_code_str.size() < 5) {
-      location_zip_code_str = '0' + location_zip_code_str;
-    }
-    // PrintLn(location_zip_code_str);
-
     // std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city_copy + "," + countryCode + "&APPID=" + openWeatherMapApiKey + "&units=imperial";
-    std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?zip=" + location_zip_code_str + "," + location_country_code_ + "&appid=" + openWeatherMapApiKey + "&units=" + (weather_units_metric_not_imperial_ ? "metric" : "imperial" );
+    std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?zip=" + location_zip_code_ + "," + location_country_code_ + "&appid=" + openWeatherMapApiKey + "&units=" + (weather_units_metric_not_imperial_ ? "metric" : "imperial" );
     WiFiClient client;
     HTTPClient http;
+    #ifdef MORE_LOGS
     PrintLn(serverPath);
+    #endif
 
     // Your Domain name with URL path or IP address with path
     http.begin(client, serverPath.c_str());
@@ -504,7 +500,7 @@ void WiFiStuff::StopSetLocationLocalServer() {
   }
 
   if(save_SAP_details_) {
-    location_zip_code_ = std::atoi(temp_zip_pin_str.c_str());
+    location_zip_code_ = temp_zip_pin_str.c_str();
     location_country_code_ = temp_country_code_str.c_str();
     SaveWeatherLocationDetails();
   }
@@ -616,7 +612,7 @@ void _SoftAPWiFiDetails() {
 
 void _LocalServerLocationInputs() {
 
-  temp_zip_pin_str = std::to_string(wifi_stuff->location_zip_code_).c_str();
+  temp_zip_pin_str = wifi_stuff->location_zip_code_.c_str();
   temp_country_code_str = wifi_stuff->location_country_code_.c_str();
 
   extern String processor(const String& var);

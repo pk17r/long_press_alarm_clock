@@ -1294,7 +1294,9 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
     case kEnterWeatherLocationZipPage:
       current_page = kLocationAndWeatherSettingsPage;     // new page needs to be set before any action
       {
+        #ifdef MORE_LOGS
         PrintLn("**** On Screen ZIP/PIN Code Text Input ****");
+        #endif
         // user input string
         std::string label = "ZIP/PIN Code";
         char returnText[8] = "";
@@ -1303,8 +1305,8 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
         PrintLn(label, returnText);
         if(ret) {
           // set Location ZIP code:
-          wifi_stuff->location_zip_code_ = atoi(returnText);
-          PrintLn("Location ZIP code: ", wifi_stuff->location_zip_code_);
+          wifi_stuff->location_zip_code_.assign(returnText);
+          PrintLn(wifi_stuff->location_zip_code_);
           wifi_stuff->SaveWeatherLocationDetails();
         }
         SetPage(kLocationAndWeatherSettingsPage);
@@ -1313,7 +1315,9 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
     case kEnterWeatherLocationCountryCodePage:
       current_page = kLocationAndWeatherSettingsPage;     // new page needs to be set before any action
       {
+        #ifdef MORE_LOGS
         PrintLn("**** On Screen Country Code Text Input ****");
+        #endif
         // user input string
         std::string label = "Two Letter Country Code";
         char returnText[3] = "";
@@ -1323,7 +1327,7 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
         if(ret) {
           // set country code:
           wifi_stuff->location_country_code_.assign(returnText);
-          PrintLn("country code: ", wifi_stuff->location_country_code_);
+          PrintLn(wifi_stuff->location_country_code_);
           wifi_stuff->SaveWeatherLocationDetails();
         }
         SetPage(kLocationAndWeatherSettingsPage);
@@ -1492,7 +1496,7 @@ void PopulateDisplayPages() {
 
   // LOCATION AND WEATHER SETTINGS PAGE
   display_pages_vec[kLocationAndWeatherSettingsPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ kLocationAndWeatherSettingsPageSetLocation, kClickButtonWithLabel, "City:", false, 0,0,0,0, (std::to_string(wifi_stuff->location_zip_code_) + " " + wifi_stuff->location_country_code_) },
+    new DisplayButton{ kLocationAndWeatherSettingsPageSetLocation, kClickButtonWithLabel, "City:", false, 0,0,0,0, (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_) },
     new DisplayButton{ kLocationAndWeatherSettingsPageUnits, kClickButtonWithLabel, "Set Units:", false, 0,0,0,0, (wifi_stuff->weather_units_metric_not_imperial_ ? kMetricUnitStr : kImperialUnitStr) },
     new DisplayButton{ kLocationAndWeatherSettingsPageFetch, kClickButtonWithLabel, "Fetch Weather:", false, 0,0,0,0, "FETCH" },
     new DisplayButton{ kLocationAndWeatherSettingsPageUpdateTime, kClickButtonWithLabel, "Time-Zone:", false, 0,0,0,0, "UPDATE TIME" },
@@ -1747,7 +1751,7 @@ void LedButtonClickAction() {
           // use touchscreen
           // user input string
           std::string label = "Enter the 5-digit ZIP or 6-\ndigit PIN of your city:";
-          std::string location_zip_code = std::to_string(wifi_stuff->location_zip_code_);
+          std::string location_zip_code = wifi_stuff->location_zip_code_;
           char returnText[kWifiSsidPasswordLengthMax + 1] = "";
           for(int i = 0; i< location_zip_code.size(); i++) {
             returnText[i] = location_zip_code[i];
@@ -1759,9 +1763,7 @@ void LedButtonClickAction() {
             display->DisplayBlankScreen();
             LedOnOffResponse();
             std::string new_location_zip_str = returnText;
-            uint32_t new_location_zip = std::stoi(new_location_zip_str);
-            PrintLn(new_location_zip);
-            wifi_stuff->location_zip_code_ = new_location_zip;
+            wifi_stuff->location_zip_code_ = new_location_zip_str;
             wifi_stuff->SaveWeatherLocationDetails();
 
             // get Country Code
@@ -1779,7 +1781,7 @@ void LedButtonClickAction() {
               wifi_stuff->SaveWeatherLocationDetails();
               // update new location Zip/Pin code on button
               int display_pages_vec_location_and_weather_button_index = DisplayPagesVecButtonIndex(kLocationAndWeatherSettingsPage, kLocationAndWeatherSettingsPageSetLocation);
-              std::string location_str = (std::to_string(wifi_stuff->location_zip_code_) + " " + wifi_stuff->location_country_code_);
+              std::string location_str = (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_);
               display_pages_vec[kLocationAndWeatherSettingsPage][display_pages_vec_location_and_weather_button_index]->btn_value = location_str;
               // get new location, update time and weather info
               AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
@@ -1836,7 +1838,7 @@ void LedButtonClickAction() {
         wifi_stuff->got_weather_info_ = false;
         // update new location Zip/Pin code on button
         int display_pages_vec_location_and_weather_button_index = DisplayPagesVecButtonIndex(kLocationAndWeatherSettingsPage, kLocationAndWeatherSettingsPageSetLocation);
-        std::string location_str = (std::to_string(wifi_stuff->location_zip_code_) + " " + wifi_stuff->location_country_code_);
+        std::string location_str = (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_);
         display_pages_vec[kLocationAndWeatherSettingsPage][display_pages_vec_location_and_weather_button_index]->btn_value = location_str;
         // got new location, update time and weather info
         AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);

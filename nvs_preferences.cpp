@@ -22,8 +22,21 @@ NvsPreferences::NvsPreferences() {
     String kWiFiPasswdString = kWiFiPasswd.c_str();
     preferences.putString(kWiFiPasswdKey, kWiFiPasswdString);
   }
-  if(!preferences.isKey(kWeatherZipCodeKey))
-    preferences.putUInt(kWeatherZipCodeKey, kWeatherZipCode);
+  // switch between old and new Zip Code format
+  if(preferences.isKey(kWeatherZipCodeOldKey)) {
+    uint32_t location_zip_code = preferences.getUInt(kWeatherZipCodeOldKey);
+    std::string location_zip_code_str = std::to_string(location_zip_code);
+    while(location_zip_code_str.size() < 5) {
+      location_zip_code_str = '0' + location_zip_code_str;
+    }
+    PrintLn("Switch Old Zip to New =", location_zip_code_str);
+    String kWeatherZipCodeString = location_zip_code_str.c_str();
+    preferences.putString(kWeatherZipCodeNewKey, kWeatherZipCodeString);
+  }
+  if(!preferences.isKey(kWeatherZipCodeNewKey)) {
+    String kWeatherZipCodeString = kWeatherZipCode.c_str();
+    preferences.putString(kWeatherZipCodeNewKey, kWeatherZipCodeString);
+  }
   if(!preferences.isKey(kWeatherCountryCodeKey)) {
     String kWeatherCountryCodeString = kWeatherCountryCode.c_str();
     preferences.putString(kWeatherCountryCodeKey, kWeatherCountryCodeString);
@@ -165,24 +178,26 @@ void NvsPreferences::SaveCurrentFirmwareVersion() {
   PrintLn(__func__, kFirmwareVersion);
 }
 
-void NvsPreferences::RetrieveWeatherLocationDetails(uint32_t &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial) {
+void NvsPreferences::RetrieveWeatherLocationForWiFiStuff(std::string &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial) {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
-  location_zip_code = preferences.getUInt(kWeatherZipCodeKey);
-  String kWeatherCountryCodeString = preferences.getString(kWeatherCountryCodeKey);
-  location_country_code = kWeatherCountryCodeString.c_str();
+  String location_zip_code_String = preferences.getString(kWeatherZipCodeNewKey);
+  location_zip_code = location_zip_code_String.c_str();
+  String location_country_code_String = preferences.getString(kWeatherCountryCodeKey);
+  location_country_code = location_country_code_String.c_str();
   weather_units_metric_not_imperial = preferences.getBool(kWeatherUnitsMetricNotImperialKey);
   preferences.end();
-  PrintLn(__func__, (std::to_string(location_zip_code) + " " + location_country_code + " " + (weather_units_metric_not_imperial ? kMetricUnitStr : kImperialUnitStr)));
+  PrintLn(__func__, (location_zip_code + " " + location_country_code + " " + (weather_units_metric_not_imperial ? kMetricUnitStr : kImperialUnitStr)));
 }
 
-void NvsPreferences::SaveWeatherLocationDetails(uint32_t location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial) {
+void NvsPreferences::SaveWeatherLocationFromWiFiStuff(std::string location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
-  preferences.putUInt(kWeatherZipCodeKey, location_zip_code);
+  String kWeatherZipCodeString = location_zip_code.c_str();
+  preferences.putString(kWeatherZipCodeNewKey, kWeatherZipCodeString);
   String kWeatherCountryCodeString = location_country_code.c_str();
   preferences.putString(kWeatherCountryCodeKey, kWeatherCountryCodeString);
   preferences.putBool(kWeatherUnitsMetricNotImperialKey, weather_units_metric_not_imperial);
   preferences.end();
-  PrintLn(__func__, (std::to_string(location_zip_code) + " " + location_country_code + " " + (weather_units_metric_not_imperial ? kMetricUnitStr : kImperialUnitStr)));
+  PrintLn(__func__, (location_zip_code + " " + location_country_code + " " + (weather_units_metric_not_imperial ? kMetricUnitStr : kImperialUnitStr)));
 }
 
 void NvsPreferences::SaveWeatherUnits(bool weather_units_metric_not_imperial) {
