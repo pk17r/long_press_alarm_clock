@@ -22,7 +22,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   - MCU Selection and Module selections in configuration.h file, pin definitions in pin_defs.h file
   - A common header containing pointers to objects of every module and global functions
   - Adafruit Library used for GFX functions
-  - uRTCLib Library for DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
+  - uRTCLib Library for DS1307/DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
   - Secure Web Over The Air Firmware Update Functionality
   - Watchdog keeps a check on the program and reboots MCU if it gets stuck
   - Modular programming that fits single core or dual core microcontrollers
@@ -32,7 +32,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   - Microcontroller: ESP32 S3 (Default) or ESP32 S2 Mini or ESP32 WROOM
   - Display: 2.8" ST7789V display (Default), other selectable options: ST7735, ILI9341 and ILI9488
   - Touchscreen XPT2046 (not enabled by default)
-  - DS3231 RTC Clock IC
+  - DS1307/DS3231 RTC Clock IC
   - A push button with LED
   - 2 push buttons for increase and decrease functions
   - An 85dB passive buzzer for alarm and different frequency tones
@@ -41,7 +41,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
 - Salient Features
   - There is no alarm snooze button.
   - Time update via NTP server using WiFi once every day to maintain high accuracy
-  - DS3231 RTC itself is high accuracy clock having deviation of +/-2 minutes per year
+  - DS1307/DS3231 RTC itself is high accuracy clock having deviation of +/-2 minutes per year
   - Time auto adjusts for time zone and day light savings with location ZIP/PIN and country code
   - Get Weather info using WiFi and display today's weather after alarm
   - Get user input of WiFi details via an on-screen keyboard (when touchscreen is used and enabled)
@@ -196,7 +196,7 @@ void setup() {
     nvs_preferences->SaveCurrentFirmwareVersion();
   }
 
-  // setup ds3231 rtc (needs to be before alarm clock)
+  // setup rtc (needs to be before alarm clock)
   rtc = new RTC();
   // setup alarm clock (needs to be before display)
   alarm_clock = new AlarmClock();
@@ -375,7 +375,7 @@ void loop() {
         if(!(wifi_stuff->incorrect_zip_code) && !(wifi_stuff->auto_updated_time_today_) && (rtc->hourModeAndAmPm() == 1 && rtc->hour() == 3 && rtc->minute() >= 5)) {
           // update time from NTP server
           AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
-          PrintLn("Get Time Update from NTP Server");
+          // PrintLn("Get Time Update from NTP Server");
         }
 
         // check for firmware update everyday
@@ -936,12 +936,15 @@ void SerialUserInput() {
       nvs_preferences->SaveTouchscreenFlip(!nvs_preferences->RetrieveTouchscreenFlip());
       ts->touchscreen_flip = nvs_preferences->RetrieveTouchscreenFlip();
       break;
-    case 'e':   // setup ds3231 rtc
-      #ifdef MORE_LOGS
-      PrintLn("**** setup ds3231 rtc ****");
-      #endif
-      rtc->Ds3231RtcSetup();
-      Serial.println(F("DS3231 setup."));
+    case 'e':   // toggle rtc type DS1307/DS3231
+      {
+        uint8_t rtc_type = nvs_preferences->RetrieveRtcType();
+        if(rtc_type == 1)
+          nvs_preferences->SaveRtcType(2);
+        else
+          nvs_preferences->SaveRtcType(1);
+        rtc->RtcSetup();
+      }
       break;
     case 'f':   // toggle 12 / 24 hour mode
       {

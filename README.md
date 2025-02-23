@@ -30,7 +30,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   - MCU Selection and Module selections in configuration.h file, pin definitions in pin_defs.h file
   - A common header containing pointers to objects of every module and global functions
   - Adafruit Library used for GFX functions
-  - uRTCLib Library for DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
+  - uRTCLib Library for DS1307/DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
   - Secure Web Over The Air Firmware Update Functionality
   - Watchdog keeps a check on the program and reboots MCU if it gets stuck
   - Modular programming that fits single core or dual core microcontrollers
@@ -40,7 +40,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   - Microcontroller: ESP32 S3 (Default) or ESP32 S2 Mini or ESP32 WROOM
   - Display: 2.8" ST7789V display (Default), other selectable options: ST7735, ILI9341 and ILI9488
   - Touchscreen XPT2046 (not enabled by default)
-  - DS3231 RTC Clock IC
+  - DS1307/DS3231 RTC Clock IC
   - A push button with LED
   - 2 push buttons for increase and decrease functions
   - An 85dB passive buzzer for alarm and different frequency tones
@@ -49,7 +49,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
 - Salient Features
   - There is no alarm snooze button.
   - Time update via NTP server using WiFi once every day to maintain high accuracy
-  - DS3231 RTC itself is high accuracy clock having deviation of +/-2 minutes per year
+  - DS1307/DS3231 RTC itself is high accuracy clock having deviation of +/-2 minutes per year
   - Time auto adjusts for time zone and day light savings with location ZIP/PIN and country code
   - Get Weather info using WiFi and display today's weather after alarm
   - Get user input of WiFi details via an on-screen keyboard (when touchscreen is used and enabled)

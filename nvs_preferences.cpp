@@ -63,6 +63,8 @@ NvsPreferences::NvsPreferences() {
     preferences.putUChar(kRgbStripLedCountKey, kRgbStripLedCount);
   if(!preferences.isKey(kRgbStripLedBrightnessKey))
     preferences.putUChar(kRgbStripLedBrightnessKey, kRgbStripLedBrightness);
+  if(!preferences.isKey(kRtcTypeKey))
+    preferences.putUChar(kRtcTypeKey, kRtcType);
 
   // save new key values
   // ADD NEW KEYS ABOVE
@@ -338,4 +340,19 @@ void NvsPreferences::SaveRgbStripLedBrightness(uint8_t rgb_strip_led_brightness)
   preferences.putUChar(kRgbStripLedBrightnessKey, rgb_strip_led_brightness);
   preferences.end();
   PrintLn(__func__, rgb_strip_led_brightness);
+}
+
+uint8_t NvsPreferences::RetrieveRtcType() {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  uint8_t rtc_type = preferences.getUChar(kRtcTypeKey, 0);
+  preferences.end();
+  PrintLn(__func__, rtc_type);
+  return rtc_type;
+}
+
+void NvsPreferences::SaveRtcType(uint8_t rtc_type) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  preferences.putUChar(kRtcTypeKey, rtc_type);
+  preferences.end();
+  PrintLn(__func__, rtc_type);
 }

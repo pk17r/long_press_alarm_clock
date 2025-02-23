@@ -50,6 +50,8 @@ public:
   void SaveRgbStripLedCount(uint8_t rgb_strip_led_count);
   uint8_t RetrieveRgbStripLedBrightness();
   void SaveRgbStripLedBrightness(uint8_t rgb_strip_led_brightness);
+  uint8_t RetrieveRtcType();
+  void SaveRtcType(uint8_t rtc_type);
 
 private:
 
@@ -129,6 +131,9 @@ private:
 
   const char* kRgbStripLedBrightnessKey = "RgbLedBright";
   const uint8_t kRgbStripLedBrightness = 255;
+
+  const char* kRtcTypeKey = "RtcType";
+  const uint8_t kRtcType = 2;     // 1 = URTCLIB_MODEL_DS1307, 2 = URTCLIB_MODEL_DS3231
 
 };
 

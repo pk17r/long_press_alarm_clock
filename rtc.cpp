@@ -1,6 +1,7 @@
 #include "lwipopts.h"
 #include "uRTCLib.h"
 #include "rtc.h"
+#include "nvs_preferences.h"
 
 // RTC constructor
 RTC::RTC() {
@@ -9,20 +10,19 @@ RTC::RTC() {
 
   // initialize Wire lib
   URTCLIB_WIRE.begin(SDA_PIN, SCL_PIN);
-  
-  // setup DS3231 rtc
-  Ds3231RtcSetup();
+
+  // setup DS1307/DS3231 rtc
+  RtcSetup();
 
   PrintLn(__func__, kInitializedStr);
 }
 
-// setup DS3231 rtc
-void RTC::Ds3231RtcSetup() {
-
+// setup DS1307/DS3231 rtc
+void RTC::RtcSetup() {
   // set rtc model
-  rtc_hw_.set_model(URTCLIB_MODEL_DS3231);
+  rtc_hw_.set_model(nvs_preferences->RetrieveRtcType());    // 1 = URTCLIB_MODEL_DS1307, 2 = URTCLIB_MODEL_DS3231
 
-  // get data from DS3231 HW
+  // get data from DS1307/DS3231 HW
   Refresh();
 
   // Set Oscillator to use VBAT when VCC turns off if not set

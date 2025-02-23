@@ -10,8 +10,8 @@ public:
 
   RTC();  // constructor
 
-  // setup DS3231 rtc
-  void Ds3231RtcSetup();
+  // setup DS1307/DS3231 rtc
+  void RtcSetup();
 
   static inline volatile bool rtc_hw_sec_update_ = false;     // seconds flag triggered by interrupt
   static inline volatile bool rtc_hw_min_update_ = false;     // minutes change flag
