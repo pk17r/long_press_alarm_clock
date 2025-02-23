@@ -32,6 +32,7 @@ NvsPreferences::NvsPreferences() {
     PrintLn("Switch Old Zip to New =", location_zip_code_str);
     String kWeatherZipCodeString = location_zip_code_str.c_str();
     preferences.putString(kWeatherZipCodeNewKey, kWeatherZipCodeString);
+    preferences.remove(kWeatherZipCodeOldKey);
   }
   if(!preferences.isKey(kWeatherZipCodeNewKey)) {
     String kWeatherZipCodeString = kWeatherZipCode.c_str();

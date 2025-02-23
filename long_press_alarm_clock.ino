@@ -494,15 +494,13 @@ void loop1() {
 
     if(current_task == kGetWeatherInfo && (!wifi_stuff->got_weather_info_ || wifi_stuff->last_fetch_weather_info_time_ms_ == 0 || millis() - wifi_stuff->last_fetch_weather_info_time_ms_ > wifi_stuff->kFetchWeatherInfoMinIntervalMs)) {
       // get today's weather info
-      wifi_stuff->GetTodaysWeatherInfo();
-      success = wifi_stuff->got_weather_info_;
+      success = wifi_stuff->GetTodaysWeatherInfo();
 
       // try once more if did not get info
       if(!success) {
         delay(1000);
         ResetWatchdog();
-        wifi_stuff->GetTodaysWeatherInfo();
-        success = wifi_stuff->got_weather_info_;
+        success = wifi_stuff->GetTodaysWeatherInfo();
       }
     }
     else if(current_task == kUpdateTimeFromNtpServer) {       // && ((wifi_stuff->last_ntp_server_time_update_time_ms == 0) || (millis() - wifi_stuff->last_ntp_server_time_update_time_ms > 10*1000))) {
@@ -961,7 +959,7 @@ void SerialUserInput() {
     case 'g':   // good morning
       display->GoodMorningScreen();
       break;
-    case 'h':   // enable / disable TOUCHSCREEN
+    case 'h':   // toggle TOUCHSCREEN type
       {
         uint8_t touchscreen_type = nvs_preferences->RetrieveTouchscreenType();
         touchscreen_type++;

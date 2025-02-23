@@ -956,17 +956,11 @@ void RGBDisplay::DisplayWeatherInfo() {
       tft.setCursor(weather_x0, weather_row3_y0);
       tft.print("before next Fetch.");
     }
-    else if(wifi_stuff->incorrect_zip_code) {
-      tft.setCursor(weather_x0, weather_row2_y0);
-      tft.print("Incorrect");
-      tft.setCursor(weather_x0, weather_row3_y0);
-      tft.print("Location/ZIP!");
-    }
     else {
       tft.setCursor(weather_x0, weather_row2_y0);
-      tft.print("Could not fetch");
+      tft.print("Could not fetch!");
       tft.setCursor(weather_x0, weather_row3_y0);
-      tft.print("Weather info!");
+      tft.print(wifi_stuff->weather_fetch_error_message.c_str());
     }
   }
 }
@@ -1630,8 +1624,8 @@ void RGBDisplay::IncorrectTimeBanner() {
     my_canvas_->print("Updating Time using WiFi..");
   else if(wifi_stuff->incorrect_wifi_details_)
     my_canvas_->print("Could not connect to WiFi.");
-  else if(wifi_stuff->incorrect_zip_code)
-    my_canvas_->print("Incorrect Location/ZIP");
+  else if(wifi_stuff->weather_fetch_error_message.size() > 0)
+    my_canvas_->print(wifi_stuff->weather_fetch_error_message.c_str());
 }
 
 void RGBDisplay::ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, bool turnOn, int gap) {

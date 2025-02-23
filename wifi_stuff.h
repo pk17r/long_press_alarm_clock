@@ -16,7 +16,7 @@ public:
   void SaveWeatherUnits();
   bool TurnWiFiOn();
   void TurnWiFiOff();
-  void GetTodaysWeatherInfo();
+  bool GetTodaysWeatherInfo();
   bool GetTimeFromNtpServer();
   void StartSetWiFiSoftAP();
   void StopSetWiFiSoftAP();
@@ -59,6 +59,7 @@ public:
   int32_t gmt_offset_sec_ = 0;
 
   bool got_weather_info_ = false;   // whether weather information has been pulled
+  std::string weather_fetch_error_message = "";
   uint8_t get_weather_info_wait_seconds_ = 0;   // wait to delay weather info pulls
   unsigned long last_fetch_weather_info_time_ms_ = 0;
   const unsigned long kFetchWeatherInfoMinIntervalMs = 5*1000;    //  5 seconds

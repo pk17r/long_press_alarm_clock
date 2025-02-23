@@ -106,7 +106,7 @@ void WiFiStuff::TurnWiFiOff() {
   wifi_connected_ = false;
 }
 
-void WiFiStuff::GetTodaysWeatherInfo() {
+bool WiFiStuff::GetTodaysWeatherInfo() {
   got_weather_info_ = false;
 
   std::string func_name = __func__;
@@ -114,7 +114,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
   // no point fetching weather info if openWeatherMapApiKey is empty
   if(openWeatherMapApiKey.size() == 0) {
     PrintLn(func_name, "No Key");
-    return;
+    return false;
   }
 
   // don't fetch frequently otherwise can get banned
@@ -123,7 +123,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
     #ifdef MORE_LOGS
     PrintLn(func_name, "Wait more");
     #endif
-    return;
+    return false;
   }
   get_weather_info_wait_seconds_ = 0;
 
@@ -133,7 +133,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
       #ifdef MORE_LOGS
       PrintLn(func_name, "No WiFi");
       #endif
-      return;
+      return false;
     }
   }
 
@@ -166,7 +166,6 @@ void WiFiStuff::GetTodaysWeatherInfo() {
 
     String jsonBuffer = "{}"; 
 
-    PrintLn(func_name, httpResponseCode);
     if (httpResponseCode>0) {
       jsonBuffer = http.getString();
     }
@@ -183,7 +182,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
     if(httpResponseCode >= 200 && httpResponseCode < 300)
     {
       // got response
-      wifi_stuff->got_weather_info_ = true;
+      got_weather_info_ = true;
 
       #ifdef MORE_LOGS
         Serial.print("JSON object = ");
@@ -222,17 +221,15 @@ void WiFiStuff::GetTodaysWeatherInfo() {
         PrintLn("city_ ", city_.c_str());
         PrintLn("gmt_offset_sec_ ", gmt_offset_sec_);
       #endif
-    }
-    else if(httpResponseCode >= 400) {
-      incorrect_zip_code = true;
-      #ifdef MORE_LOGS
-      PrintLn(func_name, "Wrong ZIP.");
-      #endif
+      weather_fetch_error_message = "";
     }
     else {
-      #ifdef MORE_LOGS
-      PrintLn(func_name, "Parse failed.");
-      #endif
+      if(httpResponseCode >= 400)
+        incorrect_zip_code = true;
+      weather_fetch_error_message = JSONVar::stringify(myObject["cod"]).c_str();
+      weather_fetch_error_message += kCharSpace;
+      weather_fetch_error_message += JSONVar::stringify(myObject["message"]).c_str();
+      weather_fetch_error_message.erase(std::remove(weather_fetch_error_message.begin(), weather_fetch_error_message.end(), '"'), weather_fetch_error_message.end());
     }
   }
   else {
@@ -243,6 +240,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
 
   // turn off WiFi
   // TurnWiFiOff();
+  return true;
 }
 
 bool WiFiStuff::GetTimeFromNtpServer() {
@@ -554,7 +552,7 @@ const char index_html_location_details[] PROGMEM = R"rawliteral(
   	<a href="https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release" target="_blank"><h3>Long Press Alarm Clock</h3></a>
     <h4>Enter Location Details:</h4>
     <label>Location ZIP/PIN Code:</label><br>
-    <input type="number" name="html_zip_pin" value="%html_zip_pin%" min="10000" max="999999"><br><br>
+    <input type="number" name="html_zip_pin" value="%html_zip_pin%"><br><br>
     <label>2-Letter Country Code (</label>
     <a href="https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes#Current_ISO_3166_country_codes" target="_blank">List</a>
     <label>):</label><br>
