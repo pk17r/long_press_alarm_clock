@@ -998,7 +998,7 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
     tft.setCursor(title_x0, title_y0);
     tft.print("WAKE UP!");
     tft.setFont(&FreeSans18pt7b);
-    tft.setTextColor(kDisplayColorOrange);
+    tft.setTextColor(kDisplayDateColor);
     tft.print(kCharSpace);
     tft.print(new_display_data_.time_HHMM);
     tft.print((new_display_data_.pm_not_am ? kPmLabel : kAmLabel));
@@ -1035,7 +1035,7 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
 
   // set font
   tft.setFont(&Satisfy_Regular24pt7b);
-  tft.setTextColor(kDisplayColorYellow);
+  tft.setTextColor(kDisplayColorCyan);
 
   // home the cursor
   // uint16_t h = 0, w = 0;
