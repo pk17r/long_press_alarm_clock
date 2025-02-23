@@ -495,29 +495,15 @@ void loop1() {
     if(current_task == kGetWeatherInfo && (!wifi_stuff->got_weather_info_ || wifi_stuff->last_fetch_weather_info_time_ms_ == 0 || millis() - wifi_stuff->last_fetch_weather_info_time_ms_ > wifi_stuff->kFetchWeatherInfoMinIntervalMs)) {
       // get today's weather info
       success = wifi_stuff->GetTodaysWeatherInfo();
-
-      // try once more if did not get info
-      if(!success) {
-        delay(1000);
-        ResetWatchdog();
-        success = wifi_stuff->GetTodaysWeatherInfo();
-      }
     }
     else if(current_task == kUpdateTimeFromNtpServer) {       // && ((wifi_stuff->last_ntp_server_time_update_time_ms == 0) || (millis() - wifi_stuff->last_ntp_server_time_update_time_ms > 10*1000))) {
       // get time from NTP server
       success = wifi_stuff->GetTimeFromNtpServer();
-      // try once more if did not get info
-      if(!success) {
-        delay(1000);
-        ResetWatchdog();
-        success = wifi_stuff->GetTimeFromNtpServer();
-      }
       if(success)
         display->redraw_display_ = true;
     }
     else if(current_task == kConnectWiFi) {
-      wifi_stuff->TurnWiFiOn();
-      success = wifi_stuff->wifi_connected_;
+      success = wifi_stuff->TurnWiFiOn();
     }
     else if(current_task == kDisconnectWiFi) {
       wifi_stuff->TurnWiFiOff();
@@ -1763,6 +1749,7 @@ void LedButtonClickAction() {
             std::string new_location_zip_str = returnText;
             wifi_stuff->location_zip_code_ = new_location_zip_str;
             wifi_stuff->SaveWeatherLocationDetails();
+            wifi_stuff->got_weather_info_ = false;
 
             // get Country Code
 
@@ -1781,10 +1768,11 @@ void LedButtonClickAction() {
               int display_pages_vec_location_and_weather_button_index = DisplayPagesVecButtonIndex(kLocationAndWeatherSettingsPage, kLocationAndWeatherSettingsPageSetLocation);
               std::string location_str = (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_);
               display_pages_vec[kLocationAndWeatherSettingsPage][display_pages_vec_location_and_weather_button_index]->btn_value = location_str;
-              // get new location, update time and weather info
-              AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
-              WaitForExecutionOfSecondCoreTask();
             }
+
+            // get new location, update time and weather info
+            AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
+            WaitForExecutionOfSecondCoreTask();
           }
           SetPage(kLocationAndWeatherSettingsPage);
         }
