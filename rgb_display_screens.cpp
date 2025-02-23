@@ -1012,7 +1012,7 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
     tft.print(press_button_text2);
     
     // show today's date
-    tft.setCursor(20, s_y0 + 35);
+    tft.setCursor(15, s_y0 + 40);
     tft.setFont(&Satisfy_Regular18pt7b);
     tft.setTextColor(kDisplayDateColor);
     tft.print(new_display_data_.date_str);

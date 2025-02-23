@@ -115,7 +115,7 @@ void AlarmClock::BuzzAlarmFn() {
     if (rtc->rtc_hw_min_update_) {
       rtc->minute();
       rtc->rtc_hw_min_update_ = false;
-      PrintLn("New Minute!");
+      // PrintLn("New Minute!");
       // update time to be shown on alarm triggered screen
       PrepareTimeDayDateArrays();
       display->AlarmTriggeredScreen(true, alarm_long_press_seconds_);
