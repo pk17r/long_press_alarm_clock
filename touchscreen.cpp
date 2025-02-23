@@ -11,7 +11,7 @@ Touchscreen::Touchscreen() {
     touchscreen_r_ptr_ = new TouchscreenResistive(TOUCHSCREEN_XP, TOUCHSCREEN_XM, TOUCHSCREEN_YP, TOUCHSCREEN_YM, 310);
     analogReadResolution(kAdcResolutionBits);
     touchscreen_r_ptr_->setAdcResolutionAndThreshold(kAdcResolutionBits);
-    touchscreen_calibration_ = TouchCalibration{150, 930, 150, 870, kTftWidth, kTftHeight};
+    touchscreen_calibration_ = TouchCalibration{150, 1000, 150, 870, kTftWidth, kTftHeight};
   }
   #ifdef XPT2046_OPTION
   else if(touchscreen_type == 1) {   // XPT2046
@@ -123,6 +123,8 @@ TouchPixel* Touchscreen::GetTouchedPixel() {
       last_touch_Pixel_ = TouchPixel{-1, -1, false};
       return &last_touch_Pixel_;
     }
+
+    // PrintLn(__func__, ("x:" + std::to_string(x) + ", y:" + std::to_string(y) + ", z:" + std::to_string(z)));
 
     // map
     x = max(min((int16_t)map(x, touchscreen_calibration_.xMin, touchscreen_calibration_.xMax, 0, touchscreen_calibration_.screen_width - 1), (int16_t)(touchscreen_calibration_.screen_width - 1)), (int16_t)0);
