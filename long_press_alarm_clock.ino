@@ -339,6 +339,8 @@ void loop() {
 
       // Activate Buzzer if Alarm Time has arrived
       if((rtc->year() >= 2024) && alarm_clock->MinutesToAlarm() == 0) {
+        // update time to be shown on alarm triggered screen
+        PrepareTimeDayDateArrays();
         // go to buzz alarm function and show alarm triggered screen!
         alarm_clock->BuzzAlarmFn();
         // returned from Alarm Triggered Screen and Good Morning Screen
@@ -474,6 +476,28 @@ void loop() {
     // ESP32_S2_MINI is single core MCU
     loop1();
   #endif
+
+  // if(current_page == kScreensaverPage) {
+  //   /*
+  //   First we configure the wake up source
+  //   We set our ESP32 to wake up for an external trigger.
+  //   There are two types for ESP32, ext0 and ext1 .
+  //   ext0 uses RTC_IO to wakeup thus requires RTC peripherals
+  //   to be on while ext1 uses RTC Controller so doesnt need
+  //   peripherals to be powered on.
+  //   Note that using internal pullups/pulldowns also requires
+  //   RTC peripherals to be turned on.
+  //   */
+  //   if(digitalRead(SQW_INT_PIN))
+  //     esp_sleep_enable_ext0_wakeup((gpio_num_t)SQW_INT_PIN, 0); //1 = High, 0 = Low
+  //   else
+  //     esp_sleep_enable_ext0_wakeup((gpio_num_t)SQW_INT_PIN, 1); //1 = High, 0 = Low
+  //   //Go to sleep now
+  //   Serial.println("Going to light sleep now");
+  //   //esp_deep_sleep_start();
+  //   Serial.flush();
+  //   esp_light_sleep_start();
+  // }
 }
 
 // arduino loop function on core1 - low priority one with wifi weather update task
@@ -943,6 +967,7 @@ void SerialUserInput() {
       }
       break;
     case 'g':   // good morning
+      display->SetMaxBrightness();
       display->GoodMorningScreen();
       break;
     case 'h':   // toggle TOUCHSCREEN type
@@ -1070,6 +1095,7 @@ void SerialUserInput() {
       #ifdef MORE_LOGS
       PrintLn("**** buzzAlarm Function ****");
       #endif
+      display->SetMaxBrightness();
       // go to buzz alarm function
       alarm_clock->BuzzAlarmFn();
       // set main page back
@@ -1114,15 +1140,16 @@ void SerialUserInput() {
       #ifdef MORE_LOGS
       PrintLn("**** Show Alarm Triggered Screen ****");
       #endif
+      display->SetMaxBrightness();
       // start alarm triggered page
       SetPage(kAlarmTriggeredPage);
       delay(1000);
       display->AlarmTriggeredScreen(false, 24);
-      delay(1000);
+      delay(2000);
       display->AlarmTriggeredScreen(false, 12);
-      delay(1000);
+      delay(2000);
       display->AlarmTriggeredScreen(false, 5);
-      delay(1000);
+      delay(2000);
       // set main page back
       SetPage(kMainPage);
       inactivity_millis = 0;

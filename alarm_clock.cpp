@@ -83,7 +83,7 @@ void AlarmClock::BuzzAlarmFn() {
   SetPage(kAlarmTriggeredPage);
   //start buzzer!
   BuzzerEnable();
-  bool alarmStopped = false, buzzerPausedByUser = false;
+  bool alarmStopped = false, buzzerPausedByUser = false, refreshAlarmTriggeredScreen = false;
   unsigned long alarmStartTimeMs = millis();
   int buttonPressSecondsCounter = alarm_long_press_seconds_;
   while(!alarmStopped) {
@@ -101,7 +101,8 @@ void AlarmClock::BuzzAlarmFn() {
         // display countdown to alarm off
         if(alarm_long_press_seconds_ - (millis() - buttonPressStartTimeMs) / 1000 < buttonPressSecondsCounter) {
           buttonPressSecondsCounter--;
-          display->AlarmTriggeredScreen(false, buttonPressSecondsCounter);
+          display->AlarmTriggeredScreen(refreshAlarmTriggeredScreen, buttonPressSecondsCounter);
+          refreshAlarmTriggeredScreen = false;
         }
         // end alarm after holding button for ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS
         if(millis() - buttonPressStartTimeMs > alarm_long_press_seconds_ * 1000) {
@@ -110,6 +111,14 @@ void AlarmClock::BuzzAlarmFn() {
           display->GoodMorningScreen();
         }
       }
+    }
+    // check for new minute
+    if (rtc->rtc_hw_min_update_) {
+      rtc->rtc_hw_min_update_ = false;
+      // PrintLn("New Minute!");
+      // update time to be shown on alarm triggered screen
+      PrepareTimeDayDateArrays();
+      refreshAlarmTriggeredScreen = true;
     }
     // activate buzzer if button is not pressed by user
     if(!AnyButtonPressed() && !alarmStopped) {
@@ -121,7 +130,8 @@ void AlarmClock::BuzzAlarmFn() {
       if(buttonPressSecondsCounter != alarm_long_press_seconds_) {
         // display Alarm On screen with seconds user needs to press and hold button to end alarm
         buttonPressSecondsCounter = alarm_long_press_seconds_;
-        display->AlarmTriggeredScreen(false, alarm_long_press_seconds_);
+        display->AlarmTriggeredScreen(refreshAlarmTriggeredScreen, alarm_long_press_seconds_);
+        refreshAlarmTriggeredScreen = false;
       }
     }
     // if user did not stop alarm within ALARM_MAX_ON_TIME_MS, make sure to stop buzzer

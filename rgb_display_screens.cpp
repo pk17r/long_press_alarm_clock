@@ -987,7 +987,7 @@ void RGBDisplay::FirmwareUpdatePage() {
 
 void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
 
-  int16_t title_x0 = 30, title_y0 = 40;
+  int16_t title_x0 = 0, title_y0 = 40;
   int16_t s_x0 = 230, s_y0 = title_y0 + 48;
   
   if(firstTime) {
@@ -997,6 +997,11 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
     tft.setTextColor(kDisplayColorYellow);
     tft.setCursor(title_x0, title_y0);
     tft.print("WAKE UP!");
+    tft.setFont(&FreeSans18pt7b);
+    tft.setTextColor(kDisplayColorOrange);
+    tft.print(kCharSpace);
+    tft.print(new_display_data_.time_HHMM);
+    tft.print((new_display_data_.pm_not_am ? kPmLabel : kAmLabel));
     tft.setTextColor(kDisplayColorCyan);
     char press_button_text1[] = "To turn off Alarm,";
     char press_button_text2[] = "press button for:";
@@ -1636,24 +1641,45 @@ void RGBDisplay::ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, b
 }
 
 void RGBDisplay::GoodMorningScreen() {
-  tft.fillScreen(kDisplayColorBlack);
+  tft.fillScreen(kDisplayBackroundColor);
   // set font
-  tft.setFont(&FreeSansBold24pt7b);
+  tft.setFont(&Satisfy_Regular18pt7b);
+
+  std::string owner_name = "AALIYA!!";
+  std::string good_morning_str = "GOOD MORNING";
+
+  // get bounds of text on screen
+  tft.setTextColor(kDisplayBackroundColor);
+  uint16_t good_morning_str_h = 0, good_morning_str_w = 0;
+  int16_t good_morning_str_gap_x = 0, good_morning_str_gap_y = 0;
+  tft.getTextBounds(good_morning_str.c_str(), 0, 0, &good_morning_str_gap_x, &good_morning_str_gap_y, &good_morning_str_w, &good_morning_str_h);
+
+  // set font
+  tft.setFont(&Satisfy_Regular24pt7b);
+  uint16_t owner_name_h = 0, owner_name_w = 0;
+  int16_t owner_name_gap_x = 0, owner_name_gap_y = 0;
+  tft.getTextBounds(owner_name.c_str(), 0, 0, &owner_name_gap_x, &owner_name_gap_y, &owner_name_w, &owner_name_h);
 
   // change the text color to the background color
   tft.setTextColor(kDisplayColorGreen);
 
+  // set font
+  tft.setFont(&Satisfy_Regular18pt7b);
   // yes! home the cursor
-  tft.setCursor(80, 40);
+  tft.setCursor((kTftWidth - good_morning_str_w) / 2, good_morning_str_h - 5);
   // redraw the old value to erase
-  tft.print(F("GOOD"));
+  tft.print(good_morning_str.c_str());
+  
+  // set font
+  tft.setFont(&Satisfy_Regular24pt7b);
   // yes! home the cursor
-  tft.setCursor(20, 80);
+  tft.setCursor((kTftWidth - owner_name_w) / 2, good_morning_str_h + owner_name_h);
   // redraw the old value to erase
-  tft.print(F("MORNING!!"));
+  tft.print(owner_name.c_str());
 
-  int16_t x0 = 80, y0 = 80;
-  uint16_t edge = 160;
+  // draw sun
+  uint16_t edge = kTftHeight - (good_morning_str_h + owner_name_h);
+  int16_t x0 = (kTftWidth - edge) / 2, y0 = (good_morning_str_h + owner_name_h) + 5;
   
   unsigned int startTime = millis();
 
