@@ -1031,8 +1031,19 @@ void SerialUserInput() {
       #endif
       firmware_updated_flag_user_information = true;
       break;
-    case 'l':   // nvs_preferences->RetrieveScreenOrientation()
-      nvs_preferences->RetrieveScreenOrientation();
+    case 'l':   // TouchCalibrationScreen
+      display->SetMaxBrightness();
+      display->TouchCalibrationScreen(kTftWidth / 5, kTftHeight / 5);
+      delay(2000);
+      display->TouchCalibrationScreen(4 * kTftWidth / 5, kTftHeight / 5);
+      delay(2000);
+      display->TouchCalibrationScreen(4 * kTftWidth / 5, 4 * kTftHeight / 5);
+      delay(2000);
+      display->TouchCalibrationScreen(kTftWidth / 5, 4 * kTftHeight / 5);
+      delay(2000);
+      // set main page back
+      SetPage(kMainPage);
+      inactivity_millis = 0;
       break;
     case 'm':   // RotateScreen();
       display->RotateScreen();

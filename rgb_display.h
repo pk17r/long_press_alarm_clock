@@ -64,6 +64,7 @@ public:
   void DisplayFirmwareVersionAndDate();
   void DisplayWiFiConnectionStatus();
   void DisplayBlankScreen();
+  void TouchCalibrationScreen(int16_t x, int16_t y);
 
   // functions
   void Setup();
