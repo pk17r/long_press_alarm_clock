@@ -1630,10 +1630,14 @@ void LedButtonClickAction() {
     display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ false, /* push_button_pressed */ true);
   else {
     if(current_page == kMainPage) {                 // MAIN PAGE
-      if(current_cursor == kMainPageSettingsWheel)
+      if(current_cursor == kMainPageSettingsWheel) {
+        LedButtonClickUiResponse(1);
         SetPage(kSettingsPage);
-      else if(current_cursor == kMainPageSetAlarm)
+      }
+      else if(current_cursor == kMainPageSetAlarm) {
+        LedButtonClickUiResponse(1);
         SetPage(kAlarmSetPage);
+      }
     }
     else if(current_page == kSettingsPage) {        // SETTINGS PAGE
       if(current_cursor == kSettingsPageWiFi) {
