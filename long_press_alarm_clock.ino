@@ -1033,14 +1033,80 @@ void SerialUserInput() {
       break;
     case 'l':   // TouchCalibrationScreen
       display->SetMaxBrightness();
-      display->TouchCalibrationScreen(kTftWidth / 5, kTftHeight / 5);
-      delay(2000);
-      display->TouchCalibrationScreen(4 * kTftWidth / 5, kTftHeight / 5);
-      delay(2000);
-      display->TouchCalibrationScreen(4 * kTftWidth / 5, 4 * kTftHeight / 5);
-      delay(2000);
-      display->TouchCalibrationScreen(kTftWidth / 5, 4 * kTftHeight / 5);
-      delay(2000);
+      {
+        const int kNumOfSamples = 10, kNumOfCorners = 4;
+        int16_t x_samples[kNumOfSamples], y_samples[kNumOfSamples];
+        int16_t x_touch_processed[kNumOfCorners], y_touch_processed[kNumOfCorners];
+        int16_t x_pixel[kNumOfCorners], y_pixel[kNumOfCorners];
+        /* corners -  0 = top left
+                      1 = top right
+                      2 = btm left
+                      3 = btm right
+        */
+        // define pixel points
+        for (int i = 0; i < kNumOfCorners; i++) {
+          if(i % 2 == 0)
+            x_pixel[i] = kTftWidth / 5;
+          else
+            x_pixel[i] = 4 * kTftWidth / 5;
+          if(i < 2)
+            y_pixel[i] = kTftHeight / 5;
+          else
+            y_pixel[i] = 4 * kTftHeight / 5;
+        }
+
+        int sample_num = 0, corner_num = 0;
+        display->TouchCalibrationScreen(x_pixel[corner_num], y_pixel[corner_num], false, true); // first draw
+        if(ts != NULL) {
+          while(1) {
+            ResetWatchdog();
+            int16_t x = -1, y = -1;
+            bool touched = ts->GetUncalibratedTouch(x, y);
+            if(!touched)
+              display->TouchCalibrationScreen(x_pixel[corner_num], y_pixel[corner_num], false, false);
+            else {
+              display->TouchCalibrationScreen(x_pixel[corner_num], y_pixel[corner_num], true, false);
+              delay(100);
+              x_samples[sample_num] = x;
+              y_samples[sample_num] = y;
+              sample_num++;
+              if(sample_num >= kNumOfSamples) {
+                // process samples
+                int32_t x_avg = 0, y_avg = 0;
+                for (int i = 0; i < kNumOfSamples; i++) {
+                  x_avg += x_samples[i];
+                  y_avg += y_samples[i];
+                  x_samples[i] = 0;
+                  y_samples[i] = 0;
+                }
+                x_touch_processed[corner_num] = x_avg / kNumOfSamples;
+                y_touch_processed[corner_num] = y_avg / kNumOfSamples;
+                sample_num = 0;
+                corner_num++;
+                if(corner_num >= kNumOfCorners)
+                  break;
+                else {
+                  // screen with no point
+                  display->TouchCalibrationScreen(kTftWidth * 2, y_pixel[corner_num], false, true); // redraw
+                  delay(1000);
+                  display->TouchCalibrationScreen(x_pixel[corner_num], y_pixel[corner_num], false, true); // redraw
+                }
+              }
+            }
+          }
+          // touch calibration inputs received
+          for (int i = 0; i < kNumOfCorners; i++) {
+            Serial.printf("Corner %d     pixel= %d, %d     touch_processed= %d, %d\r\n", i, x_pixel[i], y_pixel[i], x_touch_processed[i], y_touch_processed[i]);
+          }
+          // calculate calibration parameters
+
+          // save calibration parameters
+
+          // display calibration result
+          
+        }
+        delay(2000);
+      }
       // set main page back
       SetPage(kMainPage);
       inactivity_millis = 0;
@@ -1775,14 +1841,13 @@ void LedButtonClickAction() {
         LedButtonClickUiResponse(1);
         if(ts != NULL) {
           // use touchscreen
-          // user input string
           std::string label = "Enter the 5-digit ZIP or 6-\ndigit PIN of your city:";
           std::string location_zip_code = wifi_stuff->location_zip_code_;
           char returnText[kWifiSsidPasswordLengthMax + 1] = "";
           for(int i = 0; i< location_zip_code.size(); i++) {
             returnText[i] = location_zip_code[i];
           }
-          // get user input from screen
+          // get input from screen
           bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ true, /* bool capitals_only = */ false);
           PrintLn(returnText);
           if(ret) {
@@ -1798,7 +1863,7 @@ void LedButtonClickAction() {
             label = "Enter your Country's 2-letter\nCountry Code or Initials:";
             strcpy(returnText, "");
             strcpy(returnText, wifi_stuff->location_country_code_.c_str());
-            // get user input from screen
+            // get input from screen
             bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool capitals_only = */ true);
             PrintLn(returnText);
             if(ret) {

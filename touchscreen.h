@@ -69,6 +69,9 @@ public:
   bool touchscreen_flip = false;
 
   void SetTouchscreenOrientation();
+
+  // returns true if touched along with uncalibrated x and y
+  bool GetUncalibratedTouch(int16_t &x, int16_t &y);
 };
 
 #endif  // TOUCHSCREEN_H

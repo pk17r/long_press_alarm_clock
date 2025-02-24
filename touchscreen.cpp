@@ -101,30 +101,13 @@ TouchPixel* Touchscreen::GetTouchedPixel() {
     // note polling time
     last_polled_millis_ = millis();
 
-    int16_t x = -1, y = -1, z = -1;
-    if(touchscreen_type == 2) {
-      // get touch point using MCU ADC
-      TsPoint touch = touchscreen_r_ptr_->getPoint();
-      x = touch.x;
-      y = touch.y;
-      z = touch.z;
-    }
-    #ifdef XPT2046_OPTION
-    else {    //if(touchscreen_type == 1)
-      // get touch point from XPT2046
-      TS_Point touch = touchscreen_ptr_->getPoint();
-      x = touch.x;
-      y = touch.y;
-      z = touch.z;
-    }
-    #endif
+    int16_t x = -1, y = -1;
+    bool touched = GetUncalibratedTouch(x, y);
 
-    if(z < (touchscreen_type == 1 ? 100 : 1)) {
+    if(!touched) {
       last_touch_Pixel_ = TouchPixel{-1, -1, false};
       return &last_touch_Pixel_;
     }
-
-    // PrintLn(__func__, ("x:" + std::to_string(x) + ", y:" + std::to_string(y) + ", z:" + std::to_string(z)));
 
     // map
     x = max(min((int16_t)map(x, touchscreen_calibration_.xMin, touchscreen_calibration_.xMax, 0, touchscreen_calibration_.screen_width - 1), (int16_t)(touchscreen_calibration_.screen_width - 1)), (int16_t)0);
@@ -137,3 +120,31 @@ TouchPixel* Touchscreen::GetTouchedPixel() {
   }
   return &last_touch_Pixel_;
 }
+
+bool Touchscreen::GetUncalibratedTouch(int16_t &x, int16_t &y) {
+  int16_t z = -1;
+  if(touchscreen_type == 2) {
+    // get touch point using MCU ADC
+    TsPoint touch = touchscreen_r_ptr_->getPoint();
+    x = touch.x;
+    y = touch.y;
+    z = touch.z;
+  }
+  #ifdef XPT2046_OPTION
+  else {    //if(touchscreen_type == 1)
+    // get touch point from XPT2046
+    TS_Point touch = touchscreen_ptr_->getPoint();
+    x = touch.x;
+    y = touch.y;
+    z = touch.z;
+  }
+  #endif
+
+  if(z < (touchscreen_type == 1 ? 100 : 1)) {
+    return false;
+  }
+
+  // PrintLn(__func__, ("x:" + std::to_string(x) + ", y:" + std::to_string(y) + ", z:" + std::to_string(z)));
+  return true;
+}
+
