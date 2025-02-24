@@ -1034,76 +1034,118 @@ void SerialUserInput() {
     case 'l':   // TouchCalibrationScreen
       display->SetMaxBrightness();
       {
-        const int kNumOfSamples = 10, kNumOfCorners = 4;
-        int16_t x_samples[kNumOfSamples], y_samples[kNumOfSamples];
-        int16_t x_touch_processed[kNumOfCorners], y_touch_processed[kNumOfCorners];
-        int16_t x_pixel[kNumOfCorners], y_pixel[kNumOfCorners];
-        /* corners -  0 = top left
-                      1 = top right
-                      2 = btm left
-                      3 = btm right
-        */
-        // define pixel points
-        for (int i = 0; i < kNumOfCorners; i++) {
-          if(i % 2 == 0)
-            x_pixel[i] = kTftWidth / 5;
-          else
-            x_pixel[i] = 4 * kTftWidth / 5;
-          if(i < 2)
-            y_pixel[i] = kTftHeight / 5;
-          else
-            y_pixel[i] = 4 * kTftHeight / 5;
-        }
-
-        int sample_num = 0, corner_num = 0;
-        display->TouchCalibrationScreen(x_pixel[corner_num], y_pixel[corner_num], false, true); // first draw
         if(ts != NULL) {
+          const int kNumOfSamples = 10, kNumOfEdges = 4;
+          int16_t x_samples[kNumOfSamples], y_samples[kNumOfSamples];
+          int16_t xMin = 32767, xMax = -32768, yMin = 32767, yMax = -32768, y_top_avg = 0, y_btm_avg = 0;
+          /* edges -  0 = left
+                      1 = right
+                      2 = top
+                      3 = btm
+          */
+          int sample_num = 0, edge_num = 0;
+          int16_t x0 = 0, y0 = 0, x1 = 0, y1 = kTftHeight - 1;
+          display->TouchCalibrationScreen(x0, y0, x1, y1, false, true); // first draw
           while(1) {
             ResetWatchdog();
             int16_t x = -1, y = -1;
-            bool touched = ts->GetUncalibratedTouch(x, y);
-            if(!touched)
-              display->TouchCalibrationScreen(x_pixel[corner_num], y_pixel[corner_num], false, false);
+            if(!(ts->GetUncalibratedTouch(x, y))) {
+              display->TouchCalibrationScreen(x0, y0, x1, y1, false, false);   // show no touch
+            }
             else {
-              display->TouchCalibrationScreen(x_pixel[corner_num], y_pixel[corner_num], true, false);
-              delay(100);
+              display->TouchCalibrationScreen(x0, y0, x1, y1, true, false);   // show touch
+              delay(kUserInputDelayMs);
               x_samples[sample_num] = x;
               y_samples[sample_num] = y;
               sample_num++;
               if(sample_num >= kNumOfSamples) {
                 // process samples
-                int32_t x_avg = 0, y_avg = 0;
-                for (int i = 0; i < kNumOfSamples; i++) {
-                  x_avg += x_samples[i];
-                  y_avg += y_samples[i];
-                  x_samples[i] = 0;
-                  y_samples[i] = 0;
+                switch(edge_num) {
+                  case 0:   // left
+                  case 1:   // right
+                    for (int i = 0; i < kNumOfSamples; i++) {
+                      if(xMin > x_samples[i]) xMin = x_samples[i];
+                      if(xMax < x_samples[i]) xMax = x_samples[i];
+                    }
+                    break;
+                  case 2:   // top
+                    for (int i = 0; i < kNumOfSamples; i++) {
+                      y_top_avg += y_samples[i];
+                      if(yMin > y_samples[i]) yMin = y_samples[i];
+                      if(yMax < y_samples[i]) yMax = y_samples[i];
+                    }
+                    y_top_avg /= kNumOfSamples;
+                    break;
+                  case 3:   // btm
+                    // yMax = y_avg / kNumOfSamples;
+                    for (int i = 0; i < kNumOfSamples; i++) {
+                      y_btm_avg += y_samples[i];
+                      if(yMin > y_samples[i]) yMin = y_samples[i];
+                      if(yMax < y_samples[i]) yMax = y_samples[i];
+                    }
+                    y_btm_avg /= kNumOfSamples;
+                    break;
                 }
-                x_touch_processed[corner_num] = x_avg / kNumOfSamples;
-                y_touch_processed[corner_num] = y_avg / kNumOfSamples;
                 sample_num = 0;
-                corner_num++;
-                if(corner_num >= kNumOfCorners)
+                edge_num++;
+                if(edge_num >= kNumOfEdges)
                   break;
                 else {
-                  // screen with no point
-                  display->TouchCalibrationScreen(kTftWidth * 2, y_pixel[corner_num], false, true); // redraw
+                  // screen with no edge
+                  display->TouchCalibrationScreen(kTftWidth * 2, 0, kTftWidth * 2, kTftHeight - 1, false, true); // redraw
                   delay(1000);
-                  display->TouchCalibrationScreen(x_pixel[corner_num], y_pixel[corner_num], false, true); // redraw
+                  if(edge_num == 1) {  // right
+                    x0 = kTftWidth - 1, y0 = 0, x1 = kTftWidth - 1, y1 = kTftHeight - 1;
+                  }
+                  else if(edge_num == 2) {   // top
+                    x0 = 0, y0 = 0, x1 = kTftWidth - 1, y1 = 0;
+                  }
+                  else {  // btm
+                    x0 = 0, y0 = kTftHeight - 1, x1 = kTftWidth - 1, y1 = kTftHeight - 1;
+                  }
+                  display->TouchCalibrationScreen(x0, y0, x1, y1, false, true);  // redraw
                 }
               }
             }
           }
           // touch calibration inputs received
-          for (int i = 0; i < kNumOfCorners; i++) {
-            Serial.printf("Corner %d     pixel= %d, %d     touch_processed= %d, %d\r\n", i, x_pixel[i], y_pixel[i], x_touch_processed[i], y_touch_processed[i]);
+          if(y_top_avg > y_btm_avg)
+            ts->touchscreen_flip = true;
+          else
+            ts->touchscreen_flip = false;
+          // save calibration
+          nvs_preferences->SaveTouchscreenFlip(ts->touchscreen_flip);
+          Serial.printf("xMin %d     xMax %d     yMin %d     yMax %d      ts->touchscreen_flip %d\r\n", xMin, xMax, yMin, yMax, ts->touchscreen_flip);
+          ts->SetTouchscreenCalibration(xMin, xMax, yMin, yMax);
+          /* TODO save calibration */
+
+
+          // test calibration
+          // define test pixel points
+          for (int i = 0; i < kNumOfSamples; i++) {
+            x_samples[i] = (i / 2 + 1) * kTftWidth / (kNumOfSamples / 2 + 1);
+            if(i % 2 == 0)
+              y_samples[i] = kTftHeight / 5;
+            else
+              y_samples[i] = 4 * kTftHeight / 5;
           }
-          // calculate calibration parameters
-
-          // save calibration parameters
-
-          // display calibration result
-          
+          int test_num = 0;
+          display->TouchCalibrationScreenTest(x_samples[test_num], y_samples[test_num], 2 * kTftWidth, 2 * kTftHeight, true); // first draw
+          while(1) {
+            ResetWatchdog();
+            if(ts->GetTouchedPixel()->is_touched) {
+              display->TouchCalibrationScreenTest(x_samples[test_num], y_samples[test_num], ts->GetTouchedPixel()->x, ts->GetTouchedPixel()->y, false);
+              delay(kUserInputDelayMs);
+              test_num++;
+               if(test_num >= kNumOfSamples)
+                break;
+              else {
+                // screen with no point
+                display->TouchCalibrationScreenTest(x_samples[test_num], y_samples[test_num], 2 * kTftWidth, 2 * kTftHeight, false); // new point
+                delay(2 * kUserInputDelayMs);
+              }
+            }
+          }
         }
         delay(2000);
       }
@@ -1146,18 +1188,44 @@ void SerialUserInput() {
     case 'q':   // turn OFF RGB LED Strip
       TurnOffRgbStrip();
       break;
-    case 'r':   // Set RGB LED Count
+    case 'r':   // Touchscreen test
+      display->SetMaxBrightness();
       {
-        #ifdef MORE_LOGS
-        PrintLn("**** Set RGB LED Count [0-255] ****");
-        #endif
-        SerialInputWait();
-        int rgb_strip_led_count_user = Serial.parseInt();
-        SerialInputFlush();
-        nvs_preferences->SaveRgbStripLedCount(rgb_strip_led_count_user);
-        InitializeRgbLed();
-        RunRgbLedAccordingToSettings();
+        if(ts != NULL) {
+          // test calibration
+          const int kNumOfSamples = 10;
+          int16_t x_samples[kNumOfSamples], y_samples[kNumOfSamples];
+          // define test pixel points
+          for (int i = 0; i < kNumOfSamples; i++) {
+            x_samples[i] = (i / 2 + 1) * kTftWidth / (kNumOfSamples / 2 + 1);
+            if(i % 2 == 0)
+              y_samples[i] = kTftHeight / 5;
+            else
+              y_samples[i] = 4 * kTftHeight / 5;
+          }
+          int test_num = 0;
+          display->TouchCalibrationScreenTest(x_samples[test_num], y_samples[test_num], 2 * kTftWidth, 2 * kTftHeight, true); // first draw
+          while(1) {
+            ResetWatchdog();
+            if(ts->GetTouchedPixel()->is_touched) {
+              display->TouchCalibrationScreenTest(x_samples[test_num], y_samples[test_num], ts->GetTouchedPixel()->x, ts->GetTouchedPixel()->y, false);
+              delay(kUserInputDelayMs);
+              test_num++;
+               if(test_num >= kNumOfSamples)
+                break;
+              else {
+                // screen with no point
+                display->TouchCalibrationScreenTest(x_samples[test_num], y_samples[test_num], 2 * kTftWidth, 2 * kTftHeight, false); // new point
+                delay(2 * kUserInputDelayMs);
+              }
+            }
+          }
+        }
+        delay(2000);
       }
+      // set main page back
+      SetPage(kMainPage);
+      inactivity_millis = 0;
       break;
     case 's':   // toggle screensaver
       #ifdef MORE_LOGS
@@ -1242,6 +1310,19 @@ void SerialUserInput() {
       break;
     default:
       PrintLn("Unrecognized user input");
+    // case 'r':   // Set RGB LED Count
+    //   {
+    //     #ifdef MORE_LOGS
+    //     PrintLn("**** Set RGB LED Count [0-255] ****");
+    //     #endif
+    //     SerialInputWait();
+    //     int rgb_strip_led_count_user = Serial.parseInt();
+    //     SerialInputFlush();
+    //     nvs_preferences->SaveRgbStripLedCount(rgb_strip_led_count_user);
+    //     InitializeRgbLed();
+    //     RunRgbLedAccordingToSettings();
+    //   }
+    //   break;
   }
 }
 

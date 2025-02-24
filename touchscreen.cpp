@@ -11,13 +11,13 @@ Touchscreen::Touchscreen() {
     touchscreen_r_ptr_ = new TouchscreenResistive(TOUCHSCREEN_XP, TOUCHSCREEN_XM, TOUCHSCREEN_YP, TOUCHSCREEN_YM, 310);
     analogReadResolution(kAdcResolutionBits);
     touchscreen_r_ptr_->setAdcResolutionAndThreshold(kAdcResolutionBits);
-    touchscreen_calibration_ = TouchCalibration{150, 1000, 150, 870, kTftWidth, kTftHeight};
+    SetTouchscreenCalibration(170, 980, 150, 880);
   }
   #ifdef XPT2046_OPTION
   else if(touchscreen_type == 1) {   // XPT2046
     touchscreen_ptr_ = new XPT2046_Touchscreen(TS_CS_PIN, TS_IRQ_PIN);
     touchscreen_ptr_->begin(*spi_obj);
-    touchscreen_calibration_ = TouchCalibration{220, 3800, 280, 3830, kTftWidth, kTftHeight};
+    SetTouchscreenCalibration(220, 3800, 280, 3830);
   }
   #endif
 
@@ -148,3 +148,6 @@ bool Touchscreen::GetUncalibratedTouch(int16_t &x, int16_t &y) {
   return true;
 }
 
+void Touchscreen::SetTouchscreenCalibration(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax) {
+  touchscreen_calibration_ = TouchCalibration{xMin, xMax, yMin, yMax, kTftWidth, kTftHeight};  
+}

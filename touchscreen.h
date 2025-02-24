@@ -72,6 +72,8 @@ public:
 
   // returns true if touched along with uncalibrated x and y
   bool GetUncalibratedTouch(int16_t &x, int16_t &y);
+
+  void SetTouchscreenCalibration(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax);
 };
 
 #endif  // TOUCHSCREEN_H
