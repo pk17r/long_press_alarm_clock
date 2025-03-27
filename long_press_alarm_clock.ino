@@ -570,12 +570,12 @@ void loop1() {
     // }
   }
 
-  const int kTouchActiveThreshold = 50000;
-  int touchReadPin5 = touchRead(TOUCH_PIN_5);
-  if(touchReadPin5 > kTouchActiveThreshold) {
-    PrintLn("TOUCHED TOUCH_PIN_5");
-    LedOnOffResponse();
-  }
+  // const int kTouchActiveThreshold = 50000;
+  // int touchReadPin5 = touchRead(TOUCH_PIN_5);
+  // if(touchReadPin5 > kTouchActiveThreshold) {
+  //   PrintLn("TOUCHED TOUCH_PIN_5");
+  //   LedOnOffResponse();
+  // }
 }
 
 #if defined(ESP32_DUAL_CORE)
