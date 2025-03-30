@@ -588,6 +588,13 @@ void RGBDisplay::DisplayCurrentPageButtonRow(DisplayButton* button, int button_i
         std::string row_2_label = button->row_label.substr(row_1_label_length, button->row_label.size() - row_1_label_length);
         tft.print(row_2_label.c_str());
       }
+
+      // Special case -> Clock settings page city
+      if(current_page == kClockSettingsPage && button->btn_cursor_id == kClockSettingsPageSetLocation && wifi_stuff->city_.length() > 0) {
+        tft.setFont(&FreeMonoBold9pt7b);
+        tft.setTextColor(kDisplayColorGreen);
+        tft.print(wifi_stuff->city_.c_str());
+      }
     }
   }
 
@@ -625,7 +632,8 @@ void RGBDisplay::DisplayCurrentPage() {
     case kScreensaverSettingsPage: title_str = "SCREENSAVER SETTINGS PAGE"; break;
     case kSettingsPage: title_str = "MAIN SETTINGS PAGE"; break;
     case kWiFiSettingsPage: title_str = "WIFI SETTINGS PAGE"; break;
-    case kLocationAndWeatherSettingsPage: title_str = "LOCATION & WEATHER SETTINGS"; break;
+    case kClockSettingsPage: title_str = "CLOCK SETTINGS PAGE"; break;
+    case kWeatherSettingsPage: title_str = "LOCATION & WEATHER SETTINGS"; break;
     default: title_str = "Not Implemented!";
   }
   tft.print(title_str.c_str());
@@ -643,7 +651,7 @@ void RGBDisplay::DisplayCurrentPage() {
     case kWiFiSettingsPage:
       DisplayWiFiConnectionStatus();
       break;
-    case kLocationAndWeatherSettingsPage:
+    case kWeatherSettingsPage:
       DisplayWeatherInfo();
       break;
   }
@@ -915,19 +923,19 @@ void RGBDisplay::DisplayWeatherInfo() {
   // show today's weather
   if(wifi_stuff->got_weather_info_) {
     // tft.setFont(&FreeMonoBold9pt7b);
-    if(current_page == kLocationAndWeatherSettingsPage) {
-      tft.setFont(&FreeMonoBold9pt7b);
-      tft.setCursor(60, 50);
-      tft.setTextColor(kDisplayColorGreen);
-      tft.print(wifi_stuff->city_.c_str());
-      tft.setTextColor(kDisplayColorBlue);
-    }
-    else {
+    // if(current_page == kWeatherSettingsPage) {
+    //   tft.setFont(&FreeMonoBold9pt7b);
+    //   tft.setCursor(60, 50);
+    //   tft.setTextColor(kDisplayColorGreen);
+    //   tft.print(wifi_stuff->city_.c_str());
+    //   tft.setTextColor(kDisplayColorBlue);
+    // }
+    // else {
       tft.setFont(&FreeSans12pt7b);
       tft.setCursor(city_x0, city_y0);
       tft.setTextColor(kDisplayColorOrange);
       tft.print(wifi_stuff->city_.c_str());
-    }
+    // }
     tft.setFont(&FreeSans12pt7b);
     tft.setCursor(weather_x0, weather_main_y0);
     tft.print(wifi_stuff->weather_main_.c_str()); tft.print(" : "); tft.print(wifi_stuff->weather_description_.c_str());

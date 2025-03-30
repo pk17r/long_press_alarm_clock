@@ -411,18 +411,18 @@ void loop() {
     // SerialPrintRtcDateTime();
 
     // if SAP is on, then track got_SAP_user_input_ to stop SAP
-    if(((current_page == kSoftApInputsPage) || (current_page == kLocationInputsPage)) && wifi_stuff->got_SAP_user_input_) {
+    if(((current_page == kSoftApInputsPage) || (current_page == kLocationInputsLocalServerPage)) && wifi_stuff->got_SAP_user_input_) {
       current_cursor = kPageSaveButton;
       MainButtonClickAction();
       inactivity_millis = 0;
     }
 
     // check for inactivity
-    if(inactivity_millis > (((current_page == kSoftApInputsPage) || (current_page == kLocationInputsPage)) ? 15 * kInactivityMillisLimit : kInactivityMillisLimit)) {
+    if(inactivity_millis > (((current_page == kSoftApInputsPage) || (current_page == kLocationInputsLocalServerPage)) ? 15 * kInactivityMillisLimit : kInactivityMillisLimit)) {
       // if softap server is on, then end it
       if(current_page == kSoftApInputsPage)
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
-      else if(current_page == kLocationInputsPage)
+      else if(current_page == kLocationInputsLocalServerPage)
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
       if(use_photoresistor)
         // check photoresistor brightness and adjust display brightness
@@ -1441,11 +1441,12 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
       WaitForExecutionOfSecondCoreTask();
       // show page
       current_page = set_this_page;     // new page needs to be set before any action
-      if(move_cursor_to_first_button) current_cursor = kWiFiSettingsPageLocationAndWeather;
+      if(move_cursor_to_first_button) current_cursor = kWiFiSettingsPageScanNetworks;
       display->DisplayCurrentPage();
       break;
     case kSettingsPage:
-    case kLocationAndWeatherSettingsPage:
+    case kClockSettingsPage:
+    case kWeatherSettingsPage:
     case kScreensaverSettingsPage:
       current_page = set_this_page;     // new page needs to be set before any action
       if(move_cursor_to_first_button) current_cursor = display_pages_vec[current_page][0]->btn_cursor_id;
@@ -1461,52 +1462,10 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
       if(move_cursor_to_first_button) current_cursor = kPageSaveButton;
       display->SoftApInputsPage();
       break;
-    case kLocationInputsPage:
+    case kLocationInputsLocalServerPage:
       current_page = set_this_page;     // new page needs to be set before any action
       if(move_cursor_to_first_button) current_cursor = kPageSaveButton;
       display->LocationInputsLocalServerPage();
-      break;
-    case kEnterWeatherLocationZipPage:
-      current_page = kLocationAndWeatherSettingsPage;     // new page needs to be set before any action
-      {
-        #ifdef MORE_LOGS
-        PrintLn("**** On Screen ZIP/PIN Code Text Input ****");
-        #endif
-        // user input string
-        std::string label = "ZIP/PIN Code";
-        char returnText[8] = "";
-        // get user input from screen
-        bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ true, /* bool capitals_only = */ false);
-        PrintLn(label, returnText);
-        if(ret) {
-          // set Location ZIP code:
-          wifi_stuff->location_zip_code_.assign(returnText);
-          PrintLn(wifi_stuff->location_zip_code_);
-          wifi_stuff->SaveWeatherLocationDetails();
-        }
-        SetPage(kLocationAndWeatherSettingsPage);
-      }
-      break;
-    case kEnterWeatherLocationCountryCodePage:
-      current_page = kLocationAndWeatherSettingsPage;     // new page needs to be set before any action
-      {
-        #ifdef MORE_LOGS
-        PrintLn("**** On Screen Country Code Text Input ****");
-        #endif
-        // user input string
-        std::string label = "Two Letter Country Code";
-        char returnText[3] = "";
-        // get user input from screen
-        bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool capitals_only = */ true);
-        PrintLn(label, returnText);
-        if(ret) {
-          // set country code:
-          wifi_stuff->location_country_code_.assign(returnText);
-          PrintLn(wifi_stuff->location_country_code_);
-          wifi_stuff->SaveWeatherLocationDetails();
-        }
-        SetPage(kLocationAndWeatherSettingsPage);
-      }
       break;
     default:
       PrintLn("Unprogrammed Page ", set_this_page);
@@ -1635,8 +1594,8 @@ void PopulateDisplayPages() {
 
   // SETTINGS PAGE
   display_pages_vec[kSettingsPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ kSettingsPageWiFi, kClickButtonWithLabel, "WiFi,Location,Weather:", false, 0,0,0,0, "WIFI" },
-    new DisplayButton{ kSettingsPageAlarmLongPressTime, kClickButtonWithLabel, "Long Press / Alarm Snooze Hold Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
+    new DisplayButton{ kSettingsPageWiFi, kClickButtonWithLabel, "WiFi Settings:", false, 0,0,0,0, "WIFI" },
+    new DisplayButton{ kSettingsPageClock, kClickButtonWithLabel, "Clock & Time Settings:", false, 0,0,0,0, "CLOCK" },
     new DisplayButton{ kSettingsPageScreensaver, kClickButtonWithLabel, "Set RGB LEDs &:", false, 0,0,0,0, "SCREENSAVER" },
     new DisplayButton{ kSettingsPageRotateScreen, kClickButtonWithLabel, "Rotate Screen:", false, 0,0,0,0, "ROTATE" },
     new DisplayButton{ kSettingsPageUpdate, kClickButtonWithLabel, "Firmware Update:", false, 0,0,0,0, "UPDATE" },
@@ -1646,10 +1605,9 @@ void PopulateDisplayPages() {
   // WIFI SETTINGS PAGE
   display_pages_vec[kWiFiSettingsPage] = std::vector<DisplayButton*> {
     new DisplayButton{ kWiFiSettingsPageShowSsidRow, kLabelOnlyNoClickButton, "Saved WiFi:", false, 0,0,0,0, wifi_stuff->WiFiDetailsShortString() },
-    new DisplayButton{ kWiFiSettingsPageLocationAndWeather, kClickButtonWithLabel, "Location & Weather:", false, 0,0,0,0, "LOCATION" },
     new DisplayButton{ kWiFiSettingsPageScanNetworks, kClickButtonWithLabel, "Scan Networks:", false, 0,0,0,0, "SCAN WIFI" },
     new DisplayButton{ kWiFiSettingsPageChangePasswd, kClickButtonWithLabel, "Change Password:", false, 0,0,0,0, "WIFI PASSWD" },
-    //new DisplayButton{ kWiFiSettingsPageClearSsidAndPasswd, kClickButtonWithLabel, "Clear WiFi Details:", false, 0,0,0,0, "CLEAR" },
+    new DisplayButton{ kWiFiSettingsPageClearSsidAndPasswd, kClickButtonWithLabel, "Clear WiFi Details:", false, 0,0,0,0, "CLEAR" },
     new DisplayButton{ kWiFiSettingsPageConnect, kClickButtonWithLabel, "", false, 0,0,0,0, "CONNECT WIFI" },
     new DisplayButton{ kWiFiSettingsPageDisconnect, kClickButtonWithLabel, "", false, 0,0,0,0, "DISCONNECT" },
     page_back_button,
@@ -1669,17 +1627,24 @@ void PopulateDisplayPages() {
     page_back_button,
   };
 
-  // LOCATION AND WEATHER SETTINGS PAGE
-  display_pages_vec[kLocationAndWeatherSettingsPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ kLocationAndWeatherSettingsPageSetLocation, kClickButtonWithLabel, "City:", false, 0,0,0,0, (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_) },
-    new DisplayButton{ kLocationAndWeatherSettingsPageUpdateTime, kClickButtonWithLabel, "Time, Time-Zone:", false, 0,0,0,0, "UPDATE TIME" },
-    new DisplayButton{ kLocationAndWeatherSettingsPageUnits, kClickButtonWithLabel, "Set Units:", false, 0,0,0,0, (wifi_stuff->weather_units_metric_not_imperial_ ? kMetricUnitStr : kImperialUnitStr) },
-    new DisplayButton{ kLocationAndWeatherSettingsPageFetch, kClickButtonWithLabel, "Fetch Weather:", false, 0,0,0,0, "FETCH" },
+  // CLOCK SETTINGS PAGE
+  display_pages_vec[kClockSettingsPage] = std::vector<DisplayButton*> {
+    new DisplayButton{ kClockSettingsPageSetLocation, kClickButtonWithLabel, "City:", false, 0,0,0,0, (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_) },
+    new DisplayButton{ kClockSettingsPageUpdateTime, kClickButtonWithLabel, "Update Time:", false, 0,0,0,0, "UPDATE TIME" },
+    new DisplayButton{ kClockSettingsPageAlarmLongPressTime, kClickButtonWithLabel, "Long Press / Alarm Snooze Hold Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
+    new DisplayButton{ kClockSettingsPageWeather, kClickButtonWithLabel, "Weather Settings:", false, 0,0,0,0, "WEATHER" },
     page_back_button,
   };
 
-  // LOCATION INPUT DETAILS PAGE
-  display_pages_vec[kLocationInputsPage] = std::vector<DisplayButton*> {
+  // WEATHER SETTINGS PAGE
+  display_pages_vec[kWeatherSettingsPage] = std::vector<DisplayButton*> {
+    new DisplayButton{ kWeatherSettingsPageSetUnits, kClickButtonWithLabel, "Set Units:", false, 0,0,0,0, (wifi_stuff->weather_units_metric_not_imperial_ ? kMetricUnitStr : kImperialUnitStr) },
+    new DisplayButton{ kWeatherSettingsPageFetch, kClickButtonWithLabel, "Fetch Weather:", false, 0,0,0,0, "FETCH" },
+    page_back_button,
+  };
+
+  // LOCATION INPUT LOCAL SERVER PAGE
+  display_pages_vec[kLocationInputsLocalServerPage] = std::vector<DisplayButton*> {
     page_save_button,
     page_back_button,
   };
@@ -1797,15 +1762,15 @@ void MainButtonClickAction() {
         LedButtonClickUiResponse(1);
         SetPage(kWiFiSettingsPage);
       }
-      else if(current_cursor == kSettingsPageAlarmLongPressTime) {
-        // change seconds
-        if(alarm_clock->alarm_long_press_seconds_ < 25)
-          alarm_clock->alarm_long_press_seconds_ += 10;
+      else if(current_cursor == kSettingsPageClock) {
+        if(wifi_stuff->city_.length() == 0) {
+          LedButtonClickUiResponse(2);
+          AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
+          WaitForExecutionOfSecondCoreTask();
+        }
         else
-          alarm_clock->alarm_long_press_seconds_ = 5;
-        display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec";
-        nvs_preferences->SaveLongPressSeconds(alarm_clock->alarm_long_press_seconds_);
-        LedButtonClickUiResponse();
+          LedButtonClickUiResponse(1);
+        SetPage(kClockSettingsPage);
       }
       else if(current_cursor == kSettingsPageScreensaver) {
         LedButtonClickUiResponse(1);
@@ -1838,12 +1803,6 @@ void MainButtonClickAction() {
         WaitForExecutionOfSecondCoreTask();
         SetPage(kWiFiScanNetworksPage);
       }
-      else if(current_cursor == kWiFiSettingsPageLocationAndWeather) {
-        LedButtonClickUiResponse(2);
-        AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
-        WaitForExecutionOfSecondCoreTask();
-        SetPage(kLocationAndWeatherSettingsPage);
-      }
       else if(current_cursor == kWiFiSettingsPageChangePasswd) {
         WiFiPasswordInputTouchAndNonTouch();
       }
@@ -1875,8 +1834,97 @@ void MainButtonClickAction() {
       }
       else if(current_cursor == kPageBackButton) {
         LedButtonClickUiResponse(1);
+        current_cursor = kSettingsPageWiFi;
         SetPage(kSettingsPage);
       }
+    }
+    else if(current_page == kClockSettingsPage) {           // CLOCK SETTINGS PAGE
+      if(current_cursor == kClockSettingsPageSetLocation) {
+        LedButtonClickUiResponse(1);
+        if(ts != NULL) {
+          // use touchscreen
+          std::string label = "Enter the 5-digit ZIP or 6-\ndigit PIN of your city:";
+          std::string location_zip_code = wifi_stuff->location_zip_code_;
+          char returnText[kWifiSsidPasswordLengthMax + 1] = "";
+          for(int i = 0; i< location_zip_code.size(); i++) {
+            returnText[i] = location_zip_code[i];
+          }
+          // get input from screen
+          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ true, /* bool capitals_only = */ false);
+          PrintLn(returnText);
+          if(ret) {
+            // clear current city
+            wifi_stuff->city_ = "";
+
+            display->DisplayBlankScreen();
+            LedOnOffResponse();
+            std::string new_location_zip_str = returnText;
+            wifi_stuff->location_zip_code_ = new_location_zip_str;
+            wifi_stuff->SaveWeatherLocationDetails();
+            wifi_stuff->got_weather_info_ = false;
+
+            // get Country Code
+
+            label = "Enter your Country's 2-letter\nCountry Code or Initials:";
+            strcpy(returnText, "");
+            strcpy(returnText, wifi_stuff->location_country_code_.c_str());
+            // get input from screen
+            bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool capitals_only = */ true);
+            PrintLn(returnText);
+            if(ret) {
+              display->DisplayBlankScreen();
+              LedOnOffResponse();
+              wifi_stuff->location_country_code_ = returnText;
+              wifi_stuff->SaveWeatherLocationDetails();
+              // update new location Zip/Pin code on button
+              int display_pages_vec_location_and_weather_button_index = DisplayPagesVecButtonIndex(kClockSettingsPage, kClockSettingsPageSetLocation);
+              std::string location_str = (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_);
+              display_pages_vec[kClockSettingsPage][display_pages_vec_location_and_weather_button_index]->btn_value = location_str;
+            }
+
+            // get new location, update time and weather info
+            AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
+            WaitForExecutionOfSecondCoreTask();
+          }
+          SetPage(kClockSettingsPage);
+        }
+        else {
+          AddSecondCoreTaskIfNotThere(kStartLocationInputsLocalServer);
+          WaitForExecutionOfSecondCoreTask();
+          SetPage(kLocationInputsLocalServerPage);
+        }
+      }
+      else if(current_cursor == kClockSettingsPageUpdateTime) {
+        LedButtonClickUiResponse(1);
+        AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
+        WaitForExecutionOfSecondCoreTask();
+        if(wifi_stuff->manual_time_update_successful_)
+          SetPage(kMainPage);
+        else
+          SetPage(kClockSettingsPage, /* bool move_cursor_to_first_button = */ false);
+      }
+      else if(current_cursor == kClockSettingsPageAlarmLongPressTime) {
+        // change seconds
+        if(alarm_clock->alarm_long_press_seconds_ < 25)
+          alarm_clock->alarm_long_press_seconds_ += 10;
+        else
+          alarm_clock->alarm_long_press_seconds_ = 5;
+        display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec";
+        nvs_preferences->SaveLongPressSeconds(alarm_clock->alarm_long_press_seconds_);
+        LedButtonClickUiResponse();
+      }
+      else if(current_cursor == kClockSettingsPageWeather) {
+        LedButtonClickUiResponse(2);
+        AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
+        WaitForExecutionOfSecondCoreTask();
+        SetPage(kWeatherSettingsPage);
+      }
+      else if(current_cursor == kPageBackButton) {
+        LedButtonClickUiResponse(1);
+        current_cursor = kSettingsPageClock;
+        SetPage(kSettingsPage, /* bool move_cursor_to_first_button = */ false);
+      }
+      
     }
     else if(current_page == kWiFiScanNetworksPage) {          // WIFI NETWORKS SCAN PAGE
       if(current_cursor == kWiFiScanNetworksPageList) {
@@ -1923,69 +1971,8 @@ void MainButtonClickAction() {
       WaitForExecutionOfSecondCoreTask();
       SetPage(kWiFiSettingsPage);
     }
-    else if(current_page == kLocationAndWeatherSettingsPage) {       // LOCATION AND WEATHER SETTINGS PAGE
-      if(current_cursor == kLocationAndWeatherSettingsPageSetLocation) {
-        LedButtonClickUiResponse(1);
-        if(ts != NULL) {
-          // use touchscreen
-          std::string label = "Enter the 5-digit ZIP or 6-\ndigit PIN of your city:";
-          std::string location_zip_code = wifi_stuff->location_zip_code_;
-          char returnText[kWifiSsidPasswordLengthMax + 1] = "";
-          for(int i = 0; i< location_zip_code.size(); i++) {
-            returnText[i] = location_zip_code[i];
-          }
-          // get input from screen
-          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ true, /* bool capitals_only = */ false);
-          PrintLn(returnText);
-          if(ret) {
-            display->DisplayBlankScreen();
-            LedOnOffResponse();
-            std::string new_location_zip_str = returnText;
-            wifi_stuff->location_zip_code_ = new_location_zip_str;
-            wifi_stuff->SaveWeatherLocationDetails();
-            wifi_stuff->got_weather_info_ = false;
-
-            // get Country Code
-
-            label = "Enter your Country's 2-letter\nCountry Code or Initials:";
-            strcpy(returnText, "");
-            strcpy(returnText, wifi_stuff->location_country_code_.c_str());
-            // get input from screen
-            bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool capitals_only = */ true);
-            PrintLn(returnText);
-            if(ret) {
-              display->DisplayBlankScreen();
-              LedOnOffResponse();
-              wifi_stuff->location_country_code_ = returnText;
-              wifi_stuff->SaveWeatherLocationDetails();
-              // update new location Zip/Pin code on button
-              int display_pages_vec_location_and_weather_button_index = DisplayPagesVecButtonIndex(kLocationAndWeatherSettingsPage, kLocationAndWeatherSettingsPageSetLocation);
-              std::string location_str = (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_);
-              display_pages_vec[kLocationAndWeatherSettingsPage][display_pages_vec_location_and_weather_button_index]->btn_value = location_str;
-            }
-
-            // get new location, update time and weather info
-            AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
-            WaitForExecutionOfSecondCoreTask();
-          }
-          SetPage(kLocationAndWeatherSettingsPage);
-        }
-        else {
-          AddSecondCoreTaskIfNotThere(kStartLocationInputsLocalServer);
-          WaitForExecutionOfSecondCoreTask();
-          SetPage(kLocationInputsPage);
-        }
-      }
-      else if(current_cursor == kLocationAndWeatherSettingsPageUpdateTime) {
-        LedButtonClickUiResponse(1);
-        AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
-        WaitForExecutionOfSecondCoreTask();
-        if(wifi_stuff->manual_time_update_successful_)
-          SetPage(kMainPage);
-        else
-          SetPage(kLocationAndWeatherSettingsPage, /* bool move_cursor_to_first_button = */ false);
-      }
-      else if(current_cursor == kLocationAndWeatherSettingsPageUnits) {
+    else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
+      if(current_cursor == kWeatherSettingsPageSetUnits) {
         wifi_stuff->weather_units_metric_not_imperial_ = !wifi_stuff->weather_units_metric_not_imperial_;
         wifi_stuff->SaveWeatherUnits();
         wifi_stuff->got_weather_info_ = false;
@@ -1994,21 +1981,21 @@ void MainButtonClickAction() {
         // fetch weather info in new units
         AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
         WaitForExecutionOfSecondCoreTask();
-        SetPage(kLocationAndWeatherSettingsPage, /* bool move_cursor_to_first_button = */ false);
+        SetPage(kWeatherSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }
-      else if(current_cursor == kLocationAndWeatherSettingsPageFetch) {
+      else if(current_cursor == kWeatherSettingsPageFetch) {
         LedButtonClickUiResponse(1);
         AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
         WaitForExecutionOfSecondCoreTask();
-        SetPage(kLocationAndWeatherSettingsPage, /* bool move_cursor_to_first_button = */ false);
+        SetPage(kWeatherSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }
       else if(current_cursor == kPageBackButton) {
         LedButtonClickUiResponse(1);
-        current_cursor = kWiFiSettingsPageLocationAndWeather;
-        SetPage(kWiFiSettingsPage, /* bool move_cursor_to_first_button = */ false);
+        current_cursor = kClockSettingsPageSetLocation;
+        SetPage(kClockSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }
     }
-    else if(current_page == kLocationInputsPage) {          // LOCATION INPUTS PAGE
+    else if(current_page == kLocationInputsLocalServerPage) {          // LOCATION INPUT LOCAL SERVER PAGE
       LedButtonClickUiResponse(1);
       if(current_cursor == kPageSaveButton) {
         LedOnOffResponse();
@@ -2016,11 +2003,12 @@ void MainButtonClickAction() {
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
         WaitForExecutionOfSecondCoreTask();
         wifi_stuff->got_weather_info_ = false;
+        wifi_stuff->city_ = "";
         // update new location Zip/Pin code on button
-        int display_pages_vec_location_and_weather_button_index = DisplayPagesVecButtonIndex(kLocationAndWeatherSettingsPage, kLocationAndWeatherSettingsPageSetLocation);
+        int display_pages_vec_location_button_index = DisplayPagesVecButtonIndex(kClockSettingsPage, kClockSettingsPageSetLocation);
         std::string location_str = (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_);
-        display_pages_vec[kLocationAndWeatherSettingsPage][display_pages_vec_location_and_weather_button_index]->btn_value = location_str;
-        // got new location, update time and weather info
+        display_pages_vec[kClockSettingsPage][display_pages_vec_location_button_index]->btn_value = location_str;
+        // get new location, update time and weather info
         AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
       }
       else if(current_cursor == kPageBackButton) {
@@ -2028,7 +2016,7 @@ void MainButtonClickAction() {
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
       }
       WaitForExecutionOfSecondCoreTask();
-      SetPage(kLocationAndWeatherSettingsPage);
+      SetPage(kClockSettingsPage);
     }
     else if(current_page == kScreensaverSettingsPage) {        // SCREENSAVER SETTINGS PAGE
       if(current_cursor == kScreensaverSettingsPageMotion) {
