@@ -987,25 +987,35 @@ void RGBDisplay::FirmwareUpdatePage() {
 
 void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
 
+  SetMaxBrightness();
+
   int16_t title_x0 = 0, title_y0 = 40;
-  int16_t s_x0 = 230, s_y0 = title_y0 + 48;
+  int16_t s_x0 = 220, s_y0 = title_y0 + 48;
   
   if(firstTime) {
-
     tft.fillScreen(kDisplayBackroundColor);
     tft.setFont(&Satisfy_Regular24pt7b);
     tft.setTextColor(kDisplayColorYellow);
     tft.setCursor(title_x0, title_y0);
-    tft.print("WAKE UP!");
-    tft.setFont(&FreeSans18pt7b);
+    tft.print("WAKE");
+    tft.setCursor(tft.getCursorX() + 5, title_y0);
+    tft.print("UP!");
+    tft.setFont(&FreeSans24pt7b);
+    tft.setCursor(tft.getCursorX() + 5, title_y0);
     tft.setTextColor(kDisplayDateColor);
-    tft.print(kCharSpace);
+    if(rtc->hour() < 10)
+      tft.print(kCharSpace);
     tft.print(new_display_data_.time_HHMM);
-    tft.print((new_display_data_.pm_not_am ? kPmLabel : kAmLabel));
+    tft.setFont(&FreeMonoBold9pt7b);
+    int16_t cursor_x_ampmLabel = tft.getCursorX();
+    tft.print('M');
+    tft.setCursor(cursor_x_ampmLabel, title_y0 / 2);
+    tft.print((new_display_data_.pm_not_am ? 'P' : 'A'));
+
+    tft.setFont(&FreeMono9pt7b);
     tft.setTextColor(kDisplayColorCyan);
     char press_button_text1[] = "To turn off Alarm,";
     char press_button_text2[] = "press button for:";
-    tft.setFont(&FreeMono9pt7b);
     tft.setCursor(10, s_y0 - 18);
     tft.print(press_button_text1);
     tft.setCursor(10, s_y0);
@@ -1021,17 +1031,19 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
     DisplayWeatherInfo();
   }
 
-  char timer_str[4];
+  char timer_str[6];
   int charIndex = 0;
   if(buttonPressSecondsCounter > 9) {
     timer_str[charIndex] = (char)(buttonPressSecondsCounter / 10 + 48); charIndex++;
   }
   timer_str[charIndex] = (char)(buttonPressSecondsCounter % 10 + 48); charIndex++;
   timer_str[charIndex] = 's'; charIndex++;
+  timer_str[charIndex] = 'e'; charIndex++;
+  timer_str[charIndex] = 'c'; charIndex++;
   timer_str[charIndex] = '\0';
 
   // fill rect
-  tft.fillRect(s_x0 - 5, s_y0 - 40, 80, 46, kDisplayBackroundColor);
+  tft.fillRect(s_x0 - 5, s_y0 - 40, kTftWidth - s_x0 + 5, 46, kDisplayBackroundColor);
 
   // set font
   tft.setFont(&Satisfy_Regular24pt7b);

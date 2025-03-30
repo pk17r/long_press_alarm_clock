@@ -918,15 +918,23 @@ void SerialUserInput() {
 
   // process user input
   switch (input) {
-    case 'a':   // toggle alarm On Off
+    case 'a':   // show alarm triggered screen
       #ifdef MORE_LOGS
-      PrintLn("**** Toggle Alarm ****");
+      PrintLn("**** Show Alarm Triggered Screen ****");
       #endif
-      alarm_clock->var_1_ = alarm_clock->alarm_hr_;
-      alarm_clock->var_2_ = alarm_clock->alarm_min_;
-      alarm_clock->var_3_is_AM_ = alarm_clock->alarm_is_AM_;
-      alarm_clock->var_4_ON_ = !alarm_clock->alarm_ON_;
-      alarm_clock->SaveAlarm();
+      display->SetMaxBrightness();
+      // start alarm triggered page
+      SetPage(kAlarmTriggeredPage);
+      delay(1000);
+      display->AlarmTriggeredScreen(false, 24);
+      delay(2000);
+      display->AlarmTriggeredScreen(false, 12);
+      delay(2000);
+      display->AlarmTriggeredScreen(false, 5);
+      delay(2000);
+      // set main page back
+      SetPage(kMainPage);
+      inactivity_millis = 0;
       break;
     case 'b':   // RGB LED brightness
       {
@@ -1291,23 +1299,8 @@ void SerialUserInput() {
       nvs_preferences->SaveAutorunRgbLedStripMode(autorun_rgb_led_strip_mode);
       PrintLn(RgbLedSettingString());
       break;
-    case 'y':   // show alarm triggered screen
-      #ifdef MORE_LOGS
-      PrintLn("**** Show Alarm Triggered Screen ****");
-      #endif
-      display->SetMaxBrightness();
-      // start alarm triggered page
-      SetPage(kAlarmTriggeredPage);
-      delay(1000);
-      display->AlarmTriggeredScreen(false, 24);
-      delay(2000);
-      display->AlarmTriggeredScreen(false, 12);
-      delay(2000);
-      display->AlarmTriggeredScreen(false, 5);
-      delay(2000);
-      // set main page back
-      SetPage(kMainPage);
-      inactivity_millis = 0;
+    case 'y':   //
+
       break;
     case 'z':   // screensaver toggle show_colored_edge_screensaver_
       {
