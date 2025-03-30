@@ -258,6 +258,7 @@ void setup() {
   #endif
 
   ResetWatchdog();
+  SerialInputFlush();
 }
 
 // arduino loop function on core0 - High Priority one with time update tasks
@@ -508,9 +509,15 @@ void loop1() {
   if(rgb_led_strip_on && (current_led_strip_color != display->kColorPickerWheel[display->current_random_color_index_]))
     SetRgbStripColor(display->kColorPickerWheel[display->current_random_color_index_], /* set_color_sequentially = */ true);
 
+  // code to try executing the task a few times until success
+  uint8_t try_counts = 0;
+  const uint8_t kTryCountsLimit = 3;
+
   // run the core only to do specific not time important operations
-  while (!second_core_tasks_queue.empty())
+  while(!second_core_tasks_queue.empty())
   {
+    ResetWatchdog();
+
     SecondCoreTask current_task = second_core_tasks_queue.front();
     // PrintLn("CPU", xPortGetCoreID());
 
@@ -562,12 +569,17 @@ void loop1() {
       success = true;
     }
 
+    try_counts++;
+
     // done processing the task
-    // if(success) {
+    if(success || try_counts >= kTryCountsLimit) {
       second_core_tasks_queue.pop();
       delay(1);   // a delay to avoid race condition in dual core MCUs
       second_core_task_added_flag_array[current_task] = false;
-    // }
+      // try counts for next task
+      if(!second_core_tasks_queue.empty())
+        try_counts = 0;
+    }
   }
 
   // const int kTouchActiveThreshold = 50000;
@@ -900,23 +912,21 @@ void SerialUserInput() {
   char input = Serial.read();
   SerialInputFlush();
   // acceptable user input
-  PrintLn("User input: ");
-  Serial.println(input);
+  std::string s = "User input: ";
+  s += input;
+  PrintLn(s);
 
-  if(millis() < 2000) {
-    #ifdef MORE_LOGS
-    PrintLn("Serial User Input Ignored..");
-    #endif
-    return;
-  }
   // process user input
   switch (input) {
     case 'a':   // toggle alarm On Off
       #ifdef MORE_LOGS
       PrintLn("**** Toggle Alarm ****");
       #endif
-      alarm_clock->alarm_ON_ = !alarm_clock->alarm_ON_;
-      PrintLn(alarm_clock->alarm_ON_);
+      alarm_clock->var_1_ = alarm_clock->alarm_hr_;
+      alarm_clock->var_2_ = alarm_clock->alarm_min_;
+      alarm_clock->var_3_is_AM_ = alarm_clock->alarm_is_AM_;
+      alarm_clock->var_4_ON_ = !alarm_clock->alarm_ON_;
+      alarm_clock->SaveAlarm();
       break;
     case 'b':   // RGB LED brightness
       {
