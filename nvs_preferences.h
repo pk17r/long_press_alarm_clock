@@ -14,6 +14,8 @@ public:
 
   NvsPreferences();
 
+  void RetrieveOwnerName(std::string &owner_name);
+  void SaveOwnerName(std::string owner_name);
   void RetrieveLongPressSeconds(uint8_t &long_press_seconds);
   void SaveLongPressSeconds(uint8_t long_press_seconds);
   void RetrieveBuzzerFrequency(uint16_t &buzzer_freq);
@@ -52,6 +54,7 @@ public:
   void SaveRgbStripLedBrightness(uint8_t rgb_strip_led_brightness);
   uint8_t RetrieveRtcType();
   void SaveRtcType(uint8_t rtc_type);
+  void RemoveKey(std::string remove_key);
 
 private:
 
@@ -60,6 +63,9 @@ private:
   Preferences preferences;
 
   const char* kNvsDataKey = "longPressData";
+
+  const char* kOwnerNameKey = "OwnerName";
+  const std::string kOwnerName = "?";
 
   const char* kAlarmHrKey = "AlarmHr";
   const uint8_t kAlarmHr = 7;

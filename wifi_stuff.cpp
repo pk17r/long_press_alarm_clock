@@ -481,7 +481,7 @@ void WiFiStuff::StartSetLocationLocalServer() {
 
 void WiFiStuff::StopSetLocationLocalServer() {
   extern AsyncWebServer* server;
-  extern String temp_zip_pin_str, temp_country_code_str;
+  extern String temp_owner_name_str, temp_zip_pin_str, temp_country_code_str;
 
   // To access your stored values on ssid_str, passwd_str
   PrintLn(__func__, temp_zip_pin_str.c_str());
@@ -498,6 +498,8 @@ void WiFiStuff::StopSetLocationLocalServer() {
   }
 
   if(save_SAP_details_) {
+    std::string owner_name = temp_owner_name_str.c_str();
+    nvs_preferences->SaveOwnerName(owner_name);
     location_zip_code_ = temp_zip_pin_str.c_str();
     location_country_code_ = temp_country_code_str.c_str();
     SaveWeatherLocationDetails();
@@ -511,11 +513,13 @@ AsyncWebServer* server = NULL;
 
 const char* kHtmlParamKeySsid = "html_ssid";
 const char* kHtmlParamKeyPasswd = "html_passwd";
+const char* kHtmlParamKeyOwnerName = "html_owner_name";
 const char* kHtmlParamKeyZipPin = "html_zip_pin";
 const char* kHtmlParamKeyCountryCode = "html_country_code";
 
 String temp_ssid_str = "Enter SSID";
 String temp_passwd_str = "Enter Passwd";
+String temp_owner_name_str = "Enter Owner Name";
 String temp_zip_pin_str = "Enter ZIP/PIN";
 String temp_country_code_str = "Enter Country Code";
 
@@ -550,6 +554,8 @@ const char index_html_location_details[] PROGMEM = R"rawliteral(
   </script></head><body>
   <form action="/get" target="hidden-form">
   	<a href="https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release" target="_blank"><h3>Long Press Alarm Clock</h3></a>
+    <label>Owner Name:</label><br>
+    <input type="text" name="html_owner_name" value="%html_owner_name%" oninput="this.value = this.value.toUpperCase()"><br><br>
     <h4>Enter Location Details:</h4>
     <label>Location ZIP/PIN Code:</label><br>
     <input type="number" name="html_zip_pin" value="%html_zip_pin%"><br><br>
@@ -569,6 +575,9 @@ String processor(const String& var){
   }
   else if(strcmp(var.c_str(), kHtmlParamKeyPasswd) == 0){
     return temp_passwd_str;
+  }
+  else if(strcmp(var.c_str(), kHtmlParamKeyOwnerName) == 0){
+    return temp_owner_name_str;
   }
   else if(strcmp(var.c_str(), kHtmlParamKeyZipPin) == 0){
     return temp_zip_pin_str;
@@ -610,6 +619,9 @@ void _SoftAPWiFiDetails() {
 
 void _LocalServerLocationInputs() {
 
+  std::string owner_name;
+  nvs_preferences->RetrieveOwnerName(owner_name);
+  temp_owner_name_str = owner_name.c_str();
   temp_zip_pin_str = wifi_stuff->location_zip_code_.c_str();
   temp_country_code_str = wifi_stuff->location_country_code_.c_str();
 
@@ -623,6 +635,11 @@ void _LocalServerLocationInputs() {
   // Send a GET request to <ESP_IP>/get?inputString=<inputMessage>
   server->on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
     String inputMessage;
+    // GET html_owner_name value on <ESP_IP>/get?html_owner_name=<inputMessage>
+    if (request->hasParam(kHtmlParamKeyOwnerName)) {
+      inputMessage = request->getParam(kHtmlParamKeyOwnerName)->value();
+      temp_owner_name_str = inputMessage;
+    }
     // GET inputString value on <ESP_IP>/get?inputString=<inputMessage>
     if (request->hasParam(kHtmlParamKeyZipPin)) {
       inputMessage = request->getParam(kHtmlParamKeyZipPin)->value();

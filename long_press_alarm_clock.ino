@@ -990,6 +990,7 @@ void SerialUserInput() {
     case 'g':   // good morning
       display->SetMaxBrightness();
       display->GoodMorningScreen();
+      SetPage(kMainPage);
       break;
     case 'h':   // toggle TOUCHSCREEN type
       {
@@ -1302,8 +1303,28 @@ void SerialUserInput() {
       nvs_preferences->SaveAutorunRgbLedStripMode(autorun_rgb_led_strip_mode);
       PrintLn(RgbLedSettingString());
       break;
-    case 'y':   //
+    case 'y':   // Remove KEY NVS Preferences
+      {
+        // increase watchdog timeout to 90s
+        SetWatchdogTime(kWatchdogTimeoutOtaUpdateMs);
 
+        #ifdef MORE_LOGS
+        PrintLn("**** Remove NVS Preferences Key ****");
+        #endif
+        String inputStr;
+        PrintLn("NVS Key to remove:");
+        SerialInputWait();
+        inputStr = Serial.readString();
+        std::string remove_key = "";
+        for (int i = 0; i < min(inputStr.length(), (unsigned int)15); i++)
+          if(inputStr[i] != '\0' && inputStr[i] != '\n')
+            remove_key = remove_key + inputStr[i];
+        Serial.println(remove_key.c_str());
+        nvs_preferences->RemoveKey(remove_key);
+
+        // set back watchdog timeout
+        SetWatchdogTime(kWatchdogTimeoutMs);
+      }
       break;
     case 'z':   // screensaver toggle show_colored_edge_screensaver_
       {
@@ -1628,7 +1649,10 @@ void PopulateDisplayPages() {
   };
 
   // CLOCK SETTINGS PAGE
+  std::string owner_name;
+  nvs_preferences->RetrieveOwnerName(owner_name);
   display_pages_vec[kClockSettingsPage] = std::vector<DisplayButton*> {
+    new DisplayButton{ kClockSettingsPageOwnerName, kClickButtonWithLabel, "Owner Name:", false, 0,0,0,0, owner_name },
     new DisplayButton{ kClockSettingsPageSetLocation, kClickButtonWithLabel, "City:", false, 0,0,0,0, (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_) },
     new DisplayButton{ kClockSettingsPageUpdateTime, kClickButtonWithLabel, "Update Time:", false, 0,0,0,0, "UPDATE TIME" },
     new DisplayButton{ kClockSettingsPageAlarmLongPressTime, kClickButtonWithLabel, "Long Press / Alarm Snooze Hold Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
@@ -1839,7 +1863,41 @@ void MainButtonClickAction() {
       }
     }
     else if(current_page == kClockSettingsPage) {           // CLOCK SETTINGS PAGE
-      if(current_cursor == kClockSettingsPageSetLocation) {
+      if(current_cursor == kClockSettingsPageOwnerName) {
+        LedButtonClickUiResponse(1);
+        if(ts != NULL) {
+          // use touchscreen
+          std::string label = "Enter your name:";
+          std::string owner_name;
+          nvs_preferences->RetrieveOwnerName(owner_name);
+          char returnText[kWifiSsidPasswordLengthMax + 1] = "";
+          for(int i = 0; i< owner_name.size(); i++) {
+            returnText[i] = owner_name[i];
+          }
+          // get input from screen
+          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool capitals_only = */ true);
+          PrintLn(returnText);
+          if(ret) {
+            display->DisplayBlankScreen();
+            LedOnOffResponse();
+            std::string owner_name_str = returnText;
+            nvs_preferences->SaveOwnerName(owner_name_str);
+            delay(100);
+            nvs_preferences->RetrieveOwnerName(owner_name);
+
+            // update new owner name
+            int display_pages_vec_owner_name_button_index = DisplayPagesVecButtonIndex(kClockSettingsPage, kClockSettingsPageOwnerName);
+            display_pages_vec[kClockSettingsPage][display_pages_vec_owner_name_button_index]->btn_value = owner_name;
+          }
+          SetPage(kClockSettingsPage);
+        }
+        else {
+          AddSecondCoreTaskIfNotThere(kStartLocationInputsLocalServer);
+          WaitForExecutionOfSecondCoreTask();
+          SetPage(kLocationInputsLocalServerPage);
+        }
+      }
+      else if(current_cursor == kClockSettingsPageSetLocation) {
         LedButtonClickUiResponse(1);
         if(ts != NULL) {
           // use touchscreen
@@ -1877,9 +1935,9 @@ void MainButtonClickAction() {
               wifi_stuff->location_country_code_ = returnText;
               wifi_stuff->SaveWeatherLocationDetails();
               // update new location Zip/Pin code on button
-              int display_pages_vec_location_and_weather_button_index = DisplayPagesVecButtonIndex(kClockSettingsPage, kClockSettingsPageSetLocation);
+              int display_pages_vec_location_button_index = DisplayPagesVecButtonIndex(kClockSettingsPage, kClockSettingsPageSetLocation);
               std::string location_str = (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_);
-              display_pages_vec[kClockSettingsPage][display_pages_vec_location_and_weather_button_index]->btn_value = location_str;
+              display_pages_vec[kClockSettingsPage][display_pages_vec_location_button_index]->btn_value = location_str;
             }
 
             // get new location, update time and weather info
@@ -2008,6 +2066,11 @@ void MainButtonClickAction() {
         int display_pages_vec_location_button_index = DisplayPagesVecButtonIndex(kClockSettingsPage, kClockSettingsPageSetLocation);
         std::string location_str = (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_);
         display_pages_vec[kClockSettingsPage][display_pages_vec_location_button_index]->btn_value = location_str;
+        // update new owner name
+        std::string owner_name;
+        nvs_preferences->RetrieveOwnerName(owner_name);
+        int display_pages_vec_owner_name_button_index = DisplayPagesVecButtonIndex(kClockSettingsPage, kClockSettingsPageOwnerName);
+        display_pages_vec[kClockSettingsPage][display_pages_vec_owner_name_button_index]->btn_value = owner_name;
         // get new location, update time and weather info
         AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
       }

@@ -117,6 +117,7 @@ enum Cursor {
   kWiFiScanNetworksPageList,
   kWiFiScanNetworksPageRescan,
   kWiFiScanNetworksPageNext,
+  kClockSettingsPageOwnerName,
   kClockSettingsPageSetLocation,
   kClockSettingsPageUpdateTime,
   kClockSettingsPageAlarmLongPressTime,

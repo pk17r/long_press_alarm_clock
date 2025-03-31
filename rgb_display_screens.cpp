@@ -3,6 +3,7 @@
 #include "wifi_stuff.h"
 #include "rtc.h"
 #include "touchscreen.h"
+#include "nvs_preferences.h"
 
 /*!
     @brief  Draw a 565 RGB image at the specified (x,y) position using monochrome 8-bit image.
@@ -1662,20 +1663,23 @@ void RGBDisplay::ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, b
 
 void RGBDisplay::GoodMorningScreen() {
   tft.fillScreen(kDisplayBackroundColor);
-  // set font
-  tft.setFont(&Satisfy_Regular18pt7b);
 
-  std::string owner_name = "AALIYA!!";
+  std::string owner_name;
+  nvs_preferences->RetrieveOwnerName(owner_name);
   std::string good_morning_str = "GOOD MORNING";
 
-  // get bounds of text on screen
+  // get bounds of good morning text on screen
+  tft.setFont(&FreeSans18pt7b);
   tft.setTextColor(kDisplayBackroundColor);
   uint16_t good_morning_str_h = 0, good_morning_str_w = 0;
   int16_t good_morning_str_gap_x = 0, good_morning_str_gap_y = 0;
   tft.getTextBounds(good_morning_str.c_str(), 0, 0, &good_morning_str_gap_x, &good_morning_str_gap_y, &good_morning_str_w, &good_morning_str_h);
 
-  // set font
-  tft.setFont(&Satisfy_Regular24pt7b);
+  // get bounds of owner name text on screen
+  if(owner_name.length() <= 10)
+    tft.setFont(&FreeSans24pt7b);
+  else
+  tft.setFont(&FreeSans18pt7b);
   uint16_t owner_name_h = 0, owner_name_w = 0;
   int16_t owner_name_gap_x = 0, owner_name_gap_y = 0;
   tft.getTextBounds(owner_name.c_str(), 0, 0, &owner_name_gap_x, &owner_name_gap_y, &owner_name_w, &owner_name_h);
@@ -1684,16 +1688,19 @@ void RGBDisplay::GoodMorningScreen() {
   tft.setTextColor(kDisplayColorGreen);
 
   // set font
-  tft.setFont(&Satisfy_Regular18pt7b);
+  tft.setFont(&FreeSans18pt7b);
   // yes! home the cursor
-  tft.setCursor((kTftWidth - good_morning_str_w) / 2, good_morning_str_h - 5);
+  tft.setCursor((kTftWidth - good_morning_str_w) / 2, good_morning_str_h);
   // redraw the old value to erase
   tft.print(good_morning_str.c_str());
   
   // set font
-  tft.setFont(&Satisfy_Regular24pt7b);
+  if(owner_name.length() <= 10)
+    tft.setFont(&FreeSans24pt7b);
+  else
+    tft.setFont(&FreeSans18pt7b);
   // yes! home the cursor
-  tft.setCursor((kTftWidth - owner_name_w) / 2, good_morning_str_h + owner_name_h);
+  tft.setCursor((kTftWidth - owner_name_w) / 2, good_morning_str_h + owner_name_h + 5);
   // redraw the old value to erase
   tft.print(owner_name.c_str());
 

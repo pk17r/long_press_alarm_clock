@@ -79,6 +79,10 @@ NvsPreferences::NvsPreferences() {
     preferences.putUChar(kRgbStripLedBrightnessKey, kRgbStripLedBrightness);
   if(!preferences.isKey(kRtcTypeKey))
     preferences.putUChar(kRtcTypeKey, kRtcType);
+  if(!preferences.isKey(kOwnerNameKey)) {
+    String kOwnerNameString = kOwnerName.c_str();
+    preferences.putString(kOwnerNameKey, kOwnerNameString);
+  }
 
   // save new key values
   // ADD NEW KEYS ABOVE
@@ -372,3 +376,34 @@ void NvsPreferences::SaveRtcType(uint8_t rtc_type) {
   preferences.end();
   PrintLn(__func__, rtc_type);
 }
+
+void NvsPreferences::RetrieveOwnerName(std::string &owner_name) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  String owner_name_string = preferences.getString(kOwnerNameKey);
+  preferences.end();
+  owner_name = owner_name_string.c_str();
+  PrintLn(__func__, owner_name);
+}
+
+void NvsPreferences::SaveOwnerName(std::string owner_name) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  if(owner_name.length() == 0)
+    owner_name = kOwnerName;
+  String owner_name_string = owner_name.c_str();
+  preferences.putString(kOwnerNameKey, owner_name_string);
+  preferences.end();
+  PrintLn(__func__, owner_name);
+}
+
+void NvsPreferences::RemoveKey(std::string remove_key) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  if(preferences.isKey(remove_key.c_str())) {
+    preferences.remove(remove_key.c_str());
+    PrintLn("Removed key =", remove_key);
+  }
+  else {
+    PrintLn("Key not found =", remove_key);
+  }
+  preferences.end();
+}
+
