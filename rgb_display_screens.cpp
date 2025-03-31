@@ -82,7 +82,8 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
   int16_t gap_y = kTftHeight / 9;
   int16_t hr_x = gap_x / 2, min_x = 2.25*gap_x, amPm_x = 4.25*gap_x, onOff_x = 6.5*gap_x, setCancel_x = 9*gap_x;
   int16_t time_y = 6*gap_y, onSet_y = 3.5*gap_y, offCancel_y = 6.5*gap_y;
-  int16_t incB_y = time_y - 3*gap_y, decB_y = time_y + gap_y;
+  int16_t decB_y = time_y - 3*gap_y;
+  int16_t incB_y = time_y + gap_y;
   uint16_t onFill = kDisplayColorGreen, offFill = kDisplayColorBlack, borderColor = kDisplayColorCyan;
   uint16_t button_w = 2*gap_x, button_h = 2*gap_y;
   const char onStr[] = "ON", offStr[] = "OFF", setStr[] = "Set";
@@ -131,14 +132,14 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
 
     // draw increase / dec buttons
     // hour
-    DrawTriangleButton(hr_x, incB_y, gap_x, gap_y, true, borderColor, offFill);
-    DrawTriangleButton(hr_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
+    DrawTriangleButton(hr_x, decB_y, gap_x, gap_y, true, borderColor, offFill);     // decrease button
+    DrawTriangleButton(hr_x, incB_y, gap_x, gap_y, false, borderColor, offFill);     // increase button
     // min
-    DrawTriangleButton(min_x, incB_y, gap_x, gap_y, true, borderColor, offFill);
-    DrawTriangleButton(min_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
+    DrawTriangleButton(min_x, decB_y, gap_x, gap_y, true, borderColor, offFill);     // decrease button
+    DrawTriangleButton(min_x, incB_y, gap_x, gap_y, false, borderColor, offFill);     // increase button
     // am / pm
-    DrawTriangleButton(amPm_x, incB_y, gap_x, gap_y, true, borderColor, offFill);
-    DrawTriangleButton(amPm_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
+    DrawTriangleButton(amPm_x, decB_y, gap_x, gap_y, true, borderColor, offFill);     // decrease button
+    DrawTriangleButton(amPm_x, incB_y, gap_x, gap_y, false, borderColor, offFill);     // increase button
 
     // ON button
     DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarm_clock->var_4_ON_);
@@ -155,14 +156,14 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
   else {
     // processUserInput
 
-    // userButtonClick : 1 and 2 for Hr increase, dec button respectively; 3,4 min; 5,6 AmPm;
+    // userButtonClick
     //    0 = no button clicked or Big Button Pressed (Move to next Operation)
-    //    1 = Hr Inc button
-    //    2 = Hr Dec button
-    //    3 = Min Inc button
-    //    4 = Min Dec button
-    //    5 = AmPm Inc button
-    //    6 = AmPm Dec button
+    //    1 = Hr Dec button
+    //    2 = Hr Inc button
+    //    3 = Min Dec button
+    //    4 = Min Inc button
+    //    5 = AmPm Dec button
+    //    6 = AmPm Inc button
     //    7 = Alarm On button
     //    8 = Alarm Off button
     //    9 = Set button
@@ -174,47 +175,67 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
       int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
 
       // find if user clicked a button
-      if(ts_x < amPm_x + 1.5 * gap_x && ts_y > incB_y - 0.5 * gap_y) {
+      if(ts_x < amPm_x + 1.5 * gap_x && ts_y > decB_y - 0.5 * gap_y) {
         // check for increase or decrease button press
         // font color inside
-        if(ts_y < incB_y + 1.5 * gap_y) {
+        if(ts_y < decB_y + 1.5 * gap_y) {
           // increase button
-          if(ts_x > hr_x - 0.5 * gap_x && ts_x < hr_x + 1.5 * gap_x)
-            userButtonClick = 1;
-          else if(ts_x > min_x - 0.5 * gap_x && ts_x < min_x + 1.5 * gap_x)
-            userButtonClick = 3;
-          else if(ts_x > amPm_x - 0.5 * gap_x && ts_x < amPm_x + 1.5 * gap_x)
-            userButtonClick = 5;
-        }
-        else if(ts_y > decB_y - 0.5 * gap_y && ts_y < decB_y + 1.5 * gap_y) {
-          // decrease button
-          if(ts_x > hr_x - 0.5 * gap_x && ts_x < hr_x + 1.5 * gap_x)
+          if(ts_x > hr_x - 0.5 * gap_x && ts_x < hr_x + 1.5 * gap_x) {
             userButtonClick = 2;
-          else if(ts_x > min_x - 0.5 * gap_x && ts_x < min_x + 1.5 * gap_x)
+            current_cursor = kAlarmSetPageHour;
+          }
+          else if(ts_x > min_x - 0.5 * gap_x && ts_x < min_x + 1.5 * gap_x) {
             userButtonClick = 4;
-          else if(ts_x > amPm_x - 0.5 * gap_x && ts_x < amPm_x + 1.5 * gap_x)
+            current_cursor = kAlarmSetPageMinute;
+          }
+          else if(ts_x > amPm_x - 0.5 * gap_x && ts_x < amPm_x + 1.5 * gap_x) {
             userButtonClick = 6;
+            current_cursor = kAlarmSetPageAmPm;
+          }
+        }
+        else if(ts_y > incB_y - 0.5 * gap_y && ts_y < incB_y + 1.5 * gap_y) {
+          // decrease button
+          if(ts_x > hr_x - 0.5 * gap_x && ts_x < hr_x + 1.5 * gap_x) {
+            userButtonClick = 1;
+            current_cursor = kAlarmSetPageHour;
+          }
+          else if(ts_x > min_x - 0.5 * gap_x && ts_x < min_x + 1.5 * gap_x) {
+            userButtonClick = 3;
+            current_cursor = kAlarmSetPageMinute;
+          }
+          else if(ts_x > amPm_x - 0.5 * gap_x && ts_x < amPm_x + 1.5 * gap_x) {
+            userButtonClick = 5;
+            current_cursor = kAlarmSetPageAmPm;
+          }
         }
       }
-      else if(ts_x > onOff_x && ts_x < onOff_x + button_w && ts_y > onSet_y && ts_y < onSet_y + button_h) 
+      else if(ts_x > onOff_x && ts_x < onOff_x + button_w && ts_y > onSet_y && ts_y < onSet_y + button_h) {
         userButtonClick = 7;
-      else if(ts_x > onOff_x && ts_x < onOff_x + button_w && ts_y > offCancel_y && ts_y < offCancel_y + button_h)
+        current_cursor = kAlarmSetPageOn;
+      }
+      else if(ts_x > onOff_x && ts_x < onOff_x + button_w && ts_y > offCancel_y && ts_y < offCancel_y + button_h) {
         userButtonClick = 8;
-      else if(ts_x > setCancel_x && ts_x < setCancel_x + button_w && ts_y > onSet_y && ts_y < onSet_y + button_h)
+        current_cursor = kAlarmSetPageOff;
+      }
+      else if(ts_x > setCancel_x && ts_x < setCancel_x + button_w && ts_y > onSet_y && ts_y < onSet_y + button_h) {
         userButtonClick = 9;
-      else if(ts_x > setCancel_x && ts_x < setCancel_x + button_w && ts_y > offCancel_y && ts_y < offCancel_y + button_h)
+        current_cursor = kAlarmSetPageSet;
+      }
+      else if(ts_x > setCancel_x && ts_x < setCancel_x + button_w && ts_y > offCancel_y && ts_y < offCancel_y + button_h) {
         userButtonClick = 10;
+        current_cursor = kAlarmSetPageCancel;
+      }
     }
     else {
       // button input
-      // userButtonClick : 1 and 2 for Hr increase, dec button respectively; 3,4 min; 5,6 AmPm;
+      // userButtonClick
       //    0 = no button clicked or Big Button Pressed (Move to next Operation)
-      //    1 = Hr Inc button
-      //    2 = Hr Dec button
-      //    3 = Min Inc button
-      //    4 = Min Dec button
-      //    5 = AmPm Inc button
-      //    6 = AmPm Dec button
+      //    1 = Hr Dec button
+      //    2 = Hr Inc button
+      //    3 = Min Dec button
+      //    4 = Min Inc button
+      //    5 = AmPm Dec button
+      //    6 = AmPm Inc button
       //    7 = Alarm On button
       //    8 = Alarm Off button
       //    9 = Set button
@@ -222,23 +243,23 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
 
       // set new cursor position
       if(current_cursor == kAlarmSetPageHour) {
-        if(inc_button_pressed) userButtonClick = 1;
-        else if(dec_button_pressed) userButtonClick = 2;
+        if(inc_button_pressed) userButtonClick = 2;
+        else if(dec_button_pressed) userButtonClick = 1;
         else current_cursor = kAlarmSetPageMinute;
       }
       else if(current_cursor == kAlarmSetPageMinute) {
-        if(inc_button_pressed) userButtonClick = 3;
-        else if(dec_button_pressed) userButtonClick = 4;
+        if(inc_button_pressed) userButtonClick = 4;
+        else if(dec_button_pressed) userButtonClick = 3;
         else current_cursor = kAlarmSetPageAmPm;
       }
       else if(current_cursor == kAlarmSetPageAmPm) {
-        if(inc_button_pressed) userButtonClick = 5;
-        else if(dec_button_pressed) userButtonClick = 6;
+        if(inc_button_pressed) userButtonClick = 6;
+        else if(dec_button_pressed) userButtonClick = 5;
         else {
-          // if(alarm_clock->var_4_ON_)
+          if(alarm_clock->var_4_ON_)
             current_cursor = kAlarmSetPageOn;
-          // else
-            // highlight = kAlarmSetPageOff;
+          else
+            current_cursor = kAlarmSetPageOff;
         }
       }
       else if(current_cursor == kAlarmSetPageOn || current_cursor == kAlarmSetPageOff) {
@@ -289,12 +310,18 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
       int16_t triangle_x, triangle_y;
       bool isUp;
       switch(userButtonClick) {
-        case 1: triangle_x = hr_x; triangle_y = incB_y; isUp = true; break;
-        case 2: triangle_x = hr_x; triangle_y = decB_y; isUp = false; break;
-        case 3: triangle_x = min_x; triangle_y = incB_y; isUp = true; break;
-        case 4: triangle_x = min_x; triangle_y = decB_y; isUp = false; break;
-        case 5: triangle_x = amPm_x; triangle_y = incB_y; isUp = true; break;
-        case 6: triangle_x = amPm_x; triangle_y = decB_y; isUp = false; break;
+        //    1 = Hr Dec button
+        //    2 = Hr Inc button
+        //    3 = Min Dec button
+        //    4 = Min Inc button
+        //    5 = AmPm Dec button
+        //    6 = AmPm Inc button
+        case 1: triangle_x = hr_x; triangle_y = incB_y; isUp = false; break;
+        case 2: triangle_x = hr_x; triangle_y = decB_y; isUp = true; break;
+        case 3: triangle_x = min_x; triangle_y = incB_y; isUp = false; break;
+        case 4: triangle_x = min_x; triangle_y = decB_y; isUp = true; break;
+        case 5: triangle_x = amPm_x; triangle_y = incB_y; isUp = false; break;
+        case 6: triangle_x = amPm_x; triangle_y = decB_y; isUp = true; break;
       }
       // turn triangle On
       DrawTriangleButton(triangle_x, triangle_y, gap_x, gap_y, isUp, borderColor, onFill);
