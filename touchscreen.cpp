@@ -8,10 +8,12 @@ Touchscreen::Touchscreen() {
   // PrintLn("touchscreen_type = ", touchscreen_type);
 
   if(touchscreen_type == 2) {       // MCU ADC
+  #ifdef MCU_IS_ESP32_S3
     touchscreen_r_ptr_ = new TouchscreenResistive(TOUCHSCREEN_XP, TOUCHSCREEN_XM, TOUCHSCREEN_YP, TOUCHSCREEN_YM, 310);
     analogReadResolution(kAdcResolutionBits);
     touchscreen_r_ptr_->setAdcResolutionAndThreshold(kAdcResolutionBits);
     SetTouchscreenCalibration(170, 980, 150, 880);
+  #endif
   }
   #ifdef XPT2046_OPTION
   else if(touchscreen_type == 1) {   // XPT2046
@@ -28,10 +30,12 @@ Touchscreen::Touchscreen() {
 }
 
 Touchscreen::~Touchscreen() {
+#ifdef MCU_IS_ESP32_S3
   if(touchscreen_r_ptr_ != NULL) {       // MCU ADC
     delete touchscreen_r_ptr_;
     // PrintLn("deleted touchscreen_r_ptr_");
   }
+#endif
   #ifdef XPT2046_OPTION
   if(touchscreen_ptr_ != NULL) {        // XPT2046
     delete touchscreen_ptr_;
@@ -42,10 +46,12 @@ Touchscreen::~Touchscreen() {
 
 void Touchscreen::SetTouchscreenOrientation() {
   if(touchscreen_type == 2) {       // MCU ADC
+  #ifdef MCU_IS_ESP32_S3
     if(display->screen_orientation_ == 1)
       touchscreen_r_ptr_->setRotation(3);
     else
       touchscreen_r_ptr_->setRotation(1);
+  #endif
   }
   #ifdef XPT2046_OPTION
   else if(touchscreen_type == 1) {   // XPT2046
@@ -78,9 +84,11 @@ bool Touchscreen::IsTouched() {
   else {
     // read touch, if touched then read touch point
     if(touchscreen_type == 2) {       // MCU ADC
+    #ifdef MCU_IS_ESP32_S3
       last_touch_Pixel_.is_touched = touchscreen_r_ptr_->touched();
       if(last_touch_Pixel_.is_touched)
         GetTouchedPixel();
+    #endif
     }
     #ifdef XPT2046_OPTION
     else {    // if(touchscreen_type == 1)  // XPT2046
@@ -124,11 +132,13 @@ TouchPixel* Touchscreen::GetTouchedPixel() {
 bool Touchscreen::GetUncalibratedTouch(int16_t &x, int16_t &y) {
   int16_t z = -1;
   if(touchscreen_type == 2) {
+  #ifdef MCU_IS_ESP32_S3
     // get touch point using MCU ADC
     TsPoint touch = touchscreen_r_ptr_->getPoint();
     x = touch.x;
     y = touch.y;
     z = touch.z;
+  #endif
   }
   #ifdef XPT2046_OPTION
   else {    //if(touchscreen_type == 1)

@@ -216,6 +216,8 @@ uint8_t NvsPreferences::RetrieveSavedCpuSpeed() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   uint8_t saved_cpu_speed_mhz = preferences.getUChar(kCpuSpeedMhzKey);
   preferences.end();
+  if(saved_cpu_speed_mhz < 80)
+    saved_cpu_speed_mhz = 80;
   PrintLn(__func__, saved_cpu_speed_mhz);
   return saved_cpu_speed_mhz;
 }
