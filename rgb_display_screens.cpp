@@ -294,9 +294,9 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
     }
 
     // high light text / buttons
-    ButtonHighlight(hr_x, time_y - gap_y, gap_x, gap_y, (current_cursor == kAlarmSetPageHour), 10);
-    ButtonHighlight(min_x, time_y - gap_y, gap_x, gap_y, (current_cursor == kAlarmSetPageMinute), 10);
     ButtonHighlight(amPm_x, time_y - gap_y, gap_x, gap_y, (current_cursor == kAlarmSetPageAmPm), 10);
+    ButtonHighlight(min_x, time_y - gap_y, gap_x, gap_y, (current_cursor == kAlarmSetPageMinute), 10);
+    ButtonHighlight(hr_x, time_y - gap_y, gap_x, gap_y, (current_cursor == kAlarmSetPageHour), 10);
     ButtonHighlight(onOff_x, onSet_y, button_w, button_h, (current_cursor == kAlarmSetPageOn), 5);
     ButtonHighlight(onOff_x, offCancel_y, button_w, button_h, (current_cursor == kAlarmSetPageOff), 5);
     ButtonHighlight(setCancel_x, onSet_y, button_w, button_h, (current_cursor == kAlarmSetPageSet), 5);
@@ -1683,9 +1683,9 @@ void RGBDisplay::IncorrectTimeBanner() {
 
 void RGBDisplay::ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, bool turnOn, int gap) {
   if(turnOn)
-    tft.drawRoundRect(x - gap, y - gap, w + 2 * gap, h + 2 * gap, kRadiusButtonRoundRect, kDisplayColorCyan);
+    tft.drawRoundRect(x - gap, y - 2 * gap, w + 3 * gap, h + 4 * gap, kRadiusButtonRoundRect, kDisplayColorCyan);
   else
-    tft.drawRoundRect(x - gap, y - gap, w + 2 * gap, h + 2 * gap, kRadiusButtonRoundRect, kDisplayBackroundColor);
+    tft.drawRoundRect(x - gap, y - 2 * gap, w + 3 * gap, h + 4 * gap, kRadiusButtonRoundRect, kDisplayBackroundColor);
 }
 
 void RGBDisplay::GoodMorningScreen() {
