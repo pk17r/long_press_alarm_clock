@@ -94,7 +94,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
     tft.fillScreen(kDisplayBackroundColor);
 
     // set title font
-    tft.setFont(&Satisfy_Regular18pt7b);
+    tft.setFont(&Satisfy_Regular24pt7b);
 
     char title[] = "Set Alarm";
 
@@ -326,7 +326,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
       // turn triangle On
       DrawTriangleButton(triangle_x, triangle_y, gap_x, gap_y, isUp, borderColor, onFill);
       // clear old values
-      tft.setFont(&Satisfy_Regular18pt7b);
+      tft.setFont(&Satisfy_Regular24pt7b);
       tft.setCursor(triangle_x, time_y);
       tft.setTextColor(kDisplayBackroundColor);
       if(userButtonClick <= 2)
@@ -1059,7 +1059,7 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
     
     // show today's date
     tft.setCursor(15, s_y0 + 40);
-    tft.setFont(&Satisfy_Regular18pt7b);
+    tft.setFont(&FreeSans18pt7b);
     tft.setTextColor(kDisplayDateColor);
     tft.print(new_display_data_.date_str);
 
@@ -1117,9 +1117,9 @@ void RGBDisplay::Screensaver() {
     uint16_t date_h = 0, date_w = 0;
     int16_t date_gap_x = 0, date_gap_y = 0;
     if(rtc->hour() >= 10)
-      tft.setFont(&Satisfy_Regular24pt7b);
+      tft.setFont(&FreeSans24pt7b);
     else
-      tft.setFont(&Satisfy_Regular18pt7b);
+      tft.setFont(&FreeSans18pt7b);
     tft.getTextBounds(new_display_data_.date_str, 0, 0, &date_gap_x, &date_gap_y, &date_w, &date_h);
     
     int16_t date_x0 = GAP_BAND - date_gap_x;
@@ -1153,11 +1153,11 @@ void RGBDisplay::Screensaver() {
 
     // print date string
     if(rtc->hour() >= 10)
-      my_canvas_->setFont(&Satisfy_Regular24pt7b);
+      my_canvas_->setFont(&FreeSans24pt7b);
     else
-      my_canvas_->setFont(&Satisfy_Regular18pt7b);
+      my_canvas_->setFont(&FreeSans18pt7b);
     my_canvas_->setTextColor(randomColor);
-    my_canvas_->setCursor(date_x0 + GAP_BAND, screensaver_h_ - 5 * GAP_BAND);
+    my_canvas_->setCursor(date_x0 /*+ GAP_BAND */, screensaver_h_ - 5 * GAP_BAND);
 
     if(!firmware_updated_flag_user_information) {
       my_canvas_->print(new_display_data_.date_str);
