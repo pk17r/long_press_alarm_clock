@@ -66,7 +66,7 @@ void RGBDisplay::Setup() {
   // tft.setSPISpeed(80000000);
 
   // clear screen
-  tft.fillScreen(kDisplayColorBlack);
+  tft.fillScreen(kDisplayBackroundColor);
   tft.setTextWrap(false);
 
   // update TFT display
@@ -178,7 +178,7 @@ void RGBDisplay::ScreensaverControl(bool turnOn) {
   else
     refresh_screensaver_canvas_ = true;
   // clear screen
-  tft.fillScreen(kDisplayColorBlack);
+  tft.fillScreen(kDisplayBackroundColor);
   screensaver_x1_ = 0;
   screensaver_y1_ = 20;
   if(!screensaver_bounce_not_fly_horizontally_)   // if fly horizontally

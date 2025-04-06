@@ -434,7 +434,7 @@ bool RGBDisplay::AlarmPageButtonFn(AlarmPageBtnType btn_type, AlarmPageBtnAction
   const int16_t kBtn1HighlightY = btnMidY - kBtnBoundaryH / 2, kBtn2HighlightY = btnMidY;
 
   // button colors
-  const uint16_t onFill = kDisplayColorGreen, offFill = kDisplayColorBlack, borderColor = kDisplayColorCyan;
+  const uint16_t onFill = kDisplayColorGreen, offFill = kDisplayBackroundColor, borderColor = kDisplayColorCyan;
 
   // touch screen input
   int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
@@ -483,12 +483,12 @@ bool RGBDisplay::AlarmPageButtonFn(AlarmPageBtnType btn_type, AlarmPageBtnAction
           tft.setCursor(label_x0, label_y0);
           tft.print(label_arr);
         }
-        // draw roller button highlight
+        // draw roller button label highlight
         tft.drawRoundRect(btnMidX - kBtnBoundaryW / 2 + kGap, btnMidY - kLabelH / 2 + kGap, kBtnBoundaryW - 2 * kGap, kLabelH - 2 * kGap, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightFlag) ? borderColor : kDisplayBackroundColor));
         // top and btm triangle buttons with highlight fills
-        tft.fillTriangle(kTriangleX1, kTriangleY2Top, btnMidX, kTriangleY1Top, kTriangleX2, kTriangleY2Top, ((btn_highlight_flags & kBtnHighlightTopFlag) ? onFill : offFill));
+        tft.fillTriangle(kTriangleX1, kTriangleY2Top, btnMidX, kTriangleY1Top, kTriangleX2, kTriangleY2Top, ((btn_highlight_flags & kBtnHighlightTopFlag) ? kButtonClickedFillColor : offFill));
         tft.drawTriangle(kTriangleX1, kTriangleY2Top, btnMidX, kTriangleY1Top, kTriangleX2, kTriangleY2Top, borderColor);
-        tft.fillTriangle(kTriangleX1, kTriangleY1Btm, btnMidX, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, ((btn_highlight_flags & kBtnHighlightBtmFlag) ? onFill : offFill));
+        tft.fillTriangle(kTriangleX1, kTriangleY1Btm, btnMidX, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, ((btn_highlight_flags & kBtnHighlightBtmFlag) ? kButtonClickedFillColor : offFill));
         tft.drawTriangle(kTriangleX1, kTriangleY1Btm, btnMidX, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, borderColor);
       }
       else {                            // On Off Button
@@ -498,13 +498,13 @@ bool RGBDisplay::AlarmPageButtonFn(AlarmPageBtnType btn_type, AlarmPageBtnAction
         // draw button 1
         bool isBtnPressed = ((btn_highlight_flags & kBtnPressFlag) && (btn_highlight_flags & kBtnHighlightTopFlag));
         if(btn_type == BTN_ONOF)
-          DrawButton(kBtnX, kBtn1Y, kBtnW, kBtnH, "ON", borderColor, (isBtnPressed ? borderColor : onFill), offFill, (isBtnPressed | alarm_clock->var_4_ON_));
+          DrawButton(kBtnX, kBtn1Y, kBtnW, kBtnH, "ON", borderColor, (isBtnPressed ? kButtonClickedFillColor : onFill), offFill, (isBtnPressed | alarm_clock->var_4_ON_));
         else
           DrawButton(kBtnX, kBtn1Y, kBtnW, kBtnH, "SET", borderColor, (isBtnPressed ? kButtonClickedFillColor : kButtonFillColor), offFill, true);
         // draw button 2
         isBtnPressed = ((btn_highlight_flags & kBtnPressFlag) && (btn_highlight_flags & kBtnHighlightBtmFlag));
         if(btn_type == BTN_ONOF)
-          DrawButton(kBtnX, kBtn2Y, kBtnW, kBtnH, "OFF", borderColor, (isBtnPressed ? borderColor : onFill), offFill, (isBtnPressed | !(alarm_clock->var_4_ON_)));
+          DrawButton(kBtnX, kBtn2Y, kBtnW, kBtnH, "OFF", borderColor, (isBtnPressed ? kButtonClickedFillColor : onFill), offFill, (isBtnPressed | !(alarm_clock->var_4_ON_)));
         else
           DrawButton(kBtnX, kBtn2Y, kBtnW, kBtnH, kCancelStr, borderColor, (isBtnPressed ? kButtonClickedFillColor : kButtonFillColor), offFill, true);
         // draw button highlights
@@ -517,9 +517,9 @@ bool RGBDisplay::AlarmPageButtonFn(AlarmPageBtnType btn_type, AlarmPageBtnAction
         // draw roller button highlight
         tft.drawRoundRect(btnMidX - kBtnBoundaryW / 2 + kGap, btnMidY - kLabelH / 2 + kGap, kBtnBoundaryW - 2 * kGap, kLabelH - 2 * kGap, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightFlag) ? borderColor : kDisplayBackroundColor));
         // top and btm triangle buttons with highlight fills
-        tft.fillTriangle(kTriangleX1, kTriangleY2Top, btnMidX, kTriangleY1Top, kTriangleX2, kTriangleY2Top, ((btn_highlight_flags & kBtnHighlightTopFlag) ? onFill : offFill));
+        tft.fillTriangle(kTriangleX1, kTriangleY2Top, btnMidX, kTriangleY1Top, kTriangleX2, kTriangleY2Top, ((btn_highlight_flags & kBtnHighlightTopFlag) ? kButtonClickedFillColor : offFill));
         tft.drawTriangle(kTriangleX1, kTriangleY2Top, btnMidX, kTriangleY1Top, kTriangleX2, kTriangleY2Top, borderColor);
-        tft.fillTriangle(kTriangleX1, kTriangleY1Btm, btnMidX, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, ((btn_highlight_flags & kBtnHighlightBtmFlag) ? onFill : offFill));
+        tft.fillTriangle(kTriangleX1, kTriangleY1Btm, btnMidX, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, ((btn_highlight_flags & kBtnHighlightBtmFlag) ? kButtonClickedFillColor : offFill));
         tft.drawTriangle(kTriangleX1, kTriangleY1Btm, btnMidX, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, borderColor);
       }
       else {                            // On Off Button
@@ -653,7 +653,7 @@ void RGBDisplay::DisplayCurrentPageButtonRow(DisplayButton* button, int button_i
       if(button->fixed_location) {
         // pre-fixed location button
         tft.setFont(&FreeMonoBold9pt7b);
-        tft.setTextColor(kDisplayColorBlack);
+        tft.setTextColor(kDisplayBackroundColor);
         // make button
         tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (is_on ? kButtonClickedFillColor : kButtonFillColor));
         tft.drawRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, kButtonBorderColor);
@@ -664,7 +664,7 @@ void RGBDisplay::DisplayCurrentPageButtonRow(DisplayButton* button, int button_i
       else {
         // button location to be calculated at runtime
         tft.setFont(&FreeMonoBold9pt7b);
-        tft.setTextColor(kDisplayColorBlack);
+        tft.setTextColor(kDisplayBackroundColor);
         int16_t btn_value_x0 = 0, btn_value_y0 = row_text_y0;
         uint16_t btn_value_w, btn_value_h;
         tft.setCursor(btn_value_x0, row_text_y0);
@@ -700,7 +700,7 @@ void RGBDisplay::DisplayCurrentPageButtonRow(DisplayButton* button, int button_i
 
     if(button->row_label.size() > 0) {
       tft.setFont(&FreeMono9pt7b);
-      tft.setTextColor(kDisplayColorBlack);
+      tft.setTextColor(kDisplayBackroundColor);
       int16_t row_label_x0 = 0, row_label_y0 = row_text_y0;
       uint16_t row_label_w, row_label_h;
       tft.setCursor(row_label_x0, row_text_y0);
@@ -932,13 +932,13 @@ void RGBDisplay::WiFiScanNetworksPage(bool increment_page) {
   }
 
   // Rescan button
-  DrawButton(kRescanButtonX1, kRescanButtonY1, kRescanButtonW, kRescanButtonH, kRescanStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kRescanButtonX1, kRescanButtonY1, kRescanButtonW, kRescanButtonH, kRescanStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayBackroundColor, true);
 
   // Next button
-  DrawButton(kNextButtonX1, kNextButtonY1, kNextButtonW, kNextButtonH, kNextStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kNextButtonX1, kNextButtonY1, kNextButtonW, kNextButtonH, kNextStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayBackroundColor, true);
 
   // Back button
-  DrawButton(kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH, kBackStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH, kBackStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayBackroundColor, true);
 }
 
 void RGBDisplay::SoftApInputsPage() {
@@ -994,10 +994,10 @@ void RGBDisplay::SoftApInputsPage() {
   // tft.print("WiFi details.");
 
   // Save button
-  DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, kSaveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, kSaveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayBackroundColor, true);
 
   // Back button
-  DrawButton(kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH, kBackStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH, kBackStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayBackroundColor, true);
 }
 
 void RGBDisplay::LocationInputsLocalServerPage() {
@@ -1040,10 +1040,10 @@ void RGBDisplay::LocationInputsLocalServerPage() {
   tft.print("& set Location.");
 
   // Save button
-  DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, kSaveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, kSaveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayBackroundColor, true);
 
   // Back button
-  DrawButton(kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH, kBackStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH, kBackStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayBackroundColor, true);
 }
 
 void RGBDisplay::DisplayWeatherInfo() {
@@ -1850,7 +1850,7 @@ void RGBDisplay::GoodMorningScreen() {
   while(millis() - startTime < 5000)
     DrawSun(x0, y0, edge, tone_note_index, next_tone_change_time);
 
-  tft.fillScreen(kDisplayColorBlack);
+  tft.fillScreen(kDisplayBackroundColor);
   redraw_display_ = true;
 }
 
@@ -1877,7 +1877,7 @@ void RGBDisplay::DrawSun(int16_t x0, int16_t y0, uint16_t edge, int &tone_note_i
 
   // color
   uint16_t color = kDisplayColorYellow;
-  uint16_t background = kDisplayColorBlack;
+  uint16_t background = kDisplayBackroundColor;
 
   int16_t variation_prev = 0;
 
