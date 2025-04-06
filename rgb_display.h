@@ -124,7 +124,7 @@ public:
   bool show_colored_edge_screensaver_ = true;
   int current_random_color_index_ = 0;
   constexpr static uint8_t kColorPickerWheelSize = 33;
-  const uint16_t kColorPickerWheel[kColorPickerWheelSize] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0xB81F, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
+  const uint16_t kColorPickerWheel[kColorPickerWheelSize] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xE019, 0xB81F, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
   bool screensaver_bounce_not_fly_horizontally_ = true;
 
   // wifi networks scan page
@@ -228,7 +228,7 @@ private:
   #define RGB565_Tart_orange                                                 		0xFA69         // Tart Orange                             	#FB4D46			https://en.wikipedia.org/wiki/List_of_Crayola_crayon_colors#Heads_n_Tails
   #define RGB565_Light_deep_pink                                             		0xFAF9         // Light Deep Pink                         	#FF5CCD			https://en.wikipedia.org/wiki/Shades_of_pink#Light_deep_pink
   #define RGB565_Pink_flamingo                                               		0xFBBF         // Pink flamingo                           	#FC74FD			https://en.wikipedia.org/wiki/Manatee_(color)
-  #define RGB565_Electric_purple                                             		0xB81F         // Electric Purple                         	#BF00FF			https://en.wikipedia.org/wiki/Shades_of_purple#Electric_purple
+  #define RGB565_Electric_purple                                             		0xE019         // Electric Purple                         	#BF00FF			https://en.wikipedia.org/wiki/Shades_of_purple#Electric_purple (on screen matches #E600C8 more, found using Color_Picker_RGB888_RGB565.ino program)
   #define RGB565_Purple_Munsell                                              		0x9818         // Purple (Munsell)                        	#9F00C5
   #define RGB565_Candy_apple_red                                             		0xF840         // Candy apple red                         	#FF0800			https://en.wikipedia.org/wiki/Candy_apple_red
   #define RGB565_Red_rgb                                                     		0xF800         // Red (RGB)                               	#FF0000			https://en.wikipedia.org/wiki/Shades_of_red#Red_rgb
@@ -243,7 +243,7 @@ private:
   const uint16_t kDisplayColorBlack        = 0x0000;
   const uint16_t kDisplayColorBlue         = 0x001F;
   const uint16_t kDisplayColorRed          = RGB565_Red_rgb;
-  const uint16_t kDisplayColorOrange       = 0xfca0;
+  const uint16_t kDisplayColorOrange       = RGB565_Orange;
   const uint16_t kDisplayColorGreen        = RGB565_Electric_green;
   const uint16_t kDisplayColorCyan         = RGB565_Cyan;
   const uint16_t kDisplayColorMagenta      = RGB565_Magenta;
