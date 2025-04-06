@@ -179,7 +179,8 @@ private:
 
 // PRIVATE CONSTANTS
 
-  const uint8_t kBtnHighlightFlag = 0b10000000, kBtnHighlightTopFlag = 0b01000000, kBtnHighlightBtmFlag = 0b00100000, kOnOffBtnOnFlag = 0b00010000, kOnOffBtnOffFlag = 0b00001000, kBtnPressFlag = 0b00000100;
+  // Alarm Page Button Flags
+  const uint8_t kBtnHighlightFlag = 0b10000000, kBtnHighlightTopFlag = 0b01000000, kBtnHighlightBtmFlag = 0b00100000, kBtnPressFlag = 0b00010000;
 
   // wifi networks scan page
   int16_t kWiFiScanNetworksList_y0_ = 40, kWiFiScanNetworksList_h_ = 20;
