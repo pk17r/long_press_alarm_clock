@@ -124,7 +124,7 @@ public:
   bool show_colored_edge_screensaver_ = true;
   int current_random_color_index_ = 0;
   constexpr static uint8_t kColorPickerWheelSize = 33;
-  const uint16_t kColorPickerWheel[kColorPickerWheelSize] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
+  const uint16_t kColorPickerWheel[kColorPickerWheelSize] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0xB81F, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
   bool screensaver_bounce_not_fly_horizontally_ = true;
 
   // wifi networks scan page
@@ -203,16 +203,6 @@ private:
 
 
   // color definitions
-  const uint16_t  kDisplayColorBlack        = 0x0000;
-  const uint16_t  kDisplayColorBlue         = 0x001F;
-  const uint16_t  kDisplayColorRed          = 0xF800;
-  const uint16_t  kDisplayColorOrange       = 0xfca0;
-  const uint16_t  kDisplayColorGreen        = 0x07E0;
-  const uint16_t  kDisplayColorCyan         = 0x07FF;
-  const uint16_t  kDisplayColorMagenta      = 0xF81F;
-  const uint16_t  kDisplayColorYellow       = 0xFFE0;
-  const uint16_t  kDisplayColorWhite        = 0xFFFF;
-  const uint16_t  kDisplayColorGrey         = 0xBDD7;
   
   // https://github.com/newdigate/rgb565_colors
   #define RGB565_Argentinian_blue                                            		0x6D9D         // Argentinian Blue                        	#6CB4EE			https://en.wikipedia.org/wiki/Shades_of_azure#Argentinian_blue
@@ -239,7 +229,7 @@ private:
   #define RGB565_Light_deep_pink                                             		0xFAF9         // Light Deep Pink                         	#FF5CCD			https://en.wikipedia.org/wiki/Shades_of_pink#Light_deep_pink
   #define RGB565_Pink_flamingo                                               		0xFBBF         // Pink flamingo                           	#FC74FD			https://en.wikipedia.org/wiki/Manatee_(color)
   #define RGB565_Electric_purple                                             		0xB81F         // Electric Purple                         	#BF00FF			https://en.wikipedia.org/wiki/Shades_of_purple#Electric_purple
-  #define RGB565_Purple_x11                                                  		0x991D         // Purple (X11)                            	#A020F0			https://en.wikipedia.org/wiki/Shades_of_purple#Purple_(X11_color)_(veronica)
+  #define RGB565_Purple_Munsell                                              		0x9818         // Purple (Munsell)                        	#9F00C5
   #define RGB565_Candy_apple_red                                             		0xF840         // Candy apple red                         	#FF0800			https://en.wikipedia.org/wiki/Candy_apple_red
   #define RGB565_Red_rgb                                                     		0xF800         // Red (RGB)                               	#FF0000			https://en.wikipedia.org/wiki/Shades_of_red#Red_rgb
   #define RGB565_Tomato                                                      		0xFB09         // Tomato                                  	#FF6347			https://en.wikipedia.org/wiki/Shades_of_red#Tomato
@@ -249,21 +239,34 @@ private:
   #define RGB565_Yellow_rgb_x11_yellow                                       		0xFFE0         // Yellow (RGB) (X11 yellow)               	#FFFF00			https://en.wikipedia.org/wiki/Shades_of_yellow#Yellow_rgb_x11_yellow
   #define RGB565_Lime_color_wheel                                            		0xBFE0         // Lime (color wheel)                      	#BFFF00			https://en.wikipedia.org/wiki/Lime_(color)
 
-  // The colors we actually want to use
-  const uint16_t        kDisplayTimeColor         = kDisplayColorYellow;
-  const uint16_t        kDisplayDateColor         = kDisplayColorGreen;
-  const uint16_t        kDisplayAlarmColor        = kDisplayColorCyan;
-  const uint16_t        kDisplayBackroundColor    = kDisplayColorBlack;
+  // colors used by us
+  const uint16_t kDisplayColorBlack        = 0x0000;
+  const uint16_t kDisplayColorBlue         = 0x001F;
+  const uint16_t kDisplayColorRed          = RGB565_Red_rgb;
+  const uint16_t kDisplayColorOrange       = 0xfca0;
+  const uint16_t kDisplayColorGreen        = RGB565_Electric_green;
+  const uint16_t kDisplayColorCyan         = RGB565_Cyan;
+  const uint16_t kDisplayColorMagenta      = RGB565_Magenta;
+  const uint16_t kDisplayColorPurple       = RGB565_Electric_purple;
+  const uint16_t kDisplayColorYellow       = RGB565_Yellow_rgb_x11_yellow;
+  const uint16_t kDisplayColorWhite        = 0xFFFF;
+  const uint16_t kDisplayColorGrey         = 0xBDD7;
+
+  // colors of specific items
+  const uint16_t kDisplayTimeColor         = kDisplayColorYellow;
+  const uint16_t kDisplayDateColor         = kDisplayColorGreen;
+  const uint16_t kDisplayAlarmColor        = kDisplayColorCyan;
+  const uint16_t kDisplayBackroundColor    = kDisplayColorBlack;
 
   // on-screen input keyboard colors
-  const uint16_t  kTextRegularColor          = kDisplayColorWhite;
-  const uint16_t  kTextHighLightColor        = kDisplayBackroundColor;
-  const uint16_t  kKeyboardButtonFillColor   = kDisplayColorRed;
+  const uint16_t kTextRegularColor          = kDisplayColorWhite;
+  const uint16_t kTextHighLightColor        = kDisplayBackroundColor;
+  const uint16_t kKeyboardButtonFillColor   = kDisplayColorRed;
 
   // display page buttons
-  const uint16_t kButtonBorderColor = kDisplayColorCyan;
-  const uint16_t kButtonFillColor = kDisplayColorOrange;
-  const uint16_t kButtonClickedFillColor = kDisplayColorRed;
+  const uint16_t kButtonBorderColor           = kDisplayColorCyan;
+  const uint16_t kButtonFillColor             = kDisplayColorOrange;
+  const uint16_t kButtonClickedFillColor      = kDisplayColorRed;
 
   // BIG BELL ICONS
 
