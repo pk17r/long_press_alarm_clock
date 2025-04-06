@@ -33,6 +33,12 @@
   #include <avr/pgmspace.h>
 #endif
 
+enum AlarmPageBtnAction {
+  BTN_DRAW,
+  BTN_HIGHLIGHT,
+  BTN_ISTOUCHED_TOP,
+  BTN_ISTOUCHED_BTM
+};
 
 class RGBDisplay {
 
@@ -126,6 +132,8 @@ private:
   void DrawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color);
   void DrawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color);
   void PickNewRandomColor();  // for screensaver
+  bool RollerButton(int16_t center_x, int16_t center_y, AlarmPageBtnAction btn_action, uint8_t btn_highlight_flags, const char* label, int8_t label_num, uint16_t borderColor, uint16_t onFill, uint16_t offFill);
+  bool OnOffButton(int16_t center_x, int16_t center_y, AlarmPageBtnAction btn_action, uint8_t btn_highlight_flags, const char* label1, const char* label2, uint16_t borderColor, uint16_t onFill, uint16_t offFill);
   void DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, const char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
   void DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
   void FastDrawTwoColorBitmapSpi(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
@@ -163,6 +171,8 @@ private:
   int16_t alarm_icon_x0_ = 0, alarm_icon_y0_ = 0;
 
 // PRIVATE CONSTANTS
+
+  const uint8_t kBtnHighlightFlag = 0b10000000, kBtnHighlightTopFlag = 0b01000000, kBtnHighlightBtmFlag = 0b00100000, kOnOffBtnOnFlag = 0b00010000, kOnOffBtnOffFlag = 0b00001000, kBtnPressFlag = 0b00000100;
 
   // wifi networks scan page
   int16_t kWiFiScanNetworksList_y0_ = 40, kWiFiScanNetworksList_h_ = 20;
