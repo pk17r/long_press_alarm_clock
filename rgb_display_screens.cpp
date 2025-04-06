@@ -78,15 +78,6 @@ void RGBDisplay::FastDrawTwoColorBitmapSpi(int16_t x, int16_t y, uint8_t *bitmap
 
 void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, bool dec_button_pressed, bool push_button_pressed) {
 
-  uint16_t btnW = kTftWidth / 5;
-  // int16_t gap_x = kTftWidth / 11;
-  int16_t gap_y = kTftHeight / 9;
-  int16_t hr_x = btnW / 2, min_x = hr_x + btnW, amPm_x = min_x + btnW, onOff_x = amPm_x + btnW, setCancel_x = onOff_x + btnW;
-  int16_t btnMidY = kTftHeight * 2 / 3;
-  uint16_t onFill = kDisplayColorGreen, offFill = kDisplayColorBlack, borderColor = kDisplayColorCyan;
-
-  const char onStr[] = "ON", offStr[] = "OFF", setStr[] = "Set";
-
   if(!processUserInput) {
     // make alarm set page
 
@@ -106,7 +97,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
     tft.getTextBounds(title, 0, 0, &title_x0, &title_y0, &title_w, &title_h);
 
     int16_t title_x = (kTftWidth - title_w) / 2;
-    int16_t title_y = 2*gap_y;
+    int16_t title_y = kTftHeight * 2 / 9;
 
     // change the text color to the Alarm color
     tft.setTextColor(kDisplayAlarmColor);
@@ -116,13 +107,12 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
     // font color inside
     tft.setTextColor(kDisplayColorGreen);
 
-    // draw roller buttons
-    RollerButton(hr_x, btnMidY, BTN_DRAW, kBtnHighlightFlag, nullptr, alarm_clock->var_1_, borderColor, onFill, offFill);
-    RollerButton(min_x, btnMidY, BTN_DRAW, 0, nullptr, alarm_clock->var_2_, borderColor, onFill, offFill);
-    RollerButton(amPm_x, btnMidY, BTN_DRAW, 0, (alarm_clock->var_3_is_AM_ ? kAmLabel : kPmLabel), -1, borderColor, onFill, offFill);
-    // draw on off buttons
-    OnOffButton(onOff_x, btnMidY, BTN_DRAW, (alarm_clock->var_4_ON_ ? kOnOffBtnOnFlag : kOnOffBtnOffFlag), onStr, offStr, borderColor, onFill, offFill);
-    OnOffButton(setCancel_x, btnMidY, BTN_DRAW, 0, setStr, kCancelStr, borderColor, onFill, offFill);
+    // draw alarm page buttons
+    AlarmPageButtonFn(BTN_HOUR, BTN_DRAW, kBtnHighlightFlag);
+    AlarmPageButtonFn(BTN_MINU, BTN_DRAW, 0);
+    AlarmPageButtonFn(BTN_AMPM, BTN_DRAW, 0);
+    AlarmPageButtonFn(BTN_ONOF, BTN_DRAW, 0);
+    AlarmPageButtonFn(BTN_SETX, BTN_DRAW, 0);
   }
   else {
     // processUserInput
@@ -147,21 +137,21 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
       switch (current_cursor)
       {
         case kAlarmSetPageHour:
-          RollerButton(hr_x, btnMidY, BTN_HIGHLIGHT, 0, nullptr, -1, borderColor, onFill, offFill);
+          AlarmPageButtonFn(BTN_HOUR, BTN_HIGHLIGHT, 0);
           break;
         case kAlarmSetPageMinute:
-          RollerButton(min_x, btnMidY, BTN_HIGHLIGHT, 0, nullptr, -1, borderColor, onFill, offFill);
+          AlarmPageButtonFn(BTN_MINU, BTN_HIGHLIGHT, 0);
           break;
         case kAlarmSetPageAmPm:
-          RollerButton(amPm_x, btnMidY, BTN_HIGHLIGHT, 0, nullptr, -1, borderColor, onFill, offFill);
+          AlarmPageButtonFn(BTN_AMPM, BTN_HIGHLIGHT, 0);
           break;
         case kAlarmSetPageOn:
         case kAlarmSetPageOff:
-          OnOffButton(onOff_x, btnMidY, BTN_HIGHLIGHT, 0, nullptr, nullptr, borderColor, onFill, offFill);
+          AlarmPageButtonFn(BTN_ONOF, BTN_HIGHLIGHT, 0);
           break;
         case kAlarmSetPageSet:
         case kAlarmSetPageCancel:
-          OnOffButton(setCancel_x, btnMidY, BTN_HIGHLIGHT, 0, nullptr, nullptr, borderColor, onFill, offFill);
+          AlarmPageButtonFn(BTN_SETX, BTN_HIGHLIGHT, 0);
           break;
         default:
           break;
@@ -173,43 +163,43 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
       // touch screen input
 
       // find if user clicked a button
-      if(RollerButton(hr_x, btnMidY, BTN_ISTOUCHED_TOP, 0, nullptr, -1, borderColor, onFill, offFill)){
+      if(AlarmPageButtonFn(BTN_HOUR, BTN_ISTOUCHED_TOP, 0)){
         userButtonClick = 1;
         current_cursor = kAlarmSetPageHour;
       }
-      else if(RollerButton(hr_x, btnMidY, BTN_ISTOUCHED_BTM, 0, nullptr, -1, borderColor, onFill, offFill)){
+      else if(AlarmPageButtonFn(BTN_HOUR, BTN_ISTOUCHED_BTM, 0)){
         userButtonClick = 2;
         current_cursor = kAlarmSetPageHour;
       }
-      else if(RollerButton(min_x, btnMidY, BTN_ISTOUCHED_TOP, 0, nullptr, -1, borderColor, onFill, offFill)){
+      else if(AlarmPageButtonFn(BTN_MINU, BTN_ISTOUCHED_TOP, 0)){
         userButtonClick = 3;
         current_cursor = kAlarmSetPageMinute;
       }
-      else if(RollerButton(min_x, btnMidY, BTN_ISTOUCHED_BTM, 0, nullptr, -1, borderColor, onFill, offFill)){
+      else if(AlarmPageButtonFn(BTN_MINU, BTN_ISTOUCHED_BTM, 0)){
         userButtonClick = 4;
         current_cursor = kAlarmSetPageMinute;
       }
-      else if(RollerButton(amPm_x, btnMidY, BTN_ISTOUCHED_TOP, 0, nullptr, -1, borderColor, onFill, offFill)){
+      else if(AlarmPageButtonFn(BTN_AMPM, BTN_ISTOUCHED_TOP, 0)){
         userButtonClick = 5;
         current_cursor = kAlarmSetPageAmPm;
       }
-      else if(RollerButton(amPm_x, btnMidY, BTN_ISTOUCHED_BTM, 0, nullptr, -1, borderColor, onFill, offFill)){
+      else if(AlarmPageButtonFn(BTN_AMPM, BTN_ISTOUCHED_BTM, 0)){
         userButtonClick = 6;
         current_cursor = kAlarmSetPageAmPm;
       }
-      else if(OnOffButton(onOff_x, btnMidY, BTN_ISTOUCHED_TOP, 0, nullptr, nullptr, borderColor, onFill, offFill)){
+      else if(AlarmPageButtonFn(BTN_ONOF, BTN_ISTOUCHED_TOP, 0)){
         userButtonClick = 7;
         current_cursor = kAlarmSetPageOn;
       }
-      else if(OnOffButton(onOff_x, btnMidY, BTN_ISTOUCHED_BTM, 0, nullptr, nullptr, borderColor, onFill, offFill)){
+      else if(AlarmPageButtonFn(BTN_ONOF, BTN_ISTOUCHED_BTM, 0)){
         userButtonClick = 8;
         current_cursor = kAlarmSetPageOff;
       }
-      else if(OnOffButton(setCancel_x, btnMidY, BTN_ISTOUCHED_TOP, 0, nullptr, nullptr, borderColor, onFill, offFill)){
+      else if(AlarmPageButtonFn(BTN_SETX, BTN_ISTOUCHED_TOP, 0)){
         userButtonClick = 9;
         current_cursor = kAlarmSetPageSet;
       }
-      else if(OnOffButton(setCancel_x, btnMidY, BTN_ISTOUCHED_BTM, 0, nullptr, nullptr, borderColor, onFill, offFill)){
+      else if(AlarmPageButtonFn(BTN_SETX, BTN_ISTOUCHED_BTM, 0)){
         userButtonClick = 10;
         current_cursor = kAlarmSetPageCancel;
       }
@@ -240,7 +230,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
         else {// push_button_pressed
           current_cursor = kAlarmSetPageMinute;
           // highlight next button
-          RollerButton(min_x, btnMidY, BTN_HIGHLIGHT, kBtnHighlightFlag, nullptr, -1, borderColor, onFill, offFill);
+          AlarmPageButtonFn(BTN_MINU, BTN_HIGHLIGHT, kBtnHighlightFlag);
         }
       }
       else if(current_cursor == kAlarmSetPageMinute) {
@@ -249,7 +239,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
         else {// push_button_pressed
           current_cursor = kAlarmSetPageAmPm;
           // highlight next button
-          RollerButton(amPm_x, btnMidY, BTN_HIGHLIGHT, kBtnHighlightFlag, nullptr, -1, borderColor, onFill, offFill);
+          AlarmPageButtonFn(BTN_AMPM, BTN_HIGHLIGHT, kBtnHighlightFlag);
         }
       }
       else if(current_cursor == kAlarmSetPageAmPm) {
@@ -261,7 +251,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
           else
             current_cursor = kAlarmSetPageOff;
           // highlight next button
-          OnOffButton(onOff_x, btnMidY, BTN_HIGHLIGHT, (alarm_clock->var_4_ON_ ? (kBtnHighlightTopFlag | kOnOffBtnOnFlag) : (kBtnHighlightBtmFlag | kOnOffBtnOffFlag)), onStr, offStr, borderColor, onFill, offFill);
+          AlarmPageButtonFn(BTN_ONOF, BTN_HIGHLIGHT, (alarm_clock->var_4_ON_ ? (kBtnHighlightTopFlag | kOnOffBtnOnFlag) : (kBtnHighlightBtmFlag | kOnOffBtnOffFlag)));
         }
       }
       else if(current_cursor == kAlarmSetPageOn || current_cursor == kAlarmSetPageOff) {
@@ -285,7 +275,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
           else
             current_cursor = kAlarmSetPageSet;
           // highlight other button
-          OnOffButton(setCancel_x, btnMidY, BTN_HIGHLIGHT, (kBtnHighlightFlag | (current_cursor == kAlarmSetPageSet ? kBtnHighlightTopFlag : kBtnHighlightBtmFlag)), setStr, kCancelStr, borderColor, onFill, offFill);
+          AlarmPageButtonFn(BTN_SETX, BTN_HIGHLIGHT, (kBtnHighlightFlag | (current_cursor == kAlarmSetPageSet ? kBtnHighlightTopFlag : kBtnHighlightBtmFlag)));
         }
         else {// push_button_pressed
           if(current_cursor == kAlarmSetPageSet)
@@ -328,11 +318,11 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
       if(alarm_clock->var_1_ == 13)
         alarm_clock->var_1_ = 1;
       // fill triangle button
-      RollerButton(hr_x, btnMidY, BTN_DRAW, currentBtnFlags, nullptr, alarm_clock->var_1_, borderColor, onFill, offFill);
+      AlarmPageButtonFn(BTN_HOUR, BTN_DRAW, currentBtnFlags);
       // wait a little
       delay(kUserInputDelayMs);
       // unfill triangle button
-      RollerButton(hr_x, btnMidY, BTN_HIGHLIGHT, kBtnHighlightFlag, nullptr, alarm_clock->var_1_, borderColor, onFill, offFill);
+      AlarmPageButtonFn(BTN_HOUR, BTN_HIGHLIGHT, kBtnHighlightFlag);
     }
     else if(userButtonClick == 3 || userButtonClick == 4) {     // Minutes Roller
       current_cursor = kAlarmSetPageMinute;
@@ -352,11 +342,11 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
           currentBtnFlags |= kBtnHighlightBtmFlag;
         }
         // fill triangle button
-        RollerButton(min_x, btnMidY, BTN_DRAW, currentBtnFlags, nullptr, alarm_clock->var_2_, borderColor, onFill, offFill);
+        AlarmPageButtonFn(BTN_MINU, BTN_DRAW, currentBtnFlags);
         // NO wait for Minutes Roller Button
         // delay(kUserInputDelayMs);
         // unfill triangle button
-        RollerButton(min_x, btnMidY, BTN_HIGHLIGHT, kBtnHighlightFlag, nullptr, alarm_clock->var_2_, borderColor, onFill, offFill);
+        AlarmPageButtonFn(BTN_MINU, BTN_HIGHLIGHT, kBtnHighlightFlag);
     }
     else if(userButtonClick == 5 || userButtonClick == 6) {       // AM PM Roller
       current_cursor = kAlarmSetPageAmPm;
@@ -367,11 +357,11 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
       else
         currentBtnFlags |= kBtnHighlightBtmFlag;
       // fill triangle button
-      RollerButton(amPm_x, btnMidY, BTN_DRAW, currentBtnFlags, (alarm_clock->var_3_is_AM_ ? kAmLabel : kPmLabel), -1, borderColor, onFill, offFill);
+      AlarmPageButtonFn(BTN_AMPM, BTN_DRAW, currentBtnFlags);
       // wait a little
       delay(kUserInputDelayMs);
       // unfill triangle button
-      RollerButton(amPm_x, btnMidY, BTN_HIGHLIGHT, kBtnHighlightFlag, (alarm_clock->var_3_is_AM_ ? kAmLabel : kPmLabel), -1, borderColor, onFill, offFill);
+      AlarmPageButtonFn(BTN_AMPM, BTN_HIGHLIGHT, kBtnHighlightFlag);
     }
     else if(userButtonClick == 7 || userButtonClick == 8) {       // On / Off Button
       uint8_t currentBtnFlags = 0;
@@ -388,19 +378,19 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
         currentBtnFlags |= kOnOffBtnOffFlag;
       }
       // draw button with press indication
-      OnOffButton(onOff_x, btnMidY, BTN_DRAW, (currentBtnFlags | kBtnPressFlag), onStr, offStr, borderColor, onFill, offFill);
+      AlarmPageButtonFn(BTN_ONOF, BTN_DRAW, (currentBtnFlags | kBtnPressFlag));
       // wait a little
       delay(kUserInputDelayMs);
       // draw button without press indication
-      OnOffButton(onOff_x, btnMidY, BTN_DRAW, currentBtnFlags, onStr, offStr, borderColor, onFill, offFill);
+      AlarmPageButtonFn(BTN_ONOF, BTN_DRAW, currentBtnFlags);
 
       // if push button was pressed then move cursor
       if(push_button_pressed) {
         // unhighlight current button
-        OnOffButton(onOff_x, btnMidY, BTN_HIGHLIGHT, (alarm_clock->var_4_ON_ ? kOnOffBtnOnFlag : kOnOffBtnOffFlag), onStr, offStr, borderColor, onFill, offFill);
+        AlarmPageButtonFn(BTN_ONOF, BTN_HIGHLIGHT, (alarm_clock->var_4_ON_ ? kOnOffBtnOnFlag : kOnOffBtnOffFlag));
         // move cursor
         current_cursor = kAlarmSetPageSet;
-        OnOffButton(setCancel_x, btnMidY, BTN_HIGHLIGHT, kBtnHighlightTopFlag, setStr, kCancelStr, borderColor, onFill, offFill);
+        AlarmPageButtonFn(BTN_SETX, BTN_HIGHLIGHT, kBtnHighlightTopFlag);
       }
     }
     else if(userButtonClick == 9 || userButtonClick == 10) {      // Set / Cancel Button
@@ -418,7 +408,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
         currentBtnFlags |= kBtnHighlightBtmFlag;
       }
       // draw button with highlight
-      OnOffButton(setCancel_x, btnMidY, BTN_DRAW, currentBtnFlags, setStr, kCancelStr, borderColor, onFill, offFill);
+      AlarmPageButtonFn(BTN_SETX, BTN_DRAW, currentBtnFlags);
       // wait a little
       delay(2 * kUserInputDelayMs);
       // go back to main page
@@ -427,11 +417,29 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
   }
 }
 
-bool RGBDisplay::RollerButton(int16_t center_x, int16_t center_y, AlarmPageBtnAction btn_action, uint8_t btn_highlight_flags, const char* label, int8_t label_num, uint16_t borderColor, uint16_t onFill, uint16_t offFill) {
-  const uint16_t kRollerBtnW = 64, kRollerBtnH = 160, kTriangleBtnH = kRollerBtnH / 4, kLabelH = kRollerBtnH / 2, kGap = 5;
-  const int16_t kTriangleX1 = center_x - kRollerBtnW / 2 + kGap, kTriangleX2 = center_x + kRollerBtnW / 2 - kGap;
-  const int16_t kTriangleY1Top = center_y - kRollerBtnH / 2, kTriangleY2Top = kTriangleY1Top + kTriangleBtnH;
-  const int16_t kTriangleY2Btm = center_y + kRollerBtnH / 2, kTriangleY1Btm = kTriangleY2Btm - kTriangleBtnH;
+bool RGBDisplay::AlarmPageButtonFn(AlarmPageBtnType btn_type, AlarmPageBtnAction btn_action, uint8_t btn_highlight_flags) {
+  const int16_t btnMidY = kTftHeight * 2 / 3;
+  int16_t btnMidX = kTftWidth / 10;
+  if(btn_type == BTN_HOUR) btnMidX *= 1;
+  else if(btn_type == BTN_MINU) btnMidX *= 3;
+  else if(btn_type == BTN_AMPM) btnMidX *= 5;
+  else if(btn_type == BTN_ONOF) btnMidX *= 7;
+  else if(btn_type == BTN_SETX) btnMidX *= 9;
+  
+  const uint16_t kBtnBoundaryW = 64, kBtnBoundaryH = 160, kGap = 5;
+  // roller button constants
+  const uint16_t kTriangleBtnH = kBtnBoundaryH / 4, kLabelH = kBtnBoundaryH / 2;
+  const int16_t kTriangleX1 = btnMidX - kBtnBoundaryW / 2 + kGap, kTriangleX2 = btnMidX + kBtnBoundaryW / 2 - kGap;
+  const int16_t kTriangleY1Top = btnMidY - kBtnBoundaryH / 2, kTriangleY2Top = kTriangleY1Top + kTriangleBtnH;
+  const int16_t kTriangleY2Btm = btnMidY + kBtnBoundaryH / 2, kTriangleY1Btm = kTriangleY2Btm - kTriangleBtnH;
+  // on off button constants
+  const uint16_t kBtnW = kBtnBoundaryW - 2 * kGap, kBtnH = kBtnBoundaryH / 2 - 2 * kGap, kBtnHighlightH = kBtnBoundaryH / 2;
+  const int16_t kBtnX = btnMidX - kBtnW / 2, kBtnHighlightX = btnMidX - kBtnBoundaryW / 2;
+  const int16_t kBtn1Y = btnMidY - kBtnH - kGap, kBtn2Y = btnMidY + kGap;
+  const int16_t kBtn1HighlightY = btnMidY - kBtnBoundaryH / 2, kBtn2HighlightY = btnMidY;
+
+  // button colors
+  const uint16_t onFill = kDisplayColorGreen, offFill = kDisplayColorBlack, borderColor = kDisplayColorCyan;
 
   // touch screen input
   int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
@@ -439,109 +447,100 @@ bool RGBDisplay::RollerButton(int16_t center_x, int16_t center_y, AlarmPageBtnAc
   switch (btn_action)
   {
     case BTN_DRAW:
-      {
-        // label array
-        char label_arr[3];
-        if(label == nullptr) {
-          if(label_num / 10 > 0)
-            label_arr[0] = label_num / 10 + 48;    // first digit = number
-          else if(current_cursor == kAlarmSetPageHour)
-            label_arr[0] = 32;                   // first digit = space
-          else if(current_cursor == kAlarmSetPageMinute)
-            label_arr[0] = 48;                   // first digit = zero
-          label_arr[1] = label_num % 10 + 48;    // second digit
-          label_arr[2] = '\0';
+      if(btn_type <= BTN_AMPM) {  // Roller Button
+        {
+          // label array
+          char label_arr[3];
+          if(btn_type <= BTN_MINU) {
+            uint8_t label1_num = (btn_type == BTN_HOUR ? alarm_clock->var_1_ : alarm_clock->var_2_);
+            if(label1_num / 10 > 0)
+              label_arr[0] = label1_num / 10 + 48;    // first digit = number
+            else if(btn_type == BTN_HOUR)
+              label_arr[0] = 32;                   // first digit = space
+            else  // btn_type == BTN_MINU
+              label_arr[0] = 48;                   // first digit = zero
+            label_arr[1] = label1_num % 10 + 48;    // second digit
+            label_arr[2] = '\0';
+          }
+          else {
+            label_arr[0] = (alarm_clock->var_3_is_AM_ ? kAmLabel[0] : kPmLabel[0]);
+            label_arr[1] = 'M';
+            label_arr[2] = '\0';
+          }
+          // write label
+          int16_t label_x0, label_y0;
+          uint16_t label_w, label_h;
+          // get bounds of title on tft display (with background color as this causes a blink)
+          tft.setTextColor(offFill);
+          tft.setFont(&FreeSans18pt7b);
+          tft.getTextBounds(label_arr, 0, 0, &label_x0, &label_y0, &label_w, &label_h);
+          // std::string debug_text = std::string(label_arr) + " : label_x0=" + std::to_string(label_x0) + ", label_y0=" + std::to_string(label_y0) + ", label_w=" + std::to_string(label_w) + ", label_h=" + std::to_string(label_h);
+          // PrintLn(debug_text);
+          // clear old label
+          tft.fillRoundRect(btnMidX - kBtnBoundaryW / 2 + 1, btnMidY - kLabelH / 2 + 1, kBtnBoundaryW - 2, kLabelH - 2, kRadiusButtonRoundRect, kDisplayBackroundColor);
+          tft.setTextColor(kDisplayColorGreen);
+          label_x0 = btnMidX - label_w / 2 - /* getTextBounds() Start Position */ label_x0;
+          label_y0 = btnMidY + label_h / 2;
+          tft.setCursor(label_x0, label_y0);
+          tft.print(label_arr);
         }
-        else {
-          label_arr[0] = label[0];
-          label_arr[1] = label[1];
-          label_arr[2] = '\0';
-        }
-        // write label
-        int16_t label_x0, label_y0;
-        uint16_t label_w, label_h;
-        // get bounds of title on tft display (with background color as this causes a blink)
-        tft.setTextColor(offFill);
-        tft.setFont(&FreeSans18pt7b);
-        tft.getTextBounds(label_arr, 0, 0, &label_x0, &label_y0, &label_w, &label_h);
-        // std::string debug_text = std::string(label_arr) + " : label_x0=" + std::to_string(label_x0) + ", label_y0=" + std::to_string(label_y0) + ", label_w=" + std::to_string(label_w) + ", label_h=" + std::to_string(label_h);
-        // PrintLn(debug_text);
-        // clear old label
-        tft.fillRoundRect(center_x - kRollerBtnW / 2 + 1, center_y - kLabelH / 2 + 1, kRollerBtnW - 2, kLabelH - 2, kRadiusButtonRoundRect, kDisplayBackroundColor);
-        tft.setTextColor(kDisplayColorGreen);
-        label_x0 = center_x - label_w / 2 - /* getTextBounds() Start Position */ label_x0;
-        label_y0 = center_y + label_h / 2;
-        tft.setCursor(label_x0, label_y0);
-        tft.print(label_arr);
+        // draw roller button highlight
+        tft.drawRoundRect(btnMidX - kBtnBoundaryW / 2 + kGap, btnMidY - kLabelH / 2 + kGap, kBtnBoundaryW - 2 * kGap, kLabelH - 2 * kGap, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightFlag) ? kDisplayColorCyan : kDisplayBackroundColor));
+        // top and btm triangle buttons with highlight fills
+        tft.fillTriangle(kTriangleX1, kTriangleY2Top, btnMidX, kTriangleY1Top, kTriangleX2, kTriangleY2Top, ((btn_highlight_flags & kBtnHighlightTopFlag) ? onFill : offFill));
+        tft.drawTriangle(kTriangleX1, kTriangleY2Top, btnMidX, kTriangleY1Top, kTriangleX2, kTriangleY2Top, borderColor);
+        tft.fillTriangle(kTriangleX1, kTriangleY1Btm, btnMidX, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, ((btn_highlight_flags & kBtnHighlightBtmFlag) ? onFill : offFill));
+        tft.drawTriangle(kTriangleX1, kTriangleY1Btm, btnMidX, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, borderColor);
       }
-      // draw roller button highlight
-      tft.drawRoundRect(center_x - kRollerBtnW / 2 + kGap, center_y - kLabelH / 2 + kGap, kRollerBtnW - 2 * kGap, kLabelH - 2 * kGap, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightFlag) ? kDisplayColorCyan : kDisplayBackroundColor));
-      // top and btm triangle buttons with highlight fills
-      tft.fillTriangle(kTriangleX1, kTriangleY2Top, center_x, kTriangleY1Top, kTriangleX2, kTriangleY2Top, ((btn_highlight_flags & kBtnHighlightTopFlag) ? onFill : offFill));
-      tft.drawTriangle(kTriangleX1, kTriangleY2Top, center_x, kTriangleY1Top, kTriangleX2, kTriangleY2Top, borderColor);
-      tft.fillTriangle(kTriangleX1, kTriangleY1Btm, center_x, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, ((btn_highlight_flags & kBtnHighlightBtmFlag) ? onFill : offFill));
-      tft.drawTriangle(kTriangleX1, kTriangleY1Btm, center_x, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, borderColor);
-      break;
-    case BTN_HIGHLIGHT:
-      // draw roller button highlight
-      tft.drawRoundRect(center_x - kRollerBtnW / 2 + kGap, center_y - kLabelH / 2 + kGap, kRollerBtnW - 2 * kGap, kLabelH - 2 * kGap, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightFlag) ? kDisplayColorCyan : kDisplayBackroundColor));
-      // top and btm triangle buttons with highlight fills
-      tft.fillTriangle(kTriangleX1, kTriangleY2Top, center_x, kTriangleY1Top, kTriangleX2, kTriangleY2Top, ((btn_highlight_flags & kBtnHighlightTopFlag) ? onFill : offFill));
-      tft.drawTriangle(kTriangleX1, kTriangleY2Top, center_x, kTriangleY1Top, kTriangleX2, kTriangleY2Top, borderColor);
-      tft.fillTriangle(kTriangleX1, kTriangleY1Btm, center_x, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, ((btn_highlight_flags & kBtnHighlightBtmFlag) ? onFill : offFill));
-      tft.drawTriangle(kTriangleX1, kTriangleY1Btm, center_x, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, borderColor);
-      break;
-    case BTN_ISTOUCHED_TOP:
-      if(ts_x >= kTriangleX1 && ts_x <= kTriangleX2 && ts_y >= kTriangleY1Top - kGap && ts_y <= kTriangleY2Top + kGap)
-        return true;
-      break;
-    case BTN_ISTOUCHED_BTM:
-      if(ts_x >= kTriangleX1 && ts_x <= kTriangleX2 && ts_y >= kTriangleY1Btm - kGap && ts_y <= kTriangleY2Btm + kGap)
-        return true;
-      break;
-    default:
-      break;
-  }
-  return false;
-}
-
-bool RGBDisplay::OnOffButton(int16_t center_x, int16_t center_y, AlarmPageBtnAction btn_action, uint8_t btn_highlight_flags, const char* label1, const char* label2, uint16_t borderColor, uint16_t onFill, uint16_t offFill) {
-  const uint16_t kOnOffBtnW = 64, kOnOffBtnH = 160, kGap = 5, kBtnW = kOnOffBtnW - 2 * kGap, kBtnH = kOnOffBtnH / 2 - 2 * kGap, kBtnHighlightH = kOnOffBtnH / 2;
-  const int16_t kBtnX = center_x - kBtnW / 2, kBtnHighlightX = center_x - kOnOffBtnW / 2;
-  const int16_t kBtn1Y = center_y - kBtnH - kGap, kBtn2Y = center_y + kGap;
-  const int16_t kBtn1HighlightY = center_y - kOnOffBtnH / 2, kBtn2HighlightY = center_y;
-  // touch screen input
-  int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
-
-  switch (btn_action)
-  {
-    case BTN_DRAW:
-      {
+      else {  // On Off Button
         // undraw button highlights
-        tft.drawRoundRect(kBtnHighlightX, kBtn1HighlightY, kOnOffBtnW, kBtnHighlightH, kRadiusButtonRoundRect, kDisplayBackroundColor);
-        tft.drawRoundRect(kBtnHighlightX, kBtn2HighlightY, kOnOffBtnW, kBtnHighlightH, kRadiusButtonRoundRect, kDisplayBackroundColor);
+        tft.drawRoundRect(kBtnHighlightX, kBtn1HighlightY, kBtnBoundaryW, kBtnHighlightH, kRadiusButtonRoundRect, kDisplayBackroundColor);
+        tft.drawRoundRect(kBtnHighlightX, kBtn2HighlightY, kBtnBoundaryW, kBtnHighlightH, kRadiusButtonRoundRect, kDisplayBackroundColor);
         // draw button
-        bool isBtnPressed = ((btn_highlight_flags & kBtnPressFlag) && (btn_highlight_flags & kOnOffBtnOnFlag));
-        DrawButton(kBtnX, kBtn1Y, kBtnW, kBtnH, label1, borderColor, (isBtnPressed ? kDisplayColorCyan : onFill), offFill, (isBtnPressed ? isBtnPressed : (btn_highlight_flags & kOnOffBtnOnFlag)));
-        isBtnPressed = ((btn_highlight_flags & kBtnPressFlag) && (btn_highlight_flags & kOnOffBtnOffFlag));
-        DrawButton(kBtnX, kBtn2Y, kBtnW, kBtnH, label2, borderColor, (isBtnPressed ? kDisplayColorCyan : onFill), offFill, (isBtnPressed ? isBtnPressed : (btn_highlight_flags & kOnOffBtnOffFlag)));
+        bool isBtnPressed = ((btn_highlight_flags & kBtnPressFlag) && (btn_highlight_flags & kBtnHighlightTopFlag));
+        DrawButton(kBtnX, kBtn1Y, kBtnW, kBtnH, (btn_type == BTN_ONOF ? "ON" : "Set"), borderColor, (isBtnPressed ? kDisplayColorCyan : onFill), offFill, (isBtnPressed | (btn_type == BTN_ONOF ? alarm_clock->var_4_ON_ : 0)));
+        isBtnPressed = ((btn_highlight_flags & kBtnPressFlag) && (btn_highlight_flags & kBtnHighlightBtmFlag));
+        DrawButton(kBtnX, kBtn2Y, kBtnW, kBtnH, (btn_type == BTN_ONOF ? "OFF" : kCancelStr), borderColor, (isBtnPressed ? kDisplayColorCyan : onFill), offFill, (isBtnPressed | (btn_type == BTN_ONOF ? !(alarm_clock->var_4_ON_) : 0)));
         // draw button highlights
-        tft.drawRoundRect(kBtnHighlightX, kBtn1HighlightY, kOnOffBtnW, kBtnHighlightH, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightTopFlag) ? kDisplayColorCyan : kDisplayBackroundColor));
-        tft.drawRoundRect(kBtnHighlightX, kBtn2HighlightY, kOnOffBtnW, kBtnHighlightH, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightBtmFlag) ? kDisplayColorCyan : kDisplayBackroundColor));
+        tft.drawRoundRect(kBtnHighlightX, kBtn1HighlightY, kBtnBoundaryW, kBtnHighlightH, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightTopFlag) ? kDisplayColorCyan : kDisplayBackroundColor));
+        tft.drawRoundRect(kBtnHighlightX, kBtn2HighlightY, kBtnBoundaryW, kBtnHighlightH, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightBtmFlag) ? kDisplayColorCyan : kDisplayBackroundColor));
       }
       break;
     case BTN_HIGHLIGHT:
-      // draw button highlights
-      tft.drawRoundRect(kBtnHighlightX, kBtn1HighlightY, kOnOffBtnW, kBtnHighlightH, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightTopFlag) ? kDisplayColorCyan : kDisplayBackroundColor));
-      tft.drawRoundRect(kBtnHighlightX, kBtn2HighlightY, kOnOffBtnW, kBtnHighlightH, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightBtmFlag) ? kDisplayColorCyan : kDisplayBackroundColor));
+      if(btn_type <= BTN_AMPM) {  // Roller Button
+        // draw roller button highlight
+        tft.drawRoundRect(btnMidX - kBtnBoundaryW / 2 + kGap, btnMidY - kLabelH / 2 + kGap, kBtnBoundaryW - 2 * kGap, kLabelH - 2 * kGap, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightFlag) ? kDisplayColorCyan : kDisplayBackroundColor));
+        // top and btm triangle buttons with highlight fills
+        tft.fillTriangle(kTriangleX1, kTriangleY2Top, btnMidX, kTriangleY1Top, kTriangleX2, kTriangleY2Top, ((btn_highlight_flags & kBtnHighlightTopFlag) ? onFill : offFill));
+        tft.drawTriangle(kTriangleX1, kTriangleY2Top, btnMidX, kTriangleY1Top, kTriangleX2, kTriangleY2Top, borderColor);
+        tft.fillTriangle(kTriangleX1, kTriangleY1Btm, btnMidX, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, ((btn_highlight_flags & kBtnHighlightBtmFlag) ? onFill : offFill));
+        tft.drawTriangle(kTriangleX1, kTriangleY1Btm, btnMidX, kTriangleY2Btm, kTriangleX2, kTriangleY1Btm, borderColor);
+      }
+      else {  // On Off Button
+        // draw button highlights
+        tft.drawRoundRect(kBtnHighlightX, kBtn1HighlightY, kBtnBoundaryW, kBtnHighlightH, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightTopFlag) ? kDisplayColorCyan : kDisplayBackroundColor));
+        tft.drawRoundRect(kBtnHighlightX, kBtn2HighlightY, kBtnBoundaryW, kBtnHighlightH, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightBtmFlag) ? kDisplayColorCyan : kDisplayBackroundColor));
+      }
       break;
     case BTN_ISTOUCHED_TOP:
-      if(ts_x >= kBtnX && ts_x <= kBtnX + kBtnW && ts_y >= kBtn1Y && ts_y <= kBtn1Y + kBtnH)
-        return true;
+      if(btn_type <= BTN_AMPM) {  // Roller Button
+        if(ts_x >= kTriangleX1 && ts_x <= kTriangleX2 && ts_y >= kTriangleY1Top - kGap && ts_y <= kTriangleY2Top + kGap)
+          return true;
+      }
+      else {  // On Off Button
+        if(ts_x >= kBtnX && ts_x <= kBtnX + kBtnW && ts_y >= kBtn1Y && ts_y <= kBtn1Y + kBtnH)
+          return true;
+      }
       break;
     case BTN_ISTOUCHED_BTM:
-    if(ts_x >= kBtnX && ts_x <= kBtnX + kBtnW && ts_y >= kBtn2Y && ts_y <= kBtn2Y + kBtnH)
-        return true;
+      if(btn_type <= BTN_AMPM) {  // Roller Button
+        if(ts_x >= kTriangleX1 && ts_x <= kTriangleX2 && ts_y >= kTriangleY1Btm - kGap && ts_y <= kTriangleY2Btm + kGap)
+          return true;
+      }
+      else {  // On Off Button
+        if(ts_x >= kBtnX && ts_x <= kBtnX + kBtnW && ts_y >= kBtn2Y && ts_y <= kBtn2Y + kBtnH)
+          return true;
+      }
       break;
     default:
       break;

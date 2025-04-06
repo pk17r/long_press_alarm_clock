@@ -76,7 +76,7 @@ const int16_t kNextButtonW = 60, kNextButtonH = kBackButtonH, kNextButtonX1 = (k
 const uint8_t kSettingsGearWidth = 40, kSettingsGearHeight = 40;
 const int16_t kSettingsGearX1 = kTftWidth - kSettingsGearWidth - 10, kSettingsGearY1 = kDateRow_Y0 - kSettingsGearHeight + 5;
 
-const char kSaveStr[5] = "SAVE", setStr[4] = "SET", kBackStr[5] = "BACK", kCancelStr[2] = "X", kRescanStr[7] = "RESCAN", kPrevStr[5] = "PREV", kNextStr[5] = "NEXT";
+const char kSaveStr[5] = "SAVE", kBackStr[5] = "BACK", kCancelStr[2] = "X", kRescanStr[7] = "RESCAN", kPrevStr[5] = "PREV", kNextStr[5] = "NEXT";
 const char kSlowStr[5] = "SLOW", kMediumStr[7] = "MEDIUM", kFastStr[5] = "FAST", kFlyOutScreensaverStr[8] = "FLY OUT", kBounceScreensaverStr[7] = "BOUNCE";
 const char kMetricUnitStr[9] = "METRIC\'C", kImperialUnitStr[11] = "IMPERIAL\'F";
 const char kManualOffStr[11] = "MANUAL-OFF", kManualOnStr[10] = "MANUAL-ON", kEveningStr[13] = "AUTO-EVENING", kSunDownStr[14] = "AUTO-SUN-DOWN";

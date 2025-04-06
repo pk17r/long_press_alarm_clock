@@ -33,6 +33,14 @@
   #include <avr/pgmspace.h>
 #endif
 
+enum AlarmPageBtnType {
+  BTN_HOUR,
+  BTN_MINU,
+  BTN_AMPM,
+  BTN_ONOF,
+  BTN_SETX
+};
+
 enum AlarmPageBtnAction {
   BTN_DRAW,
   BTN_HIGHLIGHT,
@@ -132,8 +140,7 @@ private:
   void DrawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color);
   void DrawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color);
   void PickNewRandomColor();  // for screensaver
-  bool RollerButton(int16_t center_x, int16_t center_y, AlarmPageBtnAction btn_action, uint8_t btn_highlight_flags, const char* label, int8_t label_num, uint16_t borderColor, uint16_t onFill, uint16_t offFill);
-  bool OnOffButton(int16_t center_x, int16_t center_y, AlarmPageBtnAction btn_action, uint8_t btn_highlight_flags, const char* label1, const char* label2, uint16_t borderColor, uint16_t onFill, uint16_t offFill);
+  bool AlarmPageButtonFn(AlarmPageBtnType btn_type, AlarmPageBtnAction btn_action, uint8_t btn_highlight_flags);
   void DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, const char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
   void DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
   void FastDrawTwoColorBitmapSpi(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
