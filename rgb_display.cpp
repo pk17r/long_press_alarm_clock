@@ -181,6 +181,8 @@ void RGBDisplay::ScreensaverControl(bool turnOn) {
   tft.fillScreen(kDisplayColorBlack);
   screensaver_x1_ = 0;
   screensaver_y1_ = 20;
+  if(!screensaver_bounce_not_fly_horizontally_)   // if fly horizontally
+    screensaver_move_right_ = true;
   redraw_display_ = true;
   PrepareTimeDayDateArrays();
 }

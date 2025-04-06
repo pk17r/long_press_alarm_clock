@@ -497,16 +497,16 @@ bool RGBDisplay::AlarmPageButtonFn(AlarmPageBtnType btn_type, AlarmPageBtnAction
         tft.drawRoundRect(kBtnHighlightX, kBtn2HighlightY, kBtnBoundaryW, kBtnHighlightH, kRadiusButtonRoundRect, kDisplayBackroundColor);
         // draw button 1
         bool isBtnPressed = ((btn_highlight_flags & kBtnPressFlag) && (btn_highlight_flags & kBtnHighlightTopFlag));
-        if(btn_type == BTN_SETX)
-          DrawButton(kBtnX, kBtn1Y, kBtnW, kBtnH, "SET", borderColor, (isBtnPressed ? kDisplayColorPurple : kDisplayColorOrange), offFill, true);
-        else
+        if(btn_type == BTN_ONOF)
           DrawButton(kBtnX, kBtn1Y, kBtnW, kBtnH, "ON", borderColor, (isBtnPressed ? borderColor : onFill), offFill, (isBtnPressed | alarm_clock->var_4_ON_));
+        else
+          DrawButton(kBtnX, kBtn1Y, kBtnW, kBtnH, "SET", borderColor, (isBtnPressed ? kButtonClickedFillColor : kButtonFillColor), offFill, true);
         // draw button 2
         isBtnPressed = ((btn_highlight_flags & kBtnPressFlag) && (btn_highlight_flags & kBtnHighlightBtmFlag));
-        if(btn_type == BTN_SETX)
-          DrawButton(kBtnX, kBtn2Y, kBtnW, kBtnH, kCancelStr, borderColor, (isBtnPressed ? kDisplayColorPurple : kDisplayColorOrange), offFill, true);
-        else
+        if(btn_type == BTN_ONOF)
           DrawButton(kBtnX, kBtn2Y, kBtnW, kBtnH, "OFF", borderColor, (isBtnPressed ? borderColor : onFill), offFill, (isBtnPressed | !(alarm_clock->var_4_ON_)));
+        else
+          DrawButton(kBtnX, kBtn2Y, kBtnW, kBtnH, kCancelStr, borderColor, (isBtnPressed ? kButtonClickedFillColor : kButtonFillColor), offFill, true);
         // draw button highlights
         tft.drawRoundRect(kBtnHighlightX, kBtn1HighlightY, kBtnBoundaryW, kBtnHighlightH, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightTopFlag) ? borderColor : kDisplayBackroundColor));
         tft.drawRoundRect(kBtnHighlightX, kBtn2HighlightY, kBtnBoundaryW, kBtnHighlightH, kRadiusButtonRoundRect, ((btn_highlight_flags & kBtnHighlightBtmFlag) ? borderColor : kDisplayBackroundColor));
@@ -1060,23 +1060,14 @@ void RGBDisplay::DisplayWeatherInfo() {
 
   // show today's weather
   if(wifi_stuff->got_weather_info_) {
-    // tft.setFont(&FreeMonoBold9pt7b);
-    // if(current_page == kWeatherSettingsPage) {
-    //   tft.setFont(&FreeMonoBold9pt7b);
-    //   tft.setCursor(60, 50);
-    //   tft.setTextColor(kDisplayColorGreen);
-    //   tft.print(wifi_stuff->city_.c_str());
-    //   tft.setTextColor(kDisplayColorBlue);
-    // }
-    // else {
-      tft.setFont(&FreeSans12pt7b);
-      tft.setCursor(city_x0, city_y0);
-      tft.setTextColor(kDisplayColorOrange);
-      tft.print(wifi_stuff->city_.c_str());
-    // }
     tft.setFont(&FreeSans12pt7b);
+    tft.setTextColor(kDisplayColorPurple);
+    tft.setCursor(city_x0, city_y0);
+    tft.print(wifi_stuff->city_.c_str());
+
     tft.setCursor(weather_x0, weather_main_y0);
     tft.print(wifi_stuff->weather_main_.c_str()); tft.print(" : "); tft.print(wifi_stuff->weather_description_.c_str());
+
     tft.setFont(&FreeMono9pt7b);
     tft.setCursor(weather_x0, weather_row2_y0);
     tft.print("Temp: "); tft.print(wifi_stuff->weather_temp_.c_str()); tft.print("  Feels: "); tft.print(wifi_stuff->weather_temp_feels_like_.c_str());
@@ -1267,7 +1258,7 @@ void RGBDisplay::Screensaver() {
     else
       my_canvas_->setFont(&FreeSans18pt7b);
     my_canvas_->setTextColor(randomColor);
-    my_canvas_->setCursor(date_x0 /*+ GAP_BAND */, screensaver_h_ - 5 * GAP_BAND);
+    my_canvas_->setCursor(date_x0 /*+ GAP_BAND */, screensaver_h_ - 4 * GAP_BAND);
 
     if(!firmware_updated_flag_user_information) {
       my_canvas_->print(new_display_data_.date_str);
@@ -1288,6 +1279,11 @@ void RGBDisplay::Screensaver() {
     if(show_colored_edge_screensaver_)
       my_canvas_->drawRect(0,0, screensaver_w_, screensaver_h_, kDisplayColorWhite);  // canvas border
 
+    // re-center canvas if it is wider than tft width
+    if(screensaver_bounce_not_fly_horizontally_ && screensaver_w_ >= kTftWidth) {
+      screensaver_x1_ = ((int16_t)kTftWidth - (int16_t)screensaver_w_) / 2;
+    }
+
     if(rtc->year() < 2024) {
       IncorrectTimeBanner();
     }
@@ -1305,45 +1301,44 @@ void RGBDisplay::Screensaver() {
   }
   else {
 
-    // move the time text on screen
-    const int16_t adder = 1;
-    screensaver_x1_ += (screensaver_move_right_ ? adder : -adder);
-    screensaver_y1_ += (screensaver_move_down_ ? adder : -adder);
-
-    // set direction on hitting any edge
-    // left and right edge - only change direction
-    if(screensaver_x1_ + 2* GAP_BAND <= 0) {   // left edge
-      if(!screensaver_move_right_) {
-        screensaver_move_right_ = true;
-        // if(rtc->hour() < 10)
-        //   refresh_screensaver_canvas_ = true;
-      }
+    // move canvas on screen
+    const int16_t kAdder = 1;
+    const int16_t kHitLimit = 2;
+    if(screensaver_bounce_not_fly_horizontally_) {
+      if(!screensaver_move_right_ && screensaver_x1_ > -kHitLimit)
+        screensaver_x1_ -= kAdder;
+      else if(screensaver_move_right_ && screensaver_x1_ + screensaver_w_ < kTftWidth + 1 + kHitLimit)
+        screensaver_x1_ += kAdder;
     }
-    else if(screensaver_x1_ + screensaver_w_ - 2 * GAP_BAND >= kTftWidth) {    // right edge
+    else {    // fly through right edge
+      screensaver_x1_ += kAdder;
+    }
+
+    screensaver_y1_ += (screensaver_move_down_ ? kAdder : -kAdder);
+
+    // set new direction on hitting any edge
+    // left and right edge - only change direction
+    // top and bottom edge - change direction and color
+    if(!screensaver_move_right_ && screensaver_x1_ <= -kHitLimit) {   // left edge
+      screensaver_move_right_ = true;
+    }
+    else if(screensaver_move_right_ && screensaver_x1_ + screensaver_w_ >= kTftWidth + 1 + kHitLimit) {    // right edge
       if(screensaver_bounce_not_fly_horizontally_) {
-        if(screensaver_move_right_) {
-          screensaver_move_right_ = false;
-          // if(rtc->hour() < 10)
-          //   refresh_screensaver_canvas_ = true;
-        }
+        screensaver_move_right_ = false;
       }
       else {  // fly through right edge and apprear back on left edge
-        if(screensaver_x1_ > kTftWidth)
+        if(screensaver_x1_ >= kTftWidth)
           screensaver_x1_ = - kTftWidth;
       }
     }
     // top and bottom edge - when hit change color as well
-    if(screensaver_y1_ + GAP_BAND <= 0)  {   // top edge
-      if(!screensaver_move_down_) {
-        screensaver_move_down_ = true;
-        refresh_screensaver_canvas_ = true;
-      }
+    if(!screensaver_move_down_ && screensaver_y1_ <= -kHitLimit)  {   // top edge
+      screensaver_move_down_ = true;
+      refresh_screensaver_canvas_ = true;
     }
-    else if(screensaver_y1_ + screensaver_h_ - GAP_BAND >= kTftHeight)  {   // bottom edge
-      if(screensaver_move_down_) {
-        screensaver_move_down_ = false;
-        refresh_screensaver_canvas_ = true;
-      }
+    else if(screensaver_move_down_ && screensaver_y1_ + screensaver_h_ >= kTftHeight + kHitLimit)  {   // bottom edge
+      screensaver_move_down_ = false;
+      refresh_screensaver_canvas_ = true;
     }
   }
 
@@ -1625,7 +1620,7 @@ void RGBDisplay::DisplayTimeUpdate() {
       // if time is incorrect then don't bother drawing date row
 
       // draw settings gear
-      tft.drawBitmap(kSettingsGearX1, kSettingsGearY1, kSettingsGearBitmap, kSettingsGearWidth, kSettingsGearHeight, RGB565_Sandy_brown); // Copy to screen
+      tft.drawBitmap(kSettingsGearX1, kSettingsGearY1, kSettingsGearBitmap, kSettingsGearWidth, kSettingsGearHeight, kDisplayGearIconColor); // Copy to screen
     }
     else {
       // set font
@@ -1663,7 +1658,7 @@ void RGBDisplay::DisplayTimeUpdate() {
       tft.print(new_display_data_.date_str);
 
       // draw settings gear
-      tft.drawBitmap(kSettingsGearX1, kSettingsGearY1, kSettingsGearBitmap, kSettingsGearWidth, kSettingsGearHeight, RGB565_Sandy_brown); // Copy to screen
+      tft.drawBitmap(kSettingsGearX1, kSettingsGearY1, kSettingsGearBitmap, kSettingsGearWidth, kSettingsGearHeight, kDisplayGearIconColor); // Copy to screen
 
       // and remember the new value
       strcpy(displayed_data_.date_str, new_display_data_.date_str);

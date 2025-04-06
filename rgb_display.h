@@ -255,6 +255,7 @@ private:
   // colors of specific items
   const uint16_t kDisplayTimeColor         = kDisplayColorYellow;
   const uint16_t kDisplayDateColor         = kDisplayColorGreen;
+  const uint16_t kDisplayGearIconColor     = kDisplayColorOrange;
   const uint16_t kDisplayAlarmColor        = kDisplayColorCyan;
   const uint16_t kDisplayBackroundColor    = kDisplayColorBlack;
 
@@ -266,7 +267,7 @@ private:
   // display page buttons
   const uint16_t kButtonBorderColor           = kDisplayColorCyan;
   const uint16_t kButtonFillColor             = kDisplayColorOrange;
-  const uint16_t kButtonClickedFillColor      = kDisplayColorRed;
+  const uint16_t kButtonClickedFillColor      = kDisplayColorPurple;
 
   // BIG BELL ICONS
 
