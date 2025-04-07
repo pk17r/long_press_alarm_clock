@@ -436,9 +436,6 @@ bool RGBDisplay::AlarmPageButtonFn(AlarmPageBtnType btn_type, AlarmPageBtnAction
   // button colors
   const uint16_t onFill = kDisplayColorGreen, offFill = kDisplayBackroundColor, borderColor = kDisplayColorCyan;
 
-  // touch screen input
-  int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
-
   switch (btn_action)
   {
     case BTN_DRAW:
@@ -529,23 +526,31 @@ bool RGBDisplay::AlarmPageButtonFn(AlarmPageBtnType btn_type, AlarmPageBtnAction
       }
       break;
     case BTN_ISTOUCHED_TOP:
-      if(btn_type <= BTN_AMPM) {        // Roller Button
-        if(ts_x >= kTriangleX1 && ts_x <= kTriangleX2 && ts_y >= kTriangleY1Top - kGap && ts_y <= kTriangleY2Top + kGap)
-          return true;
-      }
-      else {                            // On Off Button
-        if(ts_x >= kBtnX && ts_x <= kBtnX + kBtnW && ts_y >= kBtn1Y && ts_y <= kBtn1Y + kBtnH)
-          return true;
+      if(ts != nullptr) {
+        // touch screen input
+        int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
+        if(btn_type <= BTN_AMPM) {        // Roller Button
+          if(ts_x >= kTriangleX1 && ts_x <= kTriangleX2 && ts_y >= kTriangleY1Top - kGap && ts_y <= kTriangleY2Top + kGap)
+            return true;
+        }
+        else {                            // On Off Button
+          if(ts_x >= kBtnX && ts_x <= kBtnX + kBtnW && ts_y >= kBtn1Y && ts_y <= kBtn1Y + kBtnH)
+            return true;
+        }
       }
       break;
     case BTN_ISTOUCHED_BTM:
-      if(btn_type <= BTN_AMPM) {        // Roller Button
-        if(ts_x >= kTriangleX1 && ts_x <= kTriangleX2 && ts_y >= kTriangleY1Btm - kGap && ts_y <= kTriangleY2Btm + kGap)
-          return true;
-      }
-      else {                            // On Off Button
-        if(ts_x >= kBtnX && ts_x <= kBtnX + kBtnW && ts_y >= kBtn2Y && ts_y <= kBtn2Y + kBtnH)
-          return true;
+      if(ts != nullptr) {
+        // touch screen input
+        int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
+        if(btn_type <= BTN_AMPM) {        // Roller Button
+          if(ts_x >= kTriangleX1 && ts_x <= kTriangleX2 && ts_y >= kTriangleY1Btm - kGap && ts_y <= kTriangleY2Btm + kGap)
+            return true;
+        }
+        else {                            // On Off Button
+          if(ts_x >= kBtnX && ts_x <= kBtnX + kBtnW && ts_y >= kBtn2Y && ts_y <= kBtn2Y + kBtnH)
+            return true;
+        }
       }
       break;
     default:
