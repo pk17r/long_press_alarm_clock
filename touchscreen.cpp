@@ -7,19 +7,22 @@ Touchscreen::Touchscreen() {
   touchscreen_type = nvs_preferences->RetrieveTouchscreenType();
   // PrintLn("touchscreen_type = ", touchscreen_type);
 
+  int16_t xMin, xMax, yMin, yMax;
+  nvs_preferences->RetrieveTouchScreenCalibration(xMin, xMax, yMin, yMax);
+
   if(touchscreen_type == 2) {       // MCU ADC
   #ifdef MCU_IS_ESP32_S3
     touchscreen_r_ptr_ = new TouchscreenResistive(TOUCHSCREEN_XP, TOUCHSCREEN_XM, TOUCHSCREEN_YP, TOUCHSCREEN_YM, 310);
     analogReadResolution(kAdcResolutionBits);
     touchscreen_r_ptr_->setAdcResolutionAndThreshold(kAdcResolutionBits);
-    SetTouchscreenCalibration(41, 881, 113, 914);
+    SetTouchscreenCalibration(xMin, xMax, yMin, yMax);
   #endif
   }
   #ifdef XPT2046_OPTION
   else if(touchscreen_type == 1) {   // XPT2046
     touchscreen_ptr_ = new XPT2046_Touchscreen(TS_CS_PIN, TS_IRQ_PIN);
     touchscreen_ptr_->begin(*spi_obj);
-    SetTouchscreenCalibration(232, 3686, 221, 3767);
+    SetTouchscreenCalibration(xMin, xMax, yMin, yMax);
   }
   #endif
 

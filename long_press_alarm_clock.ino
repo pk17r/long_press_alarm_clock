@@ -1050,10 +1050,8 @@ void CalibrateTouchscreenFn() {
     // set new touchscreen calibration values
     ts->SetTouchscreenCalibration(xMin, xMax, yMin, yMax);
 
-    /* TODO save calibration to NVS memory*/
-
-
-
+    /* save calibration to NVS memory*/
+    nvs_preferences->SaveTouchScreenCalibration(xMin, xMax, yMin, yMax);
   }
 
   #if 1

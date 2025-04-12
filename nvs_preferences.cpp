@@ -83,6 +83,15 @@ NvsPreferences::NvsPreferences() {
     String kOwnerNameString = kOwnerName.c_str();
     preferences.putString(kOwnerNameKey, kOwnerNameString);
   }
+  if(!preferences.isKey(kTouchCalibXMinKey))
+    preferences.putShort(kTouchCalibXMinKey, kTouchCalibXMin);
+  if(!preferences.isKey(kTouchCalibXMaxKey))
+    preferences.putShort(kTouchCalibXMaxKey, kTouchCalibXMax);
+  if(!preferences.isKey(kTouchCalibYMinKey))
+    preferences.putShort(kTouchCalibYMinKey, kTouchCalibYMin);
+  if(!preferences.isKey(kTouchCalibYMaxKey))
+    preferences.putShort(kTouchCalibYMaxKey, kTouchCalibYMax);
+
 
   // save new key values
   // ADD NEW KEYS ABOVE
@@ -409,3 +418,22 @@ void NvsPreferences::RemoveKey(std::string remove_key) {
   preferences.end();
 }
 
+void NvsPreferences::RetrieveTouchScreenCalibration(int16_t &xMin, int16_t &xMax, int16_t &yMin, int16_t &yMax) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  xMin = preferences.getShort(kTouchCalibXMinKey, kTouchCalibXMin);
+  xMax = preferences.getShort(kTouchCalibXMaxKey, kTouchCalibXMax);
+  yMin = preferences.getShort(kTouchCalibYMinKey, kTouchCalibYMin);
+  yMax = preferences.getShort(kTouchCalibYMaxKey, kTouchCalibYMax);
+  preferences.end();
+  PrintLn(__func__, ("xMin=" + std::to_string(xMin) + ", xMax=" + std::to_string(xMax) + ", yMin=" + std::to_string(yMin) + ", yMax=" + std::to_string(yMax)));
+}
+
+void NvsPreferences::SaveTouchScreenCalibration(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  preferences.putShort(kTouchCalibXMinKey, xMin);
+  preferences.putShort(kTouchCalibXMaxKey, xMax);
+  preferences.putShort(kTouchCalibYMinKey, yMin);
+  preferences.putShort(kTouchCalibYMaxKey, yMax);
+  preferences.end();
+  PrintLn(__func__, ("xMin=" + std::to_string(xMin) + ", xMax=" + std::to_string(xMax) + ", yMin=" + std::to_string(yMin) + ", yMax=" + std::to_string(yMax)));
+}

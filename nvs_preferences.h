@@ -55,6 +55,8 @@ public:
   uint8_t RetrieveRtcType();
   void SaveRtcType(uint8_t rtc_type);
   void RemoveKey(std::string remove_key);
+  void RetrieveTouchScreenCalibration(int16_t &xMin, int16_t &xMax, int16_t &yMin, int16_t &yMax);
+  void SaveTouchScreenCalibration(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax);
 
 private:
 
@@ -132,6 +134,18 @@ private:
 
   const char* kTouchscreenFlipKey = "TouchFlip";
   const bool kTouchscreenFlip = true;
+
+  // touchscreen calibration
+  // if(touchscreen_type == 1) // XPT2046     232, 3686, 221, 3767
+  // if(touchscreen_type == 2) // MCU ADC     41, 881, 113, 914
+  const char* kTouchCalibXMinKey = "TouchCalibXMin";
+  const int16_t kTouchCalibXMin = (kTouchscreenType == 1 ? 232 : 41);
+  const char* kTouchCalibXMaxKey = "TouchCalibXMax";
+  const int16_t kTouchCalibXMax = (kTouchscreenType == 1 ? 3686 : 881);
+  const char* kTouchCalibYMinKey = "TouchCalibYMin";
+  const int16_t kTouchCalibYMin = (kTouchscreenType == 1 ? 221 : 113);
+  const char* kTouchCalibYMaxKey = "TouchCalibYMax";
+  const int16_t kTouchCalibYMax = (kTouchscreenType == 1 ? 3767 : 914);
 
   const char* kRgbStripLedCountKey = "RgbLedCount";
   const uint8_t kRgbStripLedCount = 4;
