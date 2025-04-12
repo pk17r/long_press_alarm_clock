@@ -904,6 +904,216 @@ void ResetWatchdog() {
   }
 }
 
+void sortedPush(int16_t* samples_arr, int16_t val, int len) {
+  int i = 0;
+  while(i < len) {
+    // is current index value greater than val? shift all arr values right, push val at current index
+    if(samples_arr[i] > val) {
+      // shift all arr vals right
+      for (int j = len; j > i; j--) {
+        samples_arr[j] = samples_arr[j - 1];
+      }
+      // push val
+      samples_arr[i] = val;
+      return;
+    }
+    else {
+      i++;
+    }
+  }
+  // val is larger than all array values
+  samples_arr[len] = val;
+}
+
+void CalibrateTouchscreenFn() {
+  display->SetMaxBrightness();
+  if(ts != NULL) {
+    const int kNumOfSamples = 10, kNumOfEdges = 4, kDivider = 5;
+    int16_t samples[kNumOfSamples];
+    float med_avg_val = 0;
+    int16_t x_left_avg = 0, x_right_avg = 0, y_top_avg = 0, y_btm_avg = 0;
+    /* edges -  0 = top
+                1 = btm
+                2 = left
+                3 = right
+    */
+    int sample_num = 0, edge_num = 0;
+    std::string log_str;
+    // top edge
+    int16_t x0 = kTftWidth / kDivider, y0 = kTftHeight / kDivider, x1 = (kDivider-1) * kTftWidth / kDivider, y1 = kTftHeight / kDivider;
+    display->TouchCalibrationScreen(x0, y0, x1, y1, false, true); // first draw
+    PrintLn();
+    while(1) {
+      ResetWatchdog();
+      int16_t x = -1, y = -1;
+      if(!(ts->GetUncalibratedTouch(x, y))) {
+        display->TouchCalibrationScreen(x0, y0, x1, y1, false, false);   // show no touch
+      }
+      else {
+        // second reading is better
+        ts->GetUncalibratedTouch(x, y);
+        if(edge_num <= 1)
+          sortedPush(samples, y, sample_num);
+        else
+          sortedPush(samples, x, sample_num);
+        {
+          for (int g = 0; g < sample_num+1; g++) {
+            Serial.print(samples[g]); Serial.print(" ");
+          }
+          Serial.println();
+        }
+        log_str = "edge_num " + std::to_string(edge_num) + ", sample_num " + std::to_string(sample_num) + ", x " + std::to_string(x) + ", y " + std::to_string(y);
+        PrintLn(log_str);
+        display->TouchCalibrationScreen(x0, y0, x1, y1, true, false);   // show touch
+        delay(kUserInputDelayMs);
+        display->TouchCalibrationScreen(x0, y0, x1, y1, false, false);   // show no touch
+        delay(kUserInputDelayMs);
+        sample_num++;
+        if(sample_num >= kNumOfSamples) {
+          // calculate median average (average of middle 6 values)
+          med_avg_val = 0;
+          sample_num = 2;
+          while(sample_num < 8) {
+            med_avg_val += ((float)samples[sample_num]) / 6;
+            sample_num++;
+          }
+          // process samples
+          switch(edge_num) {
+            case 0:   // top
+              y_top_avg = med_avg_val;
+            case 1:   // bottom
+              y_btm_avg = med_avg_val;
+              break;
+            case 2:   // left
+              x_left_avg = med_avg_val;
+              break;
+            case 3:   // right
+              x_right_avg = med_avg_val;
+              break;
+          }
+          sample_num = 0;
+          med_avg_val = 0;
+          edge_num++;
+          PrintLn();
+          // screen with no line
+          display->TouchCalibrationScreen(kTftWidth * 2, 0, kTftWidth * 2, kTftHeight - 1, false, true); // redraw
+          delay(2000);
+          if(edge_num < kNumOfEdges) {
+            // next edge
+            if(edge_num == 1) {  // bottom
+              x0 = kTftWidth / kDivider, y0 = (kDivider-1) * kTftHeight / kDivider, x1 = (kDivider-1) * kTftWidth / kDivider, y1 = (kDivider-1) * kTftHeight / kDivider;
+            }
+            else if(edge_num == 2) {   // left
+              x0 = kTftWidth / kDivider, y0 = kTftHeight / kDivider, x1 = kTftWidth / kDivider, y1 = (kDivider-1) * kTftHeight / kDivider;
+            }
+            else {  // right
+              x0 = (kDivider-1) * kTftWidth / kDivider, y0 = kTftHeight / kDivider, x1 = (kDivider-1) * kTftWidth / kDivider, y1 = (kDivider-1) * kTftHeight / kDivider;
+            }
+            display->TouchCalibrationScreen(x0, y0, x1, y1, false, true);  // redraw
+          }
+          else {
+            break;
+          }
+        }
+      }
+    }
+    // touch calibration inputs received
+
+    // flip touchscreen if y_top_avg > y_btm_avg
+    if(y_top_avg > y_btm_avg)
+      ts->touchscreen_flip = true;
+    else
+      ts->touchscreen_flip = false;
+    nvs_preferences->SaveTouchscreenFlip(ts->touchscreen_flip);
+    int16_t temp_val = y_top_avg;
+    y_top_avg = y_btm_avg;
+    y_btm_avg = temp_val;
+    log_str = "x_left_avg=" + std::to_string(x_left_avg) + ", x_right_avg=" + std::to_string(x_right_avg) + ", y_top_avg=" + std::to_string(y_top_avg) + ", y_btm_avg=" + std::to_string(y_btm_avg) + ", touchscreen_flip=" + std::to_string(ts->touchscreen_flip);
+    PrintLn(log_str);
+
+    // for ESP32 ADC touchscreen
+    // x_left_avg=209, x_right_avg=715, y_top_avg=274, y_btm_avg=757, touchscreen_flip=1
+    // xMin, xMax, yMin, yMax = 41, 881, 113, 914
+
+    // for XPT2046
+    // x_left_avg=925, x_right_avg=3004, y_top_avg=933, y_btm_avg=3070, touchscreen_flip=1
+    // xMin, xMax, yMin, yMax = 232, 3686, 221, 3767
+
+    // calculate screen min max calibration values
+    int16_t xMin = map(0, kTftWidth / kDivider, (kDivider-1) * kTftWidth / kDivider, x_left_avg, x_right_avg);
+    int16_t xMax = map(kTftWidth - 1, kTftWidth / kDivider, (kDivider-1) * kTftWidth / kDivider, x_left_avg, x_right_avg);
+    int16_t yMin = map(0, kTftHeight / kDivider, (kDivider-1) * kTftHeight / kDivider, y_top_avg, y_btm_avg);
+    int16_t yMax = map(kTftHeight - 1, kTftHeight / kDivider, (kDivider-1) * kTftHeight / kDivider, y_top_avg, y_btm_avg);
+    log_str = "xMin, xMax, yMin, yMax = " + std::to_string(xMin) + ", " + std::to_string(xMax) + ", " + std::to_string(yMin) + ", " + std::to_string(yMax);
+    PrintLn(log_str);
+
+    // set new touchscreen calibration values
+    ts->SetTouchscreenCalibration(xMin, xMax, yMin, yMax);
+
+    /* TODO save calibration to NVS memory*/
+
+
+
+  }
+
+  #if 1
+    // test touchscreen calibration
+    TestTouchscreenCalibrationFn();
+  #else
+    delay(2000);
+    // set main page back
+    SetPage(kMainPage);
+    inactivity_millis = 0;
+  #endif
+}
+
+void TestTouchscreenCalibrationFn() {
+  display->SetMaxBrightness();
+  if(ts != NULL) {
+    // test calibration
+    const int kNumOfSamples = 10, kDivider = 5;
+    uint8_t test_num = 0;
+
+    // first target coordinate
+    int16_t x_target = (test_num / 2 + 1) * kTftWidth / (kNumOfSamples / 2 + 1);
+    int16_t y_target = kTftHeight / kDivider;
+    display->TouchCalibrationScreenTest(x_target, y_target, 2 * kTftWidth, 2 * kTftHeight, true); // first draw
+
+    // begin touchscreen calibration test
+    while(1) {
+      ResetWatchdog();
+      if(ts->GetTouchedPixel()->is_touched) {
+        // show touch
+        display->TouchCalibrationScreenTest(x_target, y_target, ts->GetTouchedPixel()->x, ts->GetTouchedPixel()->y, false);
+        // wait
+        delay(2 * kUserInputDelayMs);
+        test_num++;
+        if(test_num < kNumOfSamples) {
+          // new target coordinate
+          x_target = (test_num / 2 + 1) * kTftWidth / (kNumOfSamples / 2 + 1);
+          if((test_num & 0x01) == 0x00)
+            y_target = kTftHeight / kDivider;
+          else
+            y_target = (kDivider-1) * kTftHeight / kDivider;
+          display->TouchCalibrationScreenTest(x_target, y_target, 2 * kTftWidth, 2 * kTftHeight, false); // new point
+          // wait
+          delay(2 * kUserInputDelayMs);
+        }
+        else {
+          break;
+        }
+      }
+    }
+  }
+  else {
+    display->TouchCalibrationScreenTest(0, 0, 2 * kTftWidth, 2 * kTftHeight, true); // first draw
+  }
+  delay(2000);
+  // set main page back
+  SetPage(kMainPage);
+  inactivity_millis = 0;
+}
+
 /* Take user inputs and configure
 
   Mostly made for debug purpose
@@ -1053,127 +1263,8 @@ void SerialUserInput() {
       #endif
       firmware_updated_flag_user_information = true;
       break;
-    case 'l':   // TouchCalibrationScreen
-      display->SetMaxBrightness();
-      {
-        if(ts != NULL) {
-          const int kNumOfSamples = 10, kNumOfEdges = 4;
-          int16_t x_samples[kNumOfSamples], y_samples[kNumOfSamples];
-          int16_t xMin = 32767, xMax = -32768, yMin = 32767, yMax = -32768, y_top_avg = 0, y_btm_avg = 0;
-          /* edges -  0 = left
-                      1 = right
-                      2 = top
-                      3 = btm
-          */
-          int sample_num = 0, edge_num = 0;
-          int16_t x0 = 0, y0 = 0, x1 = 0, y1 = kTftHeight - 1;
-          display->TouchCalibrationScreen(x0, y0, x1, y1, false, true); // first draw
-          while(1) {
-            ResetWatchdog();
-            int16_t x = -1, y = -1;
-            if(!(ts->GetUncalibratedTouch(x, y))) {
-              display->TouchCalibrationScreen(x0, y0, x1, y1, false, false);   // show no touch
-            }
-            else {
-              display->TouchCalibrationScreen(x0, y0, x1, y1, true, false);   // show touch
-              delay(kUserInputDelayMs);
-              x_samples[sample_num] = x;
-              y_samples[sample_num] = y;
-              sample_num++;
-              if(sample_num >= kNumOfSamples) {
-                // process samples
-                switch(edge_num) {
-                  case 0:   // left
-                  case 1:   // right
-                    for (int i = 0; i < kNumOfSamples; i++) {
-                      if(xMin > x_samples[i]) xMin = x_samples[i];
-                      if(xMax < x_samples[i]) xMax = x_samples[i];
-                    }
-                    break;
-                  case 2:   // top
-                    for (int i = 0; i < kNumOfSamples; i++) {
-                      y_top_avg += y_samples[i];
-                      if(yMin > y_samples[i]) yMin = y_samples[i];
-                      if(yMax < y_samples[i]) yMax = y_samples[i];
-                    }
-                    y_top_avg /= kNumOfSamples;
-                    break;
-                  case 3:   // btm
-                    // yMax = y_avg / kNumOfSamples;
-                    for (int i = 0; i < kNumOfSamples; i++) {
-                      y_btm_avg += y_samples[i];
-                      if(yMin > y_samples[i]) yMin = y_samples[i];
-                      if(yMax < y_samples[i]) yMax = y_samples[i];
-                    }
-                    y_btm_avg /= kNumOfSamples;
-                    break;
-                }
-                sample_num = 0;
-                edge_num++;
-                if(edge_num >= kNumOfEdges)
-                  break;
-                else {
-                  // screen with no edge
-                  display->TouchCalibrationScreen(kTftWidth * 2, 0, kTftWidth * 2, kTftHeight - 1, false, true); // redraw
-                  delay(1000);
-                  if(edge_num == 1) {  // right
-                    x0 = kTftWidth - 1, y0 = 0, x1 = kTftWidth - 1, y1 = kTftHeight - 1;
-                  }
-                  else if(edge_num == 2) {   // top
-                    x0 = 0, y0 = 0, x1 = kTftWidth - 1, y1 = 0;
-                  }
-                  else {  // btm
-                    x0 = 0, y0 = kTftHeight - 1, x1 = kTftWidth - 1, y1 = kTftHeight - 1;
-                  }
-                  display->TouchCalibrationScreen(x0, y0, x1, y1, false, true);  // redraw
-                }
-              }
-            }
-          }
-          // touch calibration inputs received
-          if(y_top_avg > y_btm_avg)
-            ts->touchscreen_flip = true;
-          else
-            ts->touchscreen_flip = false;
-          // save calibration
-          nvs_preferences->SaveTouchscreenFlip(ts->touchscreen_flip);
-          Serial.printf("xMin %d     xMax %d     yMin %d     yMax %d      ts->touchscreen_flip %d\r\n", xMin, xMax, yMin, yMax, ts->touchscreen_flip);
-          ts->SetTouchscreenCalibration(xMin, xMax, yMin, yMax);
-          /* TODO save calibration */
-
-
-          // test calibration
-          // define test pixel points
-          for (int i = 0; i < kNumOfSamples; i++) {
-            x_samples[i] = (i / 2 + 1) * kTftWidth / (kNumOfSamples / 2 + 1);
-            if(i % 2 == 0)
-              y_samples[i] = kTftHeight / 5;
-            else
-              y_samples[i] = 4 * kTftHeight / 5;
-          }
-          int test_num = 0;
-          display->TouchCalibrationScreenTest(x_samples[test_num], y_samples[test_num], 2 * kTftWidth, 2 * kTftHeight, true); // first draw
-          while(1) {
-            ResetWatchdog();
-            if(ts->GetTouchedPixel()->is_touched) {
-              display->TouchCalibrationScreenTest(x_samples[test_num], y_samples[test_num], ts->GetTouchedPixel()->x, ts->GetTouchedPixel()->y, false);
-              delay(kUserInputDelayMs);
-              test_num++;
-               if(test_num >= kNumOfSamples)
-                break;
-              else {
-                // screen with no point
-                display->TouchCalibrationScreenTest(x_samples[test_num], y_samples[test_num], 2 * kTftWidth, 2 * kTftHeight, false); // new point
-                delay(2 * kUserInputDelayMs);
-              }
-            }
-          }
-        }
-        delay(2000);
-      }
-      // set main page back
-      SetPage(kMainPage);
-      inactivity_millis = 0;
+    case 'l':   // CalibrateTouchscreenFn()
+      CalibrateTouchscreenFn();
       break;
     case 'm':   // RotateScreen();
       display->RotateScreen();
@@ -1210,44 +1301,8 @@ void SerialUserInput() {
     case 'q':   // turn OFF RGB LED Strip
       TurnOffRgbStrip();
       break;
-    case 'r':   // Touchscreen test
-      display->SetMaxBrightness();
-      {
-        if(ts != NULL) {
-          // test calibration
-          const int kNumOfSamples = 10;
-          int16_t x_samples[kNumOfSamples], y_samples[kNumOfSamples];
-          // define test pixel points
-          for (int i = 0; i < kNumOfSamples; i++) {
-            x_samples[i] = (i / 2 + 1) * kTftWidth / (kNumOfSamples / 2 + 1);
-            if(i % 2 == 0)
-              y_samples[i] = kTftHeight / 5;
-            else
-              y_samples[i] = 4 * kTftHeight / 5;
-          }
-          int test_num = 0;
-          display->TouchCalibrationScreenTest(x_samples[test_num], y_samples[test_num], 2 * kTftWidth, 2 * kTftHeight, true); // first draw
-          while(1) {
-            ResetWatchdog();
-            if(ts->GetTouchedPixel()->is_touched) {
-              display->TouchCalibrationScreenTest(x_samples[test_num], y_samples[test_num], ts->GetTouchedPixel()->x, ts->GetTouchedPixel()->y, false);
-              delay(kUserInputDelayMs);
-              test_num++;
-               if(test_num >= kNumOfSamples)
-                break;
-              else {
-                // screen with no point
-                display->TouchCalibrationScreenTest(x_samples[test_num], y_samples[test_num], 2 * kTftWidth, 2 * kTftHeight, false); // new point
-                delay(2 * kUserInputDelayMs);
-              }
-            }
-          }
-        }
-        delay(2000);
-      }
-      // set main page back
-      SetPage(kMainPage);
-      inactivity_millis = 0;
+    case 'r':   // TestTouchscreenCalibrationFn()
+      TestTouchscreenCalibrationFn();
       break;
     case 's':   // toggle screensaver
       #ifdef MORE_LOGS

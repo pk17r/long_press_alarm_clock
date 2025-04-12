@@ -2361,8 +2361,8 @@ void RGBDisplay::TouchCalibrationScreen(int16_t x0, int16_t y0, int16_t x1, int1
   if(redraw) {
     tft.fillScreen(kDisplayBackroundColor);
     
-    std::string title_str = "Touchscreen Calibration";
-    std::string direction_str = "\"Tap\" the shown line with\n a blunt 1.5-2mm dia stylus";
+    std::string title_str = "Calibrate Touchscreen";
+    std::string direction_str = "\"Tap\" the shown line using\n a blunt 1-1.5mm dia stylus";
 
     // set font
     tft.setFont(&FreeSansBold12pt7b);
@@ -2389,7 +2389,7 @@ void RGBDisplay::TouchCalibrationScreen(int16_t x0, int16_t y0, int16_t x1, int1
     tft.setTextColor(kDisplayColorYellow);
     tft.setFont(&FreeMono9pt7b);
     // yes! home the cursor
-    tft.setCursor((kTftWidth - direction_str_w) / 2, kTftHeight / 2 + direction_str_h);
+    tft.setCursor((kTftWidth - direction_str_w) / 2, kTftHeight / 2 + direction_str_h / 2);
     tft.print(direction_str.c_str());
   }
 
@@ -2414,17 +2414,36 @@ void RGBDisplay::TouchCalibrationScreenTest(int16_t x_target, int16_t y_target, 
     uint16_t title_str_h = 0, title_str_w = 0;
     int16_t title_str_gap_x = 0, title_str_gap_y = 0;
     tft.getTextBounds(title_str.c_str(), 0, 0, &title_str_gap_x, &title_str_gap_y, &title_str_w, &title_str_h);
+    // std::string log_str = "title_str: " + title_str + "  gap_x=" + std::to_string(title_str_gap_x) + ", gap_y=" + std::to_string(title_str_gap_y) + ", w=" + std::to_string(title_str_w) + ", h=" + std::to_string(title_str_h);
+    // PrintLn(log_str);
 
     // change the text color to the background color
     tft.setTextColor(kDisplayColorGreen);
     tft.setFont(&FreeSansBold12pt7b);
     // yes! home the cursor
-    tft.setCursor((kTftWidth - title_str_w) / 2, (kTftHeight + title_str_h) / 2);
+    tft.setCursor((kTftWidth - title_str_w) / 2, kTftHeight / 2 - title_str_h / 2);
+    tft.print(title_str.c_str());
+
+    title_str = "Calibration";
+    // get bounds of text on screen
+    tft.setTextColor(kDisplayBackroundColor);
+    title_str_h = 0, title_str_w = 0;
+    title_str_gap_x = 0, title_str_gap_y = 0;
+    tft.getTextBounds(title_str.c_str(), 0, 0, &title_str_gap_x, &title_str_gap_y, &title_str_w, &title_str_h);
+    // log_str = "title_str: " + title_str + "  gap_x=" + std::to_string(title_str_gap_x) + ", gap_y=" + std::to_string(title_str_gap_y) + ", w=" + std::to_string(title_str_w) + ", h=" + std::to_string(title_str_h);
+    // PrintLn(log_str);
+
+    // change the text color to the background color
+    tft.setTextColor(kDisplayColorGreen);
+    tft.setFont(&FreeSansBold12pt7b);
+    // yes! home the cursor
+    tft.setCursor((kTftWidth - title_str_w) / 2, kTftHeight / 2 + 3 * title_str_h / 2);
     tft.print(title_str.c_str());
   }
 
   // draw target:
   tft.fillCircle(x_target, y_target, 2, kDisplayColorOrange);
+  tft.drawCircle(x_target, y_target, 6, kDisplayColorOrange);
   // draw touch
   tft.fillCircle(x_touch, y_touch, 2, kDisplayColorCyan);
 
