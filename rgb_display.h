@@ -148,6 +148,7 @@ private:
   void MakeKeyboard(const char type[][13], std::string label);
   void DrawKeyboardButton(int x, int y, int w, int h);
   void DrawKeyboardButton(int x, int y, int w, int h, uint16_t kb_btn_fill_col);
+  void DrawKeyboardButton(int x, int y, int w, int h, char letter, const char* label, bool on, bool clicked);
   bool IsTouchWithin(int x, int y, int w, int h);
   bool GetKeyboardPress(char * textBuffer, std::string label, char * textReturn);
 
@@ -261,7 +262,7 @@ private:
 
   // on-screen input keyboard colors
   const uint16_t kTextRegularColor          = kDisplayColorWhite;
-  const uint16_t kTextHighLightColor        = kDisplayBackroundColor;
+  const uint16_t kTextHighLightColor        = kDisplayColorGreen;
   const uint16_t kKeyboardButtonFillColor   = kDisplayColorRed;
 
   // display page buttons

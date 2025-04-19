@@ -1283,14 +1283,14 @@ void SerialUserInput() {
         #ifdef MORE_LOGS
         PrintLn("**** On Screen User Text Input ****");
         #endif
-        SetPage(kSettingsPage);
+        // SetPage(kSettingsPage);
         // user input string
-        std::string label = "WiFi Password";
+        std::string label = "On Screen User Text Input:";
         char returnText[kWifiSsidPasswordLengthMax + 1] = "";
         // get user input from screen
         display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool alphabets_only = */ false);
         PrintLn(returnText);
-        SetPage(kSettingsPage);
+        SetPage(kMainPage);
       }
       break;
     case 'p':   // turn ON RGB LED Strip
