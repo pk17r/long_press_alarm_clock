@@ -776,7 +776,7 @@ void RGBDisplay::DisplayCurrentPage() {
     case kSettingsPage: title_str = "MAIN SETTINGS PAGE"; break;
     case kWiFiSettingsPage: title_str = "WIFI SETTINGS PAGE"; break;
     case kClockSettingsPage: title_str = "CLOCK SETTINGS PAGE"; break;
-    case kWeatherSettingsPage: title_str = "LOCATION & WEATHER SETTINGS"; break;
+    case kWeatherSettingsPage: title_str = "WEATHER PAGE"; break;
     default: title_str = "Not Implemented!";
   }
   tft.print(title_str.c_str());
@@ -2015,7 +2015,7 @@ void RGBDisplay::MakeKeyboard(const char type[][13], std::string label) {
     }
   }
 
-  if(!kb_numbers_only && !kb_capitals_only) {
+  if(!kb_numbers_only && !kb_alphabets_only) {
     // ShiftKey
     DrawKeyboardButton(220, kTextAreaHeight + 60, 90, 25);
     if(GetKeyboardPress_shift)
@@ -2105,7 +2105,7 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
     }
 
     // ShiftKey
-    if (!kb_numbers_only && !kb_capitals_only && IsTouchWithin(220, kTextAreaHeight + 60, 90, 25))
+    if (!kb_numbers_only && !kb_alphabets_only && IsTouchWithin(220, kTextAreaHeight + 60, 90, 25))
     {
       delay(100);
       DrawKeyboardButton(220, kTextAreaHeight + 60, 90, 25);
@@ -2123,7 +2123,7 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
     }
 
     // Numpad
-    if (!kb_numbers_only && !kb_capitals_only && IsTouchWithin(193, kTextAreaHeight + 90, 85, 25))
+    if (!kb_numbers_only && !kb_alphabets_only && IsTouchWithin(193, kTextAreaHeight + 90, 85, 25))
     {
       delay(100);
       DrawKeyboardButton(193, kTextAreaHeight + 90, 85, 25);
@@ -2251,7 +2251,7 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
     }
 
     // Spacebar
-    if (!kb_numbers_only && !kb_capitals_only && IsTouchWithin(40, kTextAreaHeight + 90, 140, 25))
+    if (!kb_numbers_only && !kb_alphabets_only && IsTouchWithin(40, kTextAreaHeight + 90, 140, 25))
     {
       textBuffer[bufIndex++] = ' ';
       delay(100);
@@ -2301,14 +2301,14 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
 }
 
 // get user text input from on-screen keyboard
-bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, bool numbers_only, bool capitals_only) {
+bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, bool numbers_only, bool alphabets_only) {
   bool ret = false;
 
   tft.fillScreen(kDisplayBackroundColor);
   tft.setFont(NULL);
 
   kb_numbers_only = numbers_only;
-  kb_capitals_only = capitals_only;
+  kb_alphabets_only = alphabets_only;
   if(kb_numbers_only) {
     // Numpad Input
     GetKeyboardPress_shift = false;
@@ -2317,13 +2317,21 @@ bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, 
     GetKeyboardPress_lastNumpad = true;
     MakeKeyboard(Mobile_NumKeys, label);
   }
-  else {
-    // Keypad Input
+  else if(kb_alphabets_only) {
+    // Alphabets Input
     GetKeyboardPress_shift = true;
     GetKeyboardPress_lastShift = true;
     GetKeyboardPress_numpad = false;
     GetKeyboardPress_lastNumpad = false;
     MakeKeyboard(Mobile_KB_Capitals, label);
+  }
+  else {
+    // Keypad Input
+    GetKeyboardPress_shift = false;
+    GetKeyboardPress_lastShift = false;
+    GetKeyboardPress_numpad = false;
+    GetKeyboardPress_lastNumpad = false;
+    MakeKeyboard(Mobile_KB_Smalls, label);
   }
 
   // buffer for user input

@@ -1288,7 +1288,7 @@ void SerialUserInput() {
         std::string label = "WiFi Password";
         char returnText[kWifiSsidPasswordLengthMax + 1] = "";
         // get user input from screen
-        display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool capitals_only = */ false);
+        display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool alphabets_only = */ false);
         PrintLn(returnText);
         SetPage(kSettingsPage);
       }
@@ -1802,8 +1802,8 @@ void WiFiPasswordInputTouchAndNonTouch() {
     // for(int i = 0; i< wifi_stuff->wifi_password_.size(); i++) {
     //   returnText[i] = wifi_stuff->wifi_password_[i];
     // }
-    // get user input from screen
-    bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool capitals_only = */ false);
+    // get WiFi Password input from screen
+    bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool alphabets_only = */ false);
     PrintLn(returnText);
     if(ret) {
       LedOnOffResponse();
@@ -1927,8 +1927,8 @@ void MainButtonClickAction() {
           for(int i = 0; i< owner_name.size(); i++) {
             returnText[i] = owner_name[i];
           }
-          // get input from screen
-          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool capitals_only = */ true);
+          // get User Name input from screen
+          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool alphabets_only = */ true);
           PrintLn(returnText);
           if(ret) {
             display->DisplayBlankScreen();
@@ -1960,8 +1960,8 @@ void MainButtonClickAction() {
           for(int i = 0; i< location_zip_code.size(); i++) {
             returnText[i] = location_zip_code[i];
           }
-          // get input from screen
-          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ true, /* bool capitals_only = */ false);
+          // get ZIP Code input from screen
+          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ true, /* bool alphabets_only = */ false);
           PrintLn(returnText);
           if(ret) {
             // clear current city
@@ -1979,8 +1979,8 @@ void MainButtonClickAction() {
             label = "Enter your Country's 2-letter\nCountry Code or Initials:";
             strcpy(returnText, "");
             strcpy(returnText, wifi_stuff->location_country_code_.c_str());
-            // get input from screen
-            bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool capitals_only = */ true);
+            // get 2-letter Country Code input from screen
+            bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool alphabets_only = */ true);
             PrintLn(returnText);
             if(ret) {
               display->DisplayBlankScreen();
