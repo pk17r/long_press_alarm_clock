@@ -2008,13 +2008,14 @@ void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int k
       label = "DEL";
       break;
     case KB_ENTER_KEY:
-      label = "ENTER";
+      label = "ENTR";
       break;
-    case KB_SHIFT_KEY:
-      if(GetKeyboardPress_numpad)
-        label = "SPECIAL";
-      else
-        label = "SHIFT";
+    case KB_SHIFT_KEY:    /* shares space with SPECIAL Key */
+      label = "SHIFT";
+      on = GetKeyboardPress_shift;
+      break;
+    case KB_SPECIAL_KEY:    /* shares space with SHIFT Key */
+      label = "SPECIAL";
       on = GetKeyboardPress_shift;
       break;
     case KB_SPACEBAR_KEY:
@@ -2052,7 +2053,14 @@ void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int k
   tft.fillRoundRect(x + 1, y + 1, w - 1 * 2, h - 1 * 2, 3, ((on | clicked) ? kButtonClickedFillColor : kButtonFillColor));
 
   // button label
-  tft.setCursor(x + label_x, y + ((kb_key_flag == KB_SAVE_BUTTON || kb_key_flag == KB_BACK_BUTTON) ? 15 : 17));
+  if(kb_key_flag != KB_SAVE_BUTTON && kb_key_flag != KB_BACK_BUTTON) {
+    tft.setFont(&FreeMonoBold12pt7b);
+    tft.setCursor(x + label_x, y + KB_ALL_LABEL_Y);
+  }
+  else {
+    tft.setFont(&FreeMonoBold9pt7b);
+    tft.setCursor(x + label_x, y + 14);
+  }
   // tft.setTextColor(((on | clicked) ? kDisplayBackroundColor : kTextRegularColor));
   tft.setTextColor(kDisplayBackroundColor);
   if(label == nullptr) {
@@ -2086,6 +2094,9 @@ void RGBDisplay::GetKeyBoardKeyDimensions(int &x, int &y, int &w, int &h, int &l
     case KB_SHIFT_KEY:
       x = KB_SHIFT_KEY_X, y = KB_SHIFT_KEY_Y, w = KB_SHIFT_KEY_W, h = KB_ALL_KEY_H, label_x = KB_SHIFT_LABEL_X;
       break;
+    case KB_SPECIAL_KEY:
+      x = KB_SPECIAL_KEY_X, y = KB_SPECIAL_KEY_Y, w = KB_SPECIAL_KEY_W, h = KB_ALL_KEY_H, label_x = KB_SPECIAL_LABEL_X;
+      break;
     case KB_SPACEBAR_KEY:
       x = KB_SPACEBAR_KEY_X, y = KB_SPACEBAR_KEY_Y, w = KB_SPACEBAR_KEY_W, h = KB_ALL_KEY_H, label_x = KB_SPACEBAR_LABEL_X;
       break;
@@ -2114,8 +2125,8 @@ void RGBDisplay::MakeKeyboard(std::string label) {
   tft.print(label.c_str());
 
   // other text font
-  tft.setFont(&FreeMonoBold9pt7b);
-  tft.setTextSize(1);
+  // tft.setFont(&FreeMonoBold9pt7b);
+  // tft.setTextSize(1);
 
   // select keypad
   if (GetKeyboardPress_numpad) {
@@ -2149,8 +2160,11 @@ void RGBDisplay::MakeKeyboard(std::string label) {
   }
 
   if(!kb_numbers_only && !kb_alphabets_only) {
-    DrawKeyboardButton(KB_SHIFT_KEY, /*bool clicked*/ false);
-    DrawKeyboardButton(KB_NUMPAD_KEY, /*bool clicked*/ false);
+    if(GetKeyboardPress_numpad)
+      DrawKeyboardButton(KB_SPECIAL_KEY, /*bool clicked*/ GetKeyboardPress_shift);
+    else
+      DrawKeyboardButton(KB_SHIFT_KEY, /*bool clicked*/ GetKeyboardPress_shift);
+    DrawKeyboardButton(KB_NUMPAD_KEY, /*bool clicked*/ GetKeyboardPress_numpad);
     DrawKeyboardButton(KB_SPACEBAR_KEY, /*bool clicked*/ false);
   }
   DrawKeyboardButton(KB_DELETE_KEY, /*bool clicked*/ false);
@@ -2178,12 +2192,22 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
       return false;
     }
 
-    // ShiftKey
-    if (!kb_numbers_only && !kb_alphabets_only && IsTouchWithin(KB_SHIFT_KEY))
+    // ShiftKey   (Shares space with Special Key)
+    if (!GetKeyboardPress_numpad && !kb_numbers_only && !kb_alphabets_only && IsTouchWithin(KB_SHIFT_KEY))
     {
       DrawKeyboardButton(KB_SHIFT_KEY, /*bool clicked*/ true);
       delay(kUserInputDelayMs);
       DrawKeyboardButton(KB_SHIFT_KEY, /*bool clicked*/ false);
+
+      GetKeyboardPress_shift = !GetKeyboardPress_shift;
+    }
+
+    // SpecialKey    (Shares space with Shift Key)
+    if (GetKeyboardPress_numpad && !kb_numbers_only && !kb_alphabets_only && IsTouchWithin(KB_SPECIAL_KEY))
+    {
+      DrawKeyboardButton(KB_SPECIAL_KEY, /*bool clicked*/ true);
+      delay(kUserInputDelayMs);
+      DrawKeyboardButton(KB_SPECIAL_KEY, /*bool clicked*/ false);
 
       GetKeyboardPress_shift = !GetKeyboardPress_shift;
     }
@@ -2202,14 +2226,11 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
     if (GetKeyboardPress_numpad != GetKeyboardPress_lastNumpad || GetKeyboardPress_shift != GetKeyboardPress_lastShift)
     {
       MakeKeyboard(label);
-
-      DrawKeyboardButton(KB_NUMPAD_KEY, /*bool clicked*/ false);
-      DrawKeyboardButton(KB_SHIFT_KEY, /*bool clicked*/ false);
-
       GetKeyboardPress_lastNumpad = GetKeyboardPress_numpad;
       GetKeyboardPress_lastShift = GetKeyboardPress_shift;
     }
 
+    // Alphanumeric keys
     for (int y = 0; y < (kb_numbers_only ? 1 : 3); y++)
     {
       int cursor_shift_right = 10 * pgm_read_byte(&(current_keypad_ptr[y * kKeypadArrCols + 0]));
@@ -2284,8 +2305,9 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
   }
 
   // display current textBuffer
+  tft.setFont(&FreeMonoBold12pt7b);
   tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
-  tft.setCursor(15, kTextAreaHeight - 30);
+  tft.setCursor(15, kTextAreaHeight - 15);
   tft.print(textBuffer);
   // Serial.println(textBuffer);
   return true;
@@ -2300,24 +2322,20 @@ bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, 
   if(kb_numbers_only) {
     // Numpad Input
     GetKeyboardPress_shift = false;
-    GetKeyboardPress_lastShift = false;
     GetKeyboardPress_numpad = true;
-    GetKeyboardPress_lastNumpad = true;
   }
   else if(kb_alphabets_only) {
     // Alphabets Input
     GetKeyboardPress_shift = true;
-    GetKeyboardPress_lastShift = true;
     GetKeyboardPress_numpad = false;
-    GetKeyboardPress_lastNumpad = false;
   }
   else {
     // Keypad Input
     GetKeyboardPress_shift = false;
-    GetKeyboardPress_lastShift = false;
     GetKeyboardPress_numpad = false;
-    GetKeyboardPress_lastNumpad = false;
   }
+  GetKeyboardPress_lastShift = GetKeyboardPress_shift;
+  GetKeyboardPress_lastNumpad = GetKeyboardPress_numpad;
 
   MakeKeyboard(label);
 
@@ -2339,7 +2357,7 @@ bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, 
       break;
 
     //print the text
-    tft.setCursor(15, kTextAreaHeight - 50);
+    tft.setCursor(15, kTextAreaHeight - 45);
     tft.println(return_text);
     if(strcmp(return_text, "") != 0) {
       PrintLn(return_text);

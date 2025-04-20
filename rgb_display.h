@@ -24,6 +24,8 @@
 #include "Fonts/FreeSans18pt7b.h"           // from Adafruit_GFX library
 #include "Fonts/FreeSansBold12pt7b.h"       // from Adafruit_GFX library
 #include "Fonts/FreeSans12pt7b.h"           // from Adafruit_GFX library
+#include "Fonts/FreeMonoBold12pt7b.h"       // from Adafruit_GFX library
+#include "Fonts/FreeMono12pt7b.h"       // from Adafruit_GFX library
 #include "Fonts/FreeMonoBold9pt7b.h"        // from Adafruit_GFX library
 #include "Fonts/FreeMono9pt7b.h"            // from Adafruit_GFX library
 #include <SPI.h>
@@ -53,6 +55,7 @@ enum TouchKbKeys {
   KB_DELETE_KEY,
   KB_ENTER_KEY,
   KB_SHIFT_KEY,
+  KB_SPECIAL_KEY,
   KB_SPACEBAR_KEY,
   KB_NUMPAD_KEY,
   KB_SAVE_BUTTON,
@@ -520,32 +523,38 @@ private:
   // keyboard key sizes
   const int KB_ALL_KEY_H = 25;
   const int KB_ALPHANUMERIC_KEY_W = 20;
-  const int KB_ALL_LABEL_X = 4;
+  const int KB_ALL_LABEL_X = 3;
+  const int KB_ALL_LABEL_Y = 18;
 
   const int KB_DELETE_KEY_X = 250;
   const int KB_DELETE_KEY_Y = kTextAreaHeight + 0;
   const int KB_DELETE_KEY_W = 60;
-  const int KB_DELETE_LABEL_X = 14;
+  const int KB_DELETE_LABEL_X = 10;
 
   const int KB_ENTER_KEY_X = 240;
   const int KB_ENTER_KEY_Y = kTextAreaHeight + 30;
   const int KB_ENTER_KEY_W = 70;
-  const int KB_ENTER_LABEL_X = 6;
+  const int KB_ENTER_LABEL_X = 7;
 
   const int KB_SHIFT_KEY_X = 220;
   const int KB_SHIFT_KEY_Y = kTextAreaHeight + 60;
   const int KB_SHIFT_KEY_W = 90;
-  const int KB_SHIFT_LABEL_X = 16;
+  const int KB_SHIFT_LABEL_X = 10;
 
-  const int KB_NUMPAD_KEY_X = 220;
+  const int KB_SPECIAL_KEY_X = 200;
+  const int KB_SPECIAL_KEY_Y = kTextAreaHeight + 60;
+  const int KB_SPECIAL_KEY_W = 110;
+  const int KB_SPECIAL_LABEL_X = 5;
+
+  const int KB_NUMPAD_KEY_X = 210;
   const int KB_NUMPAD_KEY_Y = kTextAreaHeight + 90;
-  const int KB_NUMPAD_KEY_W = 90;
-  const int KB_NUMPAD_LABEL_X = 11;
+  const int KB_NUMPAD_KEY_W = 100;
+  const int KB_NUMPAD_LABEL_X = 9;
 
   const int KB_SPACEBAR_KEY_X = 39;
   const int KB_SPACEBAR_KEY_Y = kTextAreaHeight + 90;
   const int KB_SPACEBAR_KEY_W = 158;
-  const int KB_SPACEBAR_LABEL_X = 27;
+  const int KB_SPACEBAR_LABEL_X = 18;
 
 };
 
