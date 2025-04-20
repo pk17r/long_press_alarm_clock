@@ -2091,7 +2091,10 @@ void RGBDisplay::GetKeyBoardKeyDimensions(int &x, int &y, int &w, int &h, TouchK
 }
 
 // credits: Andrew Mascolo https://github.com/AndrewMascolo/Adafruit_Stuff/blob/master/Sketches/Keyboard.ino
-void RGBDisplay::MakeKeyboard(const char type[][13], std::string label) {
+void RGBDisplay::MakeKeyboard(std::string label) {
+  // clear screen
+  tft.fillScreen(kDisplayBackroundColor);
+
   // heading label
   tft.setTextSize(1);
   tft.setFont(&FreeMono9pt7b);
@@ -2103,13 +2106,34 @@ void RGBDisplay::MakeKeyboard(const char type[][13], std::string label) {
   tft.setFont(NULL);
   tft.setTextSize(2);
 
+  // select keypad
+  if (GetKeyboardPress_numpad) {
+    if (GetKeyboardPress_shift) {
+      current_keypad_ptr = (char *)Mobile_SymKeys;
+    }
+    else {
+      current_keypad_ptr = (char *)Mobile_NumKeys;
+    }
+  }
+  else {
+    if (GetKeyboardPress_shift) {
+      current_keypad_ptr = (char *)Mobile_KB_Capitals;
+    }
+    else {
+      current_keypad_ptr = (char *)Mobile_KB_Smalls;
+    }
+  }
+
   // keys
   tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
   for (int y = 0; y < (kb_numbers_only ? 1 : 3); y++) {
-    int cursor_shift_right = 10 * pgm_read_byte(&(type[y][0]));
-    for (int x = 3; x < 13; x++) {
-      if (x >= pgm_read_byte(&(type[y][1]))) break;
-      DrawKeyboardButton(KB_ALPHANUMERIC_KEY, /*bool clicked*/ false, x, y, cursor_shift_right, char(pgm_read_byte(&(type[y][x]))));
+    int cursor_shift_right = 10 * pgm_read_byte(&(current_keypad_ptr[y * kKeypadArrCols + 0]));
+    int x_max = pgm_read_byte(&(current_keypad_ptr[y * kKeypadArrCols + 1]));
+    for (int x = 3; x < kKeypadArrCols; x++) {
+      if (x >= x_max)
+        break;
+      char letter = pgm_read_byte(&(current_keypad_ptr[y * kKeypadArrCols + x]));
+      DrawKeyboardButton(KB_ALPHANUMERIC_KEY, /*bool clicked*/ false, x, y, cursor_shift_right, letter);
     }
   }
 
@@ -2126,8 +2150,6 @@ void RGBDisplay::MakeKeyboard(const char type[][13], std::string label) {
 // get keyboard presses on keyboard made by MakeKeyboard
 // credits: Andrew Mascolo https://github.com/AndrewMascolo/Adafruit_Stuff/blob/master/Sketches/Keyboard.ino
 bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * textReturn) {
-  //// static vars for Keyboard
-  //static bool GetKeyboardPress_shift = true, GetKeyboardPress_lastShift = true, GetKeyboardPress_numpad = false, GetKeyboardPress_lastNumpad = false;
   static char bufIndex = 0;
   // increase bufIndex to length of pre-filled user input
   while(textBuffer[bufIndex] != '\0')
@@ -2167,34 +2189,7 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
     // re-draw keyboard if...
     if (GetKeyboardPress_numpad != GetKeyboardPress_lastNumpad || GetKeyboardPress_shift != GetKeyboardPress_lastShift)
     {
-      if (GetKeyboardPress_numpad)
-      {
-        if (GetKeyboardPress_shift)
-        {
-          tft.fillScreen(kDisplayBackroundColor);
-          MakeKeyboard(Mobile_SymKeys, label);
-        }
-        else
-        {
-          tft.fillScreen(kDisplayBackroundColor);
-          MakeKeyboard(Mobile_NumKeys, label);
-        }
-      }
-      else
-      {
-        if (GetKeyboardPress_shift)
-        {
-          tft.fillScreen(kDisplayBackroundColor);
-          MakeKeyboard(Mobile_KB_Capitals, label);
-          tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
-        }
-        else
-        {
-          tft.fillScreen(kDisplayBackroundColor);
-          MakeKeyboard(Mobile_KB_Smalls, label);
-          tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
-        }
-      }
+      MakeKeyboard(label);
 
       DrawKeyboardButton(KB_NUMPAD_KEY, /*bool clicked*/ false);
       DrawKeyboardButton(KB_SHIFT_KEY, /*bool clicked*/ false);
@@ -2205,54 +2200,24 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
 
     for (int y = 0; y < (kb_numbers_only ? 1 : 3); y++)
     {
-      int cursor_shift_right;
-      if (GetKeyboardPress_numpad)
-      {
-        if (GetKeyboardPress_shift)
-          cursor_shift_right = 10 * pgm_read_byte(&(Mobile_SymKeys[y][0]));
-        else
-          cursor_shift_right = 10 * pgm_read_byte(&(Mobile_NumKeys[y][0]));
-      }
-      else
-      {
-        if (GetKeyboardPress_shift)
-          cursor_shift_right = 10 * pgm_read_byte(&(Mobile_KB_Capitals[y][0]));
-        else
-          cursor_shift_right = 10 * pgm_read_byte(&(Mobile_KB_Smalls[y][0]));
-      }
+      int cursor_shift_right = 10 * pgm_read_byte(&(current_keypad_ptr[y * kKeypadArrCols + 0]));
+      int x_max = pgm_read_byte(&(current_keypad_ptr[y * kKeypadArrCols + 1]));
 
       for (int x = 3; x < 13; x++)
       {
-        if (x >=  (GetKeyboardPress_numpad ? (GetKeyboardPress_shift ? pgm_read_byte(&(Mobile_SymKeys[y][1])) : pgm_read_byte(&(Mobile_NumKeys[y][1]))) : pgm_read_byte(&(Mobile_KB_Capitals[y][1])) ))
+        if (x >= x_max)
           break;
 
         if (IsTouchWithin(KB_ALPHANUMERIC_KEY, x, y, cursor_shift_right))
         {// this will draw the button on the screen by so many pixels
           if (bufIndex < (kWifiSsidPasswordLengthMax))
           {
-            char pressed_char = 0;
-
-            if (GetKeyboardPress_numpad) {
-              if (GetKeyboardPress_shift)
-                pressed_char = pgm_read_byte(&(Mobile_SymKeys[y][x]));
-              else
-                pressed_char = pgm_read_byte(&(Mobile_NumKeys[y][x]));
-            }
-            else {
-              if (GetKeyboardPress_shift)
-                pressed_char = pgm_read_byte(&(Mobile_KB_Capitals[y][x]));
-              else
-                pressed_char = pgm_read_byte(&(Mobile_KB_Smalls[y][x]));
-            }
-            //pressed_char = (pgm_read_byte(&(Mobile_KB_Capitals[y][x])) + (GetKeyboardPress_shift ? 0 : ('a' - 'A')));
+            char pressed_char = pgm_read_byte(&(current_keypad_ptr[y * kKeypadArrCols + x]));
+            textBuffer[bufIndex] = pressed_char;
 
             // draw pressed key
             DrawKeyboardButton(KB_ALPHANUMERIC_KEY, /*bool clicked*/ true, x, y, cursor_shift_right, pressed_char);
             delay(kUserInputDelayMs);
-
-            textBuffer[bufIndex] = pressed_char;
-
-            // draw key
             DrawKeyboardButton(KB_ALPHANUMERIC_KEY, /*bool clicked*/ false, x, y, cursor_shift_right, pressed_char);
 
             bufIndex++;
@@ -2316,9 +2281,6 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
 bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, bool numbers_only, bool alphabets_only) {
   bool ret = false;
 
-  tft.fillScreen(kDisplayBackroundColor);
-  tft.setFont(NULL);
-
   kb_numbers_only = numbers_only;
   kb_alphabets_only = alphabets_only;
   if(kb_numbers_only) {
@@ -2327,7 +2289,6 @@ bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, 
     GetKeyboardPress_lastShift = false;
     GetKeyboardPress_numpad = true;
     GetKeyboardPress_lastNumpad = true;
-    MakeKeyboard(Mobile_NumKeys, label);
   }
   else if(kb_alphabets_only) {
     // Alphabets Input
@@ -2335,7 +2296,6 @@ bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, 
     GetKeyboardPress_lastShift = true;
     GetKeyboardPress_numpad = false;
     GetKeyboardPress_lastNumpad = false;
-    MakeKeyboard(Mobile_KB_Capitals, label);
   }
   else {
     // Keypad Input
@@ -2343,8 +2303,9 @@ bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, 
     GetKeyboardPress_lastShift = false;
     GetKeyboardPress_numpad = false;
     GetKeyboardPress_lastNumpad = false;
-    MakeKeyboard(Mobile_KB_Smalls, label);
   }
+
+  MakeKeyboard(label);
 
   // buffer for user input
   char user_input_buffer[kWifiSsidPasswordLengthMax + 1] = "";
@@ -2372,6 +2333,9 @@ bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, 
       break;
     }
   }
+
+  current_keypad_ptr = nullptr;
+
   // change back text size to default
   tft.setTextSize(1);
   return ret;

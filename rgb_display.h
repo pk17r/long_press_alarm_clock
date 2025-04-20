@@ -155,7 +155,7 @@ private:
   void DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
   void FastDrawTwoColorBitmapSpi(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
   // keyboard functions
-  void MakeKeyboard(const char type[][13], std::string label);
+  void MakeKeyboard(std::string label);
   void DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int key_array_x, int key_array_y, int cursor_shift_right, char letter);
   bool IsTouchWithin(TouchKbKeys kb_key_flag, int key_array_x, int key_array_y, int cursor_shift_right);
   void GetKeyBoardKeyDimensions(int &x, int &y, int &w, int &h, TouchKbKeys kb_key_flag, int key_array_x, int key_array_y, int cursor_shift_right);
@@ -167,6 +167,7 @@ private:
   // static vars for GetKeyboardPress Keyboard
   bool GetKeyboardPress_shift = false, GetKeyboardPress_lastShift = false, GetKeyboardPress_numpad = false, GetKeyboardPress_lastNumpad = false;
   bool kb_alphabets_only = false, kb_numbers_only = false;
+  char* current_keypad_ptr = nullptr;
 
   // current screen brightness
   int current_brightness_ = 0;
@@ -485,26 +486,28 @@ private:
   };
 
   // KEYBOARD
+  static const int kKeypadArrRows = 3;
+  static const int kKeypadArrCols = 13;
 
-  const char Mobile_KB_Capitals[3][13] PROGMEM = {
+  const char Mobile_KB_Capitals[kKeypadArrRows][kKeypadArrCols] PROGMEM = {
     {0, 13, 10, 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'},
     {1, 12, 9, 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'},
     {3, 10, 7, 'Z', 'X', 'C', 'V', 'B', 'N', 'M'},
   };
 
-  const char Mobile_KB_Smalls[3][13] PROGMEM = {
+  const char Mobile_KB_Smalls[kKeypadArrRows][kKeypadArrCols] PROGMEM = {
     {0, 13, 10, 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'},
     {1, 12, 9, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'},
     {3, 10, 7, 'z', 'x', 'c', 'v', 'b', 'n', 'm'},
   };
 
-  const char Mobile_NumKeys[3][13] PROGMEM = {
+  const char Mobile_NumKeys[kKeypadArrRows][kKeypadArrCols] PROGMEM = {
     {0, 13, 10, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'},
     {0, 13, 10, '-', '/', ':', ';', '(', ')', '$', '&', '@', '"'},
     {5, 8, 5, '.', ',', '?', '!', '\''}
   };
 
-  const char Mobile_SymKeys[3][13] PROGMEM = {
+  const char Mobile_SymKeys[kKeypadArrRows][kKeypadArrCols] PROGMEM = {
     {0, 13, 10, '[', ']', '{', '}', '#', '%', '^', '*', '+', '='},
     {4, 9, 6, '_', '\\', '|', '~', '<', '>'}, //4
     {5, 8, 5, '.', ',', '?', '!', '\''}
