@@ -113,24 +113,30 @@ uint8_t rgb_strip_led_brightness = 255;
 uint8_t frames_per_second = 0;
 #endif
 
+enum ButtonClickUiFeedbackType {
+  kTurnOn_Delay_TurnOff,
+  kTurnOn_Delay,
+  kTurnOn,
+  kTurnOff
+};
+
 // LOCAL FUNCTIONS
 // populate all pages in display_pages_vec
 void PopulateDisplayPages();
 int DisplayPagesVecCurrentButtonIndex();
 int DisplayPagesVecButtonIndex(ScreenPage button_page, Cursor button_cursor);
-void LedButtonClickUiResponse(int response_type);
+void ButtonClickUiFeedback(ButtonClickUiFeedbackType response_type);
 void InitializeRgbLed();
 void RunRgbLedAccordingToSettings();
 const char* RgbLedSettingString();
 void WiFiPasswordInputTouchAndNonTouch();
-void LedOnOffResponse();
 
 // setup core1
 void setup() {
 
   // LED Pin High
   pinMode(LED_PIN, OUTPUT);
-  ResponseLed(HIGH);
+  LedFeedback(HIGH);
 
   // WIFI_LED Low
   pinMode(WIFI_LED, OUTPUT);
@@ -269,7 +275,7 @@ void loop() {
   bool dec_button_pressed = dec_button->buttonActiveDebounced();
 
   // if user presses main LED Push button, show instant response by turning On LED
-  ResponseLed(push_button_pressed);
+  LedFeedback(push_button_pressed);
 
   // if a button or touchscreen is pressed then take action
   if((inactivity_millis >= kUserInputDelayMs) && (push_button_pressed || inc_button_pressed || dec_button_pressed || (ts != NULL && ts->IsTouched()))) {
@@ -296,14 +302,14 @@ void loop() {
         if(user_input_cursor != kCursorNoSelection) {
           display->DisplayCursorHighlight(/*highlight_On = */ false);
           current_cursor = user_input_cursor;
-          MainButtonClickAction();
+          ButtonClickAction();
         }
       }
     }
     // push/big LED button click action
     else if(push_button_pressed) {
       PrintLn("push_button");
-      MainButtonClickAction();
+      ButtonClickAction();
     }
     else if(inc_button_pressed || dec_button_pressed) {
       if(inc_button_pressed) {
@@ -413,7 +419,7 @@ void loop() {
     // if SAP is on, then track got_SAP_user_input_ to stop SAP
     if(((current_page == kSoftApInputsPage) || (current_page == kLocationInputsLocalServerPage)) && wifi_stuff->got_SAP_user_input_) {
       current_cursor = kPageSaveButton;
-      MainButtonClickAction();
+      ButtonClickAction();
       inactivity_millis = 0;
     }
 
@@ -589,7 +595,7 @@ void loop1() {
   // int touchReadPin5 = touchRead(TOUCH_PIN_5);
   // if(touchReadPin5 > kTouchActiveThreshold) {
   //   PrintLn("TOUCHED TOUCH_PIN_5");
-  //   LedOnOffResponse();
+  //   LedFeedbackOnOff();
   // }
 }
 
@@ -995,6 +1001,7 @@ void CalibrateTouchscreenFn() {
           med_avg_val = 0;
           edge_num++;
           PrintLn();
+          LedFeedback(true);
           if(edge_num < kNumOfEdges) {
             // next edge
             if(edge_num == 1) {  // bottom
@@ -1008,13 +1015,15 @@ void CalibrateTouchscreenFn() {
             }
             // screen with no line
             display->TouchCalibrationScreen(kTftWidth * 2, 0, kTftWidth * 2, kTftHeight - 1, /*touched*/ false, /*redraw*/ true); // redraw
-            delay(2000);
+            delay(1000);
+            LedFeedback(false);
             display->TouchCalibrationScreen(x0, y0, x1, y1, /*touched*/ false, /*redraw*/ true);  // redraw
           }
           else {
             // screen with no line
             display->TouchCalibrationScreen(kTftWidth * 2, 0, kTftWidth * 2, kTftHeight - 1, /*touched*/ false, /*redraw*/ true, /*calibration_done*/ true); // redraw
             delay(2000);
+            LedFeedback(false);
             break;
           }
         }
@@ -1058,6 +1067,7 @@ void CalibrateTouchscreenFn() {
     bool accurate_calibration = TestTouchscreenCalibrationFn();
 
     if(accurate_calibration) {
+      LedFeedback(true);
       /* save calibration to NVS memory*/
       nvs_preferences->SaveTouchScreenCalibration(xMin, xMax, yMin, yMax);
       nvs_preferences->SaveTouchscreenFlip(ts->touchscreen_flip);
@@ -1065,6 +1075,7 @@ void CalibrateTouchscreenFn() {
       // display message
       display->DisplayMessage(std::string("New Calibration Saved"), std::string(""));
       delay(2000);
+      LedFeedback(false);
     }
     else {
       // retrieve old calibration values
@@ -1573,6 +1584,7 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
   }
   delay(kUserInputDelayMs);
   display->DisplayCursorHighlight(/*highlight_On = */ true);
+  LedFeedback(false);
 }
 
 void MoveCursor(bool increment) {
@@ -1734,7 +1746,7 @@ void PopulateDisplayPages() {
     new DisplayButton{ kClockSettingsPageOwnerName, kClickButtonWithLabel, "Owner Name:", false, 0,0,0,0, owner_name },
     new DisplayButton{ kClockSettingsPageSetLocation, kClickButtonWithLabel, "City:", false, 0,0,0,0, (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_) },
     new DisplayButton{ kClockSettingsPageUpdateTime, kClickButtonWithLabel, "Update Time:", false, 0,0,0,0, "UPDATE TIME" },
-    new DisplayButton{ kClockSettingsPageAlarmLongPressTime, kClickButtonWithLabel, "Long Press / Alarm Snooze Hold Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
+    new DisplayButton{ kClockSettingsPageAlarmLongPressTime, kClickButtonWithLabel, "Long Press Alarm Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
     new DisplayButton{ kClockSettingsPageDisplaySettings, kClickButtonWithLabel, "Display Settings:", false, 0,0,0,0, "DISPLAY" },
     new DisplayButton{ kClockSettingsPageUpdateFirmware, kClickButtonWithLabel, "Firmware Update:", false, 0,0,0,0, "UPDATE" },
     page_back_button,
@@ -1792,43 +1804,19 @@ int DisplayPagesVecButtonIndex(ScreenPage button_page, Cursor button_cursor) {
   return -1;
 }
 
-void LedOnOffResponse() {
-  ResponseLed(HIGH);
+void LedFeedbackOnOff() {
+  LedFeedback(HIGH);
   delay(kUserInputDelayMs);
-  ResponseLed(LOW);
+  LedFeedback(LOW);
 }
 
-void ResponseLed(bool value) {
+void LedFeedback(bool value) {
   digitalWrite(LED_PIN, value);
-}
-
-/*  1: turn On Button & wait,
-    2: turn On Button,
-    3: turn Off Button,
-    default: turn On Button, wait & turn Off button
-*/
-void LedButtonClickUiResponse(int response_type = 0) {
-  switch (response_type) {
-    case 1:   // turn On Button, wait
-      display->DisplayCurrentPageButtonRow(/*is_on = */ true);
-      delay(kUserInputDelayMs);
-      break;
-    case 2:   // turn On Button
-      display->DisplayCurrentPageButtonRow(/*is_on = */ true);
-      break;
-    case 3:   // turn Off Button
-      display->DisplayCurrentPageButtonRow(/*is_on = */ false);
-      break;
-    default:     // turn On Button, wait, turn Off button
-      display->DisplayCurrentPageButtonRow(/*is_on = */ true);
-      delay(kUserInputDelayMs);
-      display->DisplayCurrentPageButtonRow(/*is_on = */ false);
-  }
 }
 
 // takes in WiFi Password input using Touchscreen or by creating a SoftAP
 void WiFiPasswordInputTouchAndNonTouch() {
-  LedButtonClickUiResponse();
+  LedFeedback(true);
   // get WiFi Password Input
   if(ts != NULL) {
     // use touchscreen
@@ -1839,11 +1827,12 @@ void WiFiPasswordInputTouchAndNonTouch() {
     // for(int i = 0; i< wifi_stuff->wifi_password_.size(); i++) {
     //   returnText[i] = wifi_stuff->wifi_password_[i];
     // }
+    LedFeedback(false);
     // get WiFi Password input from screen
     bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool alphabets_only = */ false);
     PrintLn(returnText);
     if(ret) {
-      LedOnOffResponse();
+      LedFeedback(true);
       wifi_stuff->wifi_password_ = returnText;
       wifi_stuff->SaveWiFiDetails();
     }
@@ -1857,37 +1846,63 @@ void WiFiPasswordInputTouchAndNonTouch() {
   }
 }
 
-void MainButtonClickAction() {
+/*  ButtonClickUiFeedback(kTurnOn_Delay_TurnOff);  (default)
+    ButtonClickUiFeedback(kTurnOn_Delay);
+    ButtonClickUiFeedback(kTurnOn);
+    ButtonClickUiFeedback(kTurnOff);   */
+void ButtonClickUiFeedback(ButtonClickUiFeedbackType response_type = kTurnOn_Delay_TurnOff) {
+  switch (response_type) {
+    case kTurnOn_Delay:   // turn On Button, delay a little
+      display->DisplayCurrentPageButtonRow(/*is_on = */ true);
+      delay(kUserInputDelayMs);
+      break;
+    case kTurnOn:   // turn On Button
+      display->DisplayCurrentPageButtonRow(/*is_on = */ true);
+      break;
+    case kTurnOff:   // turn Off Button
+      display->DisplayCurrentPageButtonRow(/*is_on = */ false);
+      break;
+    case kTurnOn_Delay_TurnOff:
+    default:     // turn On Button, delay, turn Off button
+      display->DisplayCurrentPageButtonRow(/*is_on = */ true);
+      delay(kUserInputDelayMs);
+      display->DisplayCurrentPageButtonRow(/*is_on = */ false);
+  }
+}
+
+void ButtonClickAction() {
   if(current_page == kAlarmSetPage)
     display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ false, /* push_button_pressed */ true);
   else {
     if(current_page == kMainPage) {                 // MAIN PAGE
       if(current_cursor == kMainPageSettingsWheel) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         SetPage(kSettingsPage);
       }
       else if(current_cursor == kMainPageSetAlarm) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         SetPage(kAlarmSetPage);
       }
     }
     else if(current_page == kSettingsPage) {        // SETTINGS PAGE
       if(current_cursor == kSettingsPageWiFi) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn);
+        LedFeedback(true);
         SetPage(kWiFiSettingsPage);
       }
       else if(current_cursor == kSettingsPageClock) {
         if(wifi_stuff->city_.length() == 0) {
-          LedButtonClickUiResponse(2);
+          ButtonClickUiFeedback(kTurnOn);
+          LedFeedback(true);
           AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
           WaitForExecutionOfSecondCoreTask();
         }
         else
-          LedButtonClickUiResponse(1);
+          ButtonClickUiFeedback(kTurnOn_Delay);
         SetPage(kClockSettingsPage);
       }
       else if(current_cursor == kSettingsPageScreensaver) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         SetPage(kScreensaverSettingsPage);
       }
       else if(current_cursor == kDisplaySettingsPageRotateScreen) {
@@ -1898,19 +1913,21 @@ void MainButtonClickAction() {
         SetPage(kSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }
       else if(current_cursor == kSettingsPageWeather) {
-        LedButtonClickUiResponse(2);
+        ButtonClickUiFeedback(kTurnOn);
+        LedFeedback(true);
         AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
         WaitForExecutionOfSecondCoreTask();
         SetPage(kWeatherSettingsPage);
       }
       else if(current_cursor == kPageBackButton) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         SetPage(kMainPage);
       }
     }
     else if(current_page == kWiFiSettingsPage) {          // WIFI SETTINGS PAGE
       if(current_cursor == kWiFiSettingsPageScanNetworks) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn);
+        LedFeedback(true);
         AddSecondCoreTaskIfNotThere(kScanNetworks);
         WaitForExecutionOfSecondCoreTask();
         SetPage(kWiFiScanNetworksPage);
@@ -1919,7 +1936,8 @@ void MainButtonClickAction() {
         WiFiPasswordInputTouchAndNonTouch();
       }
       else if(current_cursor == kWiFiSettingsPageClearSsidAndPasswd) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn);
+        LedFeedbackOnOff();
         AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
         WaitForExecutionOfSecondCoreTask();
         wifi_stuff->wifi_ssid_ = "Scan WiFi";
@@ -1931,28 +1949,32 @@ void MainButtonClickAction() {
         SetPage(kWiFiSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }
       else if(current_cursor == kWiFiSettingsPageConnect) {
-        LedButtonClickUiResponse(2);
+        ButtonClickUiFeedback(kTurnOn);
+        LedFeedback(true);
         AddSecondCoreTaskIfNotThere(kConnectWiFi);
         WaitForExecutionOfSecondCoreTask();
-        LedButtonClickUiResponse(3);
+        ButtonClickUiFeedback(kTurnOff);
+        LedFeedback(false);
         display->DisplayWiFiConnectionStatus();
       }
       else if(current_cursor == kWiFiSettingsPageDisconnect) {
-        LedButtonClickUiResponse(1);
+        LedFeedback(true);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
         WaitForExecutionOfSecondCoreTask();
-        LedButtonClickUiResponse(3);
+        ButtonClickUiFeedback(kTurnOff);
         display->DisplayWiFiConnectionStatus();
+        LedFeedback(false);
       }
       else if(current_cursor == kPageBackButton) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         current_cursor = kSettingsPageWiFi;
         SetPage(kSettingsPage);
       }
     }
     else if(current_page == kClockSettingsPage) {           // CLOCK SETTINGS PAGE
       if(current_cursor == kClockSettingsPageOwnerName) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         if(ts != NULL) {
           // use touchscreen
           std::string label = "Enter your name:";
@@ -1967,7 +1989,7 @@ void MainButtonClickAction() {
           PrintLn(returnText);
           if(ret) {
             display->DisplayBlankScreen();
-            LedOnOffResponse();
+            LedFeedbackOnOff();
             std::string owner_name_str = returnText;
             nvs_preferences->SaveOwnerName(owner_name_str);
             delay(100);
@@ -1986,7 +2008,8 @@ void MainButtonClickAction() {
         }
       }
       else if(current_cursor == kClockSettingsPageSetLocation) {
-        LedButtonClickUiResponse(1);
+        LedFeedback(true);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         if(ts != NULL) {
           // use touchscreen
           std::string label = "Enter the 5-digit ZIP or 6-\ndigit PIN of your city:";
@@ -1995,6 +2018,7 @@ void MainButtonClickAction() {
           for(int i = 0; i< location_zip_code.size(); i++) {
             returnText[i] = location_zip_code[i];
           }
+          LedFeedback(false);
           // get ZIP Code input from screen
           bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ true, /* bool alphabets_only = */ false);
           PrintLn(returnText);
@@ -2003,7 +2027,7 @@ void MainButtonClickAction() {
             wifi_stuff->city_ = "";
 
             display->DisplayBlankScreen();
-            LedOnOffResponse();
+            LedFeedbackOnOff();
             std::string new_location_zip_str = returnText;
             wifi_stuff->location_zip_code_ = new_location_zip_str;
             wifi_stuff->SaveWeatherLocationDetails();
@@ -2018,8 +2042,8 @@ void MainButtonClickAction() {
             bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool alphabets_only = */ true);
             PrintLn(returnText);
             if(ret) {
+              LedFeedback(true);
               display->DisplayBlankScreen();
-              LedOnOffResponse();
               wifi_stuff->location_country_code_ = returnText;
               wifi_stuff->SaveWeatherLocationDetails();
               // update new location Zip/Pin code on button
@@ -2027,7 +2051,6 @@ void MainButtonClickAction() {
               std::string location_str = (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_);
               display_pages_vec[kClockSettingsPage][display_pages_vec_location_button_index]->btn_value = location_str;
             }
-
             // get new location, update time and weather info
             AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
             WaitForExecutionOfSecondCoreTask();
@@ -2041,7 +2064,8 @@ void MainButtonClickAction() {
         }
       }
       else if(current_cursor == kClockSettingsPageUpdateTime) {
-        LedButtonClickUiResponse(1);
+        LedFeedback(true);
+        ButtonClickUiFeedback(kTurnOn);
         AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
         WaitForExecutionOfSecondCoreTask();
         if(wifi_stuff->manual_time_update_successful_)
@@ -2057,22 +2081,24 @@ void MainButtonClickAction() {
           alarm_clock->alarm_long_press_seconds_ = 5;
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec";
         nvs_preferences->SaveLongPressSeconds(alarm_clock->alarm_long_press_seconds_);
-        LedButtonClickUiResponse();
+        ButtonClickUiFeedback(kTurnOn_Delay_TurnOff);
       }
       else if(current_cursor == kClockSettingsPageDisplaySettings) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         SetPage(kDisplaySettingsPage);
       }
       else if(current_cursor == kClockSettingsPageUpdateFirmware) {
-        LedButtonClickUiResponse(2);
+        LedFeedback(true);
+        ButtonClickUiFeedback(kTurnOn);
         AddSecondCoreTaskIfNotThere(kFirmwareVersionCheck);
         WaitForExecutionOfSecondCoreTask();
         if(wifi_stuff->firmware_update_available_str_.size() > 0)
           display->DisplayFirmwareVersionAndDate();
-        LedButtonClickUiResponse(3);
+        ButtonClickUiFeedback(kTurnOff);
+        LedFeedback(false);
       }
       else if(current_cursor == kPageBackButton) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         current_cursor = kSettingsPageClock;
         SetPage(kSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }
@@ -2080,33 +2106,38 @@ void MainButtonClickAction() {
     }
     else if(current_page == kDisplaySettingsPage) {        // DISPLAY SETTINGS PAGE
       if(current_cursor == kDisplaySettingsPageRotateScreen) {
+        ButtonClickUiFeedback(kTurnOn);
+        LedFeedbackOnOff();
         // rotate screen 180 degrees
         display->RotateScreen();
         if(ts != NULL)
           ts->SetTouchscreenOrientation();
         SetPage(kDisplaySettingsPage, /* bool move_cursor_to_first_button = */ false);
+        ButtonClickUiFeedback(kTurnOff);
       }
       else if(current_cursor == kDisplaySettingsPageTestTouchscreenCalibration) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         TestTouchscreenCalibrationFn();
         // set back current page
         SetPage(current_page);
         inactivity_millis = 0;
       }
       else if(current_cursor == kDisplaySettingsPageCalibrateTouchscreen) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         CalibrateTouchscreenFn();
         // set back current page
         SetPage(current_page);
         inactivity_millis = 0;
       }
       else if(current_cursor == kPageBackButton) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         SetPage(kClockSettingsPage);
       }
     }
     else if(current_page == kWiFiScanNetworksPage) {          // WIFI NETWORKS SCAN PAGE
       if(current_cursor == kWiFiScanNetworksPageList) {
+        ButtonClickUiFeedback(kTurnOn);
+        LedFeedback(true);
         int index_of_selected_ssid = display->current_wifi_networks_scan_page_cursor + display->current_wifi_networks_scan_page_no * display->kWifiScanNetworksPageItems;
         PrintLn("index_of_selected_ssid = ", index_of_selected_ssid);
         if((index_of_selected_ssid > wifi_stuff->WiFiScanNetworksCount() - 1) || (index_of_selected_ssid < 0))
@@ -2122,28 +2153,30 @@ void MainButtonClickAction() {
         WiFiPasswordInputTouchAndNonTouch();
       }
       if(current_cursor == kWiFiScanNetworksPageRescan) {
-        LedButtonClickUiResponse(2);
+        LedFeedback(true);
+        ButtonClickUiFeedback(kTurnOn);
         AddSecondCoreTaskIfNotThere(kScanNetworks);
         WaitForExecutionOfSecondCoreTask();
         SetPage(kWiFiScanNetworksPage);
       }
       else if(current_cursor == kWiFiScanNetworksPageNext) {
-        LedButtonClickUiResponse();
+        ButtonClickUiFeedback(kTurnOn_Delay_TurnOff);
         SetPage(kWiFiScanNetworksPage, false, true);
       }
       else if(current_cursor == kPageBackButton) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         wifi_stuff->WiFiScanNetworksFreeMemory();
         SetPage(kWiFiSettingsPage);
       }
     }
     else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE
-      LedButtonClickUiResponse(1);
       if(current_cursor == kPageSaveButton) {
-        LedOnOffResponse();
+        ButtonClickUiFeedback(kTurnOn);
+        LedFeedback(true);
         wifi_stuff->save_SAP_details_ = true;
       }
       else if(current_cursor == kPageBackButton) {
+        ButtonClickUiFeedback(kTurnOn_Delay);
         // don't save wifi details
       }
       AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
@@ -2152,32 +2185,34 @@ void MainButtonClickAction() {
     }
     else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
       if(current_cursor == kWeatherSettingsPageSetUnits) {
+        ButtonClickUiFeedback(kTurnOn);
+        LedFeedback(true);
         wifi_stuff->weather_units_metric_not_imperial_ = !wifi_stuff->weather_units_metric_not_imperial_;
         wifi_stuff->SaveWeatherUnits();
         wifi_stuff->got_weather_info_ = false;
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (wifi_stuff->weather_units_metric_not_imperial_ ? kMetricUnitStr : kImperialUnitStr);
-        LedButtonClickUiResponse(1);
         // fetch weather info in new units
         AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
         WaitForExecutionOfSecondCoreTask();
         SetPage(kWeatherSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }
       else if(current_cursor == kWeatherSettingsPageFetch) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn);
+        LedFeedback(true);
         AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
         WaitForExecutionOfSecondCoreTask();
         SetPage(kWeatherSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }
       else if(current_cursor == kPageBackButton) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         current_cursor = kSettingsPageWeather;
         SetPage(kSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }
     }
     else if(current_page == kLocationInputsLocalServerPage) {          // LOCATION INPUT LOCAL SERVER PAGE
-      LedButtonClickUiResponse(1);
       if(current_cursor == kPageSaveButton) {
-        LedOnOffResponse();
+        ButtonClickUiFeedback(kTurnOn);
+        LedFeedback(true);
         wifi_stuff->save_SAP_details_ = true;
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
         WaitForExecutionOfSecondCoreTask();
@@ -2196,7 +2231,7 @@ void MainButtonClickAction() {
         AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
       }
       else if(current_cursor == kPageBackButton) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
       }
       WaitForExecutionOfSecondCoreTask();
@@ -2207,15 +2242,15 @@ void MainButtonClickAction() {
         display->screensaver_bounce_not_fly_horizontally_ = !display->screensaver_bounce_not_fly_horizontally_;
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (display->screensaver_bounce_not_fly_horizontally_ ? kBounceScreensaverStr : kFlyOutScreensaverStr);
         nvs_preferences->SaveScreensaverBounceNotFlyHorizontally(display->screensaver_bounce_not_fly_horizontally_);
-        LedButtonClickUiResponse();
+        ButtonClickUiFeedback(kTurnOn_Delay_TurnOff);
       }
       else if(current_cursor == kScreensaverSettingsPageSpeed) {
         CycleCpuFrequency();
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (cpu_speed_mhz == 80 ? kSlowStr : (cpu_speed_mhz == 160 ? kMediumStr : kFastStr));
-        LedButtonClickUiResponse();
+        ButtonClickUiFeedback(kTurnOn_Delay_TurnOff);
       }
       else if(current_cursor == kScreensaverSettingsPageRun) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         SetPage(kScreensaverPage);
       }
       else if(current_cursor == kScreensaverSettingsPageNightTmDimHr) {
@@ -2228,7 +2263,7 @@ void MainButtonClickAction() {
         nvs_preferences->SaveNightTimeDimHour(night_time_dim_hour);
         night_time_minutes = night_time_dim_hour * 60 + 720;
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (std::to_string(night_time_dim_hour) + "PM");
-        LedButtonClickUiResponse();
+        ButtonClickUiFeedback(kTurnOn_Delay_TurnOff);
       }
       else if(current_cursor == kScreensaverSettingsPageRgbLedStripMode) {
         if(autorun_rgb_led_strip_mode < 3)
@@ -2238,9 +2273,10 @@ void MainButtonClickAction() {
         nvs_preferences->SaveAutorunRgbLedStripMode(autorun_rgb_led_strip_mode);
         RunRgbLedAccordingToSettings();
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = RgbLedSettingString();
-        LedButtonClickUiResponse();
+        ButtonClickUiFeedback(kTurnOn_Delay_TurnOff);
       }
       else if(current_cursor == kScreensaverSettingsPageRgbLedBrightness) {
+        ButtonClickUiFeedback(kTurnOn_Delay);
         // change brightness
         if(rgb_strip_led_brightness < 255)
           rgb_strip_led_brightness += 51;
@@ -2250,10 +2286,10 @@ void MainButtonClickAction() {
         nvs_preferences->SaveRgbStripLedBrightness(rgb_strip_led_brightness);
         InitializeRgbLed();
         RunRgbLedAccordingToSettings();
-        LedButtonClickUiResponse();
+        ButtonClickUiFeedback(kTurnOff);
       }
       else if(current_cursor == kPageBackButton) {
-        LedButtonClickUiResponse(1);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         current_cursor = kSettingsPageScreensaver;
         SetPage(kSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }

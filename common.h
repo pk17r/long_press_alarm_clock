@@ -244,6 +244,7 @@ extern void PrintLn(std::string &someTextStr1);
 extern void PrintLn(int someInt);
 extern void PrintLn();
 extern bool AnyButtonPressed();
-extern void ResponseLed(bool value);
+extern void LedFeedback(bool value);
+extern void LedFeedbackOnOff();
 
 #endif // COMMON_H

@@ -147,7 +147,7 @@ void IRAM_ATTR AlarmClock::PassiveBuzzerTimerISR() {
   if(millis() - beep_start_time_ms_ > kBeepLengthMs) {
     beep_toggle_ = !beep_toggle_;
     beep_start_time_ms_ = millis();
-    ResponseLed(beep_toggle_);
+    LedFeedback(beep_toggle_);
   }
   buzzer_square_wave_toggle_ = !buzzer_square_wave_toggle_;
   digitalWrite(BUZZER_PIN, buzzer_square_wave_toggle_ && beep_toggle_);
@@ -189,7 +189,7 @@ void AlarmClock::BuzzerDisable() {
     timerAlarmDisable(passive_buzzer_timer_ptr_);
   #endif
   digitalWrite(BUZZER_PIN, LOW);
-  ResponseLed(LOW);
+  LedFeedback(LOW);
   buzzer_square_wave_toggle_ = false;
   beep_toggle_ = false;
   #ifdef MORE_LOGS

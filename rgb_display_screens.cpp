@@ -396,6 +396,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
         current_cursor = kAlarmSetPageSet;
         currentBtnFlags |= kBtnHighlightTopFlag;
         // save Set Alarm Page values
+        LedFeedback(true);
         alarm_clock->SaveAlarm();
       }
       else {
@@ -405,7 +406,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
       // draw button with highlight
       AlarmPageButtonFn(BTN_SETX, BTN_DRAW, currentBtnFlags);
       // wait a little
-      delay(2 * kUserInputDelayMs);
+      delay(3 * kUserInputDelayMs);
       // go back to main page
       SetPage(kMainPage);
     }
@@ -1992,11 +1993,11 @@ void RGBDisplay::DrawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &
 
 void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int key_array_x = 0, int key_array_y = 0, int cursor_shift_right = 0, char letter = 0) {
 
-  int x = 0, y = 0, w = 0, h = 0;
+  int x = 0, y = 0, w = 0, h = 0, label_x = 0;
   bool on = false;
   char* label = nullptr;
 
-  GetKeyBoardKeyDimensions(x, y, w, h, kb_key_flag, key_array_x, key_array_y, cursor_shift_right);
+  GetKeyBoardKeyDimensions(x, y, w, h, label_x, kb_key_flag, key_array_x, key_array_y, cursor_shift_right);
 
   // key labels
   switch(kb_key_flag) 
@@ -2013,7 +2014,7 @@ void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int k
       if(GetKeyboardPress_numpad)
         label = "SPECIAL";
       else
-        label = "CAPITAL";
+        label = " SHIFT";
       on = GetKeyboardPress_shift;
       break;
     case KB_SPACEBAR_KEY:
@@ -2047,7 +2048,7 @@ void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int k
   tft.fillRoundRect(x + 1, y + 1, w - 1 * 2, h - 1 * 2, 3, (clicked ? kButtonClickedFillColor : (on ? kTextHighLightColor : kKeyboardButtonFillColor)));
 
   // button label
-  tft.setCursor(x + (w < 100 ? 4 : 18), y + h/5);
+  tft.setCursor(x + label_x, y + h/5);
   tft.setTextColor((on ? kDisplayBackroundColor : kTextRegularColor));
   if(label == nullptr) {
     tft.print(letter);
@@ -2058,36 +2059,36 @@ void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int k
 }
 
 bool RGBDisplay::IsTouchWithin(TouchKbKeys kb_key_flag, int key_array_x = 0, int key_array_y = 0, int cursor_shift_right = 0) {
-  int x = 0, y = 0, w = 0, h = 0;
-  GetKeyBoardKeyDimensions(x, y, w, h, kb_key_flag, key_array_x, key_array_y, cursor_shift_right);
+  int x = 0, y = 0, w = 0, h = 0, label_x = 0;
+  GetKeyBoardKeyDimensions(x, y, w, h, label_x, kb_key_flag, key_array_x, key_array_y, cursor_shift_right);
 
   // tft.fillCircle(x, y, 2, 0x0FF0);
   return ((((ts->GetTouchedPixel())->x>=x)&&((ts->GetTouchedPixel())->x<=x + w)) & (((ts->GetTouchedPixel())->y>=y)&&((ts->GetTouchedPixel())->y<=y + h)));
 }
 
-void RGBDisplay::GetKeyBoardKeyDimensions(int &x, int &y, int &w, int &h, TouchKbKeys kb_key_flag, int key_array_x = 0, int key_array_y = 0, int cursor_shift_right = 0) {
+void RGBDisplay::GetKeyBoardKeyDimensions(int &x, int &y, int &w, int &h, int &label_x, TouchKbKeys kb_key_flag, int key_array_x = 0, int key_array_y = 0, int cursor_shift_right = 0) {
   switch(kb_key_flag) 
   {
     case KB_ALPHANUMERIC_KEY:
-      x = 8 + (23 * (key_array_x - 3)) + cursor_shift_right, y = kTextAreaHeight + (30 * key_array_y), w = KB_ALPHANUMERIC_KEY_W, h = KB_ALL_KEY_H;
+      x = 8 + (23 * (key_array_x - 3)) + cursor_shift_right, y = kTextAreaHeight + (30 * key_array_y), w = KB_ALPHANUMERIC_KEY_W, h = KB_ALL_KEY_H, label_x = KB_ALL_LABEL_X;
       break;
     case KB_DELETE_KEY:
-      x = KB_DELETE_KEY_X, y = KB_DELETE_KEY_Y, w = KB_DELETE_KEY_W, h = KB_ALL_KEY_H;
+      x = KB_DELETE_KEY_X, y = KB_DELETE_KEY_Y, w = KB_DELETE_KEY_W, h = KB_ALL_KEY_H, label_x = KB_DELETE_LABEL_X;
       break;
     case KB_ENTER_KEY:
-      x = KB_ENTER_KEY_X, y = KB_ENTER_KEY_Y, w = KB_ENTER_KEY_W, h = KB_ALL_KEY_H;
+      x = KB_ENTER_KEY_X, y = KB_ENTER_KEY_Y, w = KB_ENTER_KEY_W, h = KB_ALL_KEY_H, label_x = KB_ENTER_LABEL_X;
       break;
     case KB_SHIFT_KEY:
-      x = KB_SHIFT_KEY_X, y = KB_SHIFT_KEY_Y, w = KB_SHIFT_KEY_W, h = KB_ALL_KEY_H;
+      x = KB_SHIFT_KEY_X, y = KB_SHIFT_KEY_Y, w = KB_SHIFT_KEY_W, h = KB_ALL_KEY_H, label_x = KB_SHIFT_LABEL_X;
       break;
     case KB_SPACEBAR_KEY:
-      x = KB_SPACEBAR_KEY_X, y = KB_SPACEBAR_KEY_Y, w = KB_SPACEBAR_KEY_W, h = KB_ALL_KEY_H;
+      x = KB_SPACEBAR_KEY_X, y = KB_SPACEBAR_KEY_Y, w = KB_SPACEBAR_KEY_W, h = KB_ALL_KEY_H, label_x = KB_SPACEBAR_LABEL_X;
       break;
     case KB_NUMPAD_KEY:
-      x = KB_NUMPAD_KEY_X, y = KB_NUMPAD_KEY_Y, w = KB_NUMPAD_KEY_W, h = KB_ALL_KEY_H;
+      x = KB_NUMPAD_KEY_X, y = KB_NUMPAD_KEY_Y, w = KB_NUMPAD_KEY_W, h = KB_ALL_KEY_H, label_x = KB_NUMPAD_LABEL_X;
       break;
     case KB_BACK_BUTTON:
-      x = kBackButtonX1, y = kBackButtonY1, w = kBackButtonW, h = kBackButtonH;
+      x = kBackButtonX1, y = kBackButtonY1, w = kBackButtonW, h = kBackButtonH, label_x = 5;
       break;
   }
 }
