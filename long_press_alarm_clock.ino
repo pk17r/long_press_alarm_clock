@@ -1672,7 +1672,7 @@ void PopulateDisplayPages() {
     new DisplayButton{ kSettingsPageClock, kClickButtonWithLabel, "Clock & Time Settings:", false, 0,0,0,0, "CLOCK" },
     new DisplayButton{ kSettingsPageScreensaver, kClickButtonWithLabel, "Set RGB LEDs &:", false, 0,0,0,0, "SCREENSAVER" },
     new DisplayButton{ kSettingsPageRotateScreen, kClickButtonWithLabel, "Rotate Screen:", false, 0,0,0,0, "ROTATE" },
-    new DisplayButton{ kSettingsPageUpdate, kClickButtonWithLabel, "Firmware Update:", false, 0,0,0,0, "UPDATE" },
+    new DisplayButton{ kSettingsPageWeather, kClickButtonWithLabel, "Weather Settings:", false, 0,0,0,0, "WEATHER" },
     page_back_button,
   };
 
@@ -1709,7 +1709,7 @@ void PopulateDisplayPages() {
     new DisplayButton{ kClockSettingsPageSetLocation, kClickButtonWithLabel, "City:", false, 0,0,0,0, (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_) },
     new DisplayButton{ kClockSettingsPageUpdateTime, kClickButtonWithLabel, "Update Time:", false, 0,0,0,0, "UPDATE TIME" },
     new DisplayButton{ kClockSettingsPageAlarmLongPressTime, kClickButtonWithLabel, "Long Press / Alarm Snooze Hold Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
-    new DisplayButton{ kClockSettingsPageWeather, kClickButtonWithLabel, "Weather Settings:", false, 0,0,0,0, "WEATHER" },
+    new DisplayButton{ kClockSettingsPageUpdateFirmware, kClickButtonWithLabel, "Firmware Update:", false, 0,0,0,0, "UPDATE" },
     page_back_button,
   };
 
@@ -1860,13 +1860,11 @@ void MainButtonClickAction() {
           ts->SetTouchscreenOrientation();
         SetPage(kSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }
-      else if(current_cursor == kSettingsPageUpdate) {
+      else if(current_cursor == kSettingsPageWeather) {
         LedButtonClickUiResponse(2);
-        AddSecondCoreTaskIfNotThere(kFirmwareVersionCheck);
+        AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
         WaitForExecutionOfSecondCoreTask();
-        if(wifi_stuff->firmware_update_available_str_.size() > 0)
-          display->DisplayFirmwareVersionAndDate();
-        LedButtonClickUiResponse(3);
+        SetPage(kWeatherSettingsPage);
       }
       else if(current_cursor == kPageBackButton) {
         LedButtonClickUiResponse(1);
@@ -2024,11 +2022,13 @@ void MainButtonClickAction() {
         nvs_preferences->SaveLongPressSeconds(alarm_clock->alarm_long_press_seconds_);
         LedButtonClickUiResponse();
       }
-      else if(current_cursor == kClockSettingsPageWeather) {
+      else if(current_cursor == kClockSettingsPageUpdateFirmware) {
         LedButtonClickUiResponse(2);
-        AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
+        AddSecondCoreTaskIfNotThere(kFirmwareVersionCheck);
         WaitForExecutionOfSecondCoreTask();
-        SetPage(kWeatherSettingsPage);
+        if(wifi_stuff->firmware_update_available_str_.size() > 0)
+          display->DisplayFirmwareVersionAndDate();
+        LedButtonClickUiResponse(3);
       }
       else if(current_cursor == kPageBackButton) {
         LedButtonClickUiResponse(1);
@@ -2102,8 +2102,8 @@ void MainButtonClickAction() {
       }
       else if(current_cursor == kPageBackButton) {
         LedButtonClickUiResponse(1);
-        current_cursor = kClockSettingsPageSetLocation;
-        SetPage(kClockSettingsPage, /* bool move_cursor_to_first_button = */ false);
+        current_cursor = kSettingsPageWeather;
+        SetPage(kSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }
     }
     else if(current_page == kLocationInputsLocalServerPage) {          // LOCATION INPUT LOCAL SERVER PAGE

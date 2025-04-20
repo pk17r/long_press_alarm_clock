@@ -789,6 +789,7 @@ void RGBDisplay::DisplayCurrentPage() {
   // Page Footer
   switch(current_page) {
     case kSettingsPage:
+    case kClockSettingsPage:
       DisplayFirmwareVersionAndDate();
       break;
     case kWiFiSettingsPage:
