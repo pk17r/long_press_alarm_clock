@@ -1518,14 +1518,6 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
       if(move_cursor_to_first_button) current_cursor = kWiFiSettingsPageScanNetworks;
       display->DisplayCurrentPage();
       break;
-    case kSettingsPage:
-    case kClockSettingsPage:
-    case kWeatherSettingsPage:
-    case kScreensaverSettingsPage:
-      current_page = set_this_page;     // new page needs to be set before any action
-      if(move_cursor_to_first_button) current_cursor = display_pages_vec[current_page][0]->btn_cursor_id;
-      display->DisplayCurrentPage();
-      break;
     case kWiFiScanNetworksPage:
       current_page = set_this_page;     // new page needs to be set before any action
       if(move_cursor_to_first_button) current_cursor = kWiFiScanNetworksPageRescan;
@@ -1542,7 +1534,9 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
       display->LocationInputsLocalServerPage();
       break;
     default:
-      PrintLn("Unprogrammed Page ", set_this_page);
+      current_page = set_this_page;     // new page needs to be set before any action
+      if(move_cursor_to_first_button) current_cursor = display_pages_vec[current_page][0]->btn_cursor_id;
+      display->DisplayCurrentPage();
   }
   delay(kUserInputDelayMs);
   display->DisplayCursorHighlight(/*highlight_On = */ true);
@@ -1671,7 +1665,6 @@ void PopulateDisplayPages() {
     new DisplayButton{ kSettingsPageWiFi, kClickButtonWithLabel, "WiFi Settings:", false, 0,0,0,0, "WIFI" },
     new DisplayButton{ kSettingsPageClock, kClickButtonWithLabel, "Clock & Time Settings:", false, 0,0,0,0, "CLOCK" },
     new DisplayButton{ kSettingsPageScreensaver, kClickButtonWithLabel, "Set RGB LEDs &:", false, 0,0,0,0, "SCREENSAVER" },
-    new DisplayButton{ kSettingsPageRotateScreen, kClickButtonWithLabel, "Rotate Screen:", false, 0,0,0,0, "ROTATE" },
     new DisplayButton{ kSettingsPageWeather, kClickButtonWithLabel, "Weather Settings:", false, 0,0,0,0, "WEATHER" },
     page_back_button,
   };
@@ -1709,7 +1702,14 @@ void PopulateDisplayPages() {
     new DisplayButton{ kClockSettingsPageSetLocation, kClickButtonWithLabel, "City:", false, 0,0,0,0, (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_) },
     new DisplayButton{ kClockSettingsPageUpdateTime, kClickButtonWithLabel, "Update Time:", false, 0,0,0,0, "UPDATE TIME" },
     new DisplayButton{ kClockSettingsPageAlarmLongPressTime, kClickButtonWithLabel, "Long Press / Alarm Snooze Hold Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
+    new DisplayButton{ kClockSettingsPageDisplaySettings, kClickButtonWithLabel, "Display Settings:", false, 0,0,0,0, "DISPLAY" },
     new DisplayButton{ kClockSettingsPageUpdateFirmware, kClickButtonWithLabel, "Firmware Update:", false, 0,0,0,0, "UPDATE" },
+    page_back_button,
+  };
+
+  // DISPLAY SETTINGS PAGE
+  display_pages_vec[kDisplaySettingsPage] = std::vector<DisplayButton*> {
+    new DisplayButton{ kDisplaySettingsPageRotateScreen, kClickButtonWithLabel, "Rotate Screen:", false, 0,0,0,0, "ROTATE" },
     page_back_button,
   };
 
@@ -1853,7 +1853,7 @@ void MainButtonClickAction() {
         LedButtonClickUiResponse(1);
         SetPage(kScreensaverSettingsPage);
       }
-      else if(current_cursor == kSettingsPageRotateScreen) {
+      else if(current_cursor == kDisplaySettingsPageRotateScreen) {
         // rotate screen 180 degrees
         display->RotateScreen();
         if(ts != NULL)
@@ -2022,6 +2022,10 @@ void MainButtonClickAction() {
         nvs_preferences->SaveLongPressSeconds(alarm_clock->alarm_long_press_seconds_);
         LedButtonClickUiResponse();
       }
+      else if(current_cursor == kClockSettingsPageDisplaySettings) {
+        LedButtonClickUiResponse(1);
+        SetPage(kDisplaySettingsPage);
+      }
       else if(current_cursor == kClockSettingsPageUpdateFirmware) {
         LedButtonClickUiResponse(2);
         AddSecondCoreTaskIfNotThere(kFirmwareVersionCheck);
@@ -2036,6 +2040,19 @@ void MainButtonClickAction() {
         SetPage(kSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }
       
+    }
+    else if(current_page == kDisplaySettingsPage) {        // DISPLAY SETTINGS PAGE
+      if(current_cursor == kDisplaySettingsPageRotateScreen) {
+        // rotate screen 180 degrees
+        display->RotateScreen();
+        if(ts != NULL)
+          ts->SetTouchscreenOrientation();
+        SetPage(kDisplaySettingsPage, /* bool move_cursor_to_first_button = */ false);
+      }
+      else if(current_cursor == kPageBackButton) {
+        LedButtonClickUiResponse(1);
+        SetPage(kClockSettingsPage);
+      }
     }
     else if(current_page == kWiFiScanNetworksPage) {          // WIFI NETWORKS SCAN PAGE
       if(current_cursor == kWiFiScanNetworksPageList) {

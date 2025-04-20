@@ -777,6 +777,7 @@ void RGBDisplay::DisplayCurrentPage() {
     case kWiFiSettingsPage: title_str = "WIFI SETTINGS PAGE"; break;
     case kClockSettingsPage: title_str = "CLOCK SETTINGS PAGE"; break;
     case kWeatherSettingsPage: title_str = "WEATHER PAGE"; break;
+    case kDisplaySettingsPage: title_str = "DISPLAY SETTINGS PAGE"; break;
     default: title_str = "Not Implemented!";
   }
   tft.print(title_str.c_str());
