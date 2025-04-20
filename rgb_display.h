@@ -275,11 +275,6 @@ private:
   const uint16_t kDisplayAlarmColor        = kDisplayColorCyan;
   const uint16_t kDisplayBackroundColor    = kDisplayColorBlack;
 
-  // on-screen input keyboard colors
-  const uint16_t kTextRegularColor          = kDisplayColorWhite;
-  const uint16_t kTextHighLightColor        = kDisplayColorGreen;
-  const uint16_t kKeyboardButtonFillColor   = kDisplayColorRed;
-
   // display page buttons
   const uint16_t kButtonBorderColor           = kDisplayColorCyan;
   const uint16_t kButtonFillColor             = kDisplayColorOrange;

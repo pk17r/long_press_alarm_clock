@@ -2049,7 +2049,6 @@ void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int k
   tft.fillRoundRect(x, y, w, h, 3, 0xffff);
 
   // button inside fill
-  // tft.fillRoundRect(x + 1, y + 1, w - 1 * 2, h - 1 * 2, 3, (clicked ? kTextHighLightColor : (on ? kTextHighLightColor : kKeyboardButtonFillColor)));
   tft.fillRoundRect(x + 1, y + 1, w - 1 * 2, h - 1 * 2, 3, ((on | clicked) ? kButtonClickedFillColor : kButtonFillColor));
 
   // button label
@@ -2061,7 +2060,6 @@ void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int k
     tft.setFont(&FreeMonoBold9pt7b);
     tft.setCursor(x + label_x, y + 14);
   }
-  // tft.setTextColor(((on | clicked) ? kDisplayBackroundColor : kTextRegularColor));
   tft.setTextColor(kDisplayBackroundColor);
   if(label == nullptr) {
     tft.print(letter);
@@ -2121,7 +2119,7 @@ void RGBDisplay::MakeKeyboard(std::string label) {
   tft.setTextSize(1);
   tft.setFont(&FreeMono9pt7b);
   tft.setCursor(0, 12);
-  tft.setTextColor(kTextRegularColor, kDisplayBackroundColor);
+  tft.setTextColor(kDisplayColorYellow);
   tft.print(label.c_str());
 
   // other text font
@@ -2147,7 +2145,6 @@ void RGBDisplay::MakeKeyboard(std::string label) {
   }
 
   // keys
-  tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
   for (int y = 0; y < (kb_numbers_only ? 1 : 3); y++) {
     int cursor_shift_right = 10 * pgm_read_byte(&(current_keypad_ptr[y * kKeypadArrCols + 0]));
     int x_max = pgm_read_byte(&(current_keypad_ptr[y * kKeypadArrCols + 1]));
@@ -2306,7 +2303,7 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
 
   // display current textBuffer
   tft.setFont(&FreeMonoBold12pt7b);
-  tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
+  tft.setTextColor(kDisplayColorWhite);
   tft.setCursor(15, kTextAreaHeight - 15);
   tft.print(textBuffer);
   // Serial.println(textBuffer);
