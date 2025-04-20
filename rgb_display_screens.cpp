@@ -1990,25 +1990,24 @@ void RGBDisplay::DrawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &
 
 void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int key_array_x = 0, int key_array_y = 0, int cursor_shift_right = 0, char letter = 0) {
 
-  int x = 0, y = 0, w = 0, h = 25;
+  int x = 0, y = 0, w = 0, h = 0;
   bool on = false;
   char* label = nullptr;
 
+  GetKeyBoardKeyDimensions(x, y, w, h, kb_key_flag, key_array_x, key_array_y, cursor_shift_right);
+
+  // key labels
   switch(kb_key_flag) 
   {
     case KB_ALPHANUMERIC_KEY:
-      x = 8 + (23 * (key_array_x - 3)) + cursor_shift_right, y = kTextAreaHeight + (30 * key_array_y), w = KB_ALPHANUMERIC_KEY_W;
       break;
     case KB_DELETE_KEY:
-      x = KB_DELETE_KEY_X, y = KB_DELETE_KEY_Y, w = KB_DELETE_KEY_W;
       label = "DEL";
       break;
     case KB_ENTER_KEY:
-      x = KB_ENTER_KEY_X, y = KB_ENTER_KEY_Y, w = KB_ENTER_KEY_W;
       label = "ENTER";
       break;
     case KB_SHIFT_KEY:
-      x = KB_SHIFT_KEY_X, y = KB_SHIFT_KEY_Y, w = KB_SHIFT_KEY_W;
       if(GetKeyboardPress_numpad)
         label = "SPECIAL";
       else
@@ -2016,16 +2015,13 @@ void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int k
       on = GetKeyboardPress_shift;
       break;
     case KB_SPACEBAR_KEY:
-      x = KB_SPACEBAR_KEY_X, y = KB_SPACEBAR_KEY_Y, w = KB_SPACEBAR_KEY_W;
       label = "SPACE BAR";
       break;
     case KB_NUMPAD_KEY:
-      x = KB_NUMPAD_KEY_X, y = KB_NUMPAD_KEY_Y, w = KB_NUMPAD_KEY_W;
       label = "NUMPAD";
       on = GetKeyboardPress_numpad;
       break;
     case KB_BACK_BUTTON:
-      x = kBackButtonX1, y = kBackButtonY1, w = kBackButtonW, h = kBackButtonH;
       label = (char *)kBackStr;
       break;
   }
@@ -2061,6 +2057,13 @@ void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int k
 
 bool RGBDisplay::IsTouchWithin(TouchKbKeys kb_key_flag, int key_array_x = 0, int key_array_y = 0, int cursor_shift_right = 0) {
   int x = 0, y = 0, w = 0, h = 0;
+  GetKeyBoardKeyDimensions(x, y, w, h, kb_key_flag, key_array_x, key_array_y, cursor_shift_right);
+
+  // tft.fillCircle(x, y, 2, 0x0FF0);
+  return ((((ts->GetTouchedPixel())->x>=x)&&((ts->GetTouchedPixel())->x<=x + w)) & (((ts->GetTouchedPixel())->y>=y)&&((ts->GetTouchedPixel())->y<=y + h)));
+}
+
+void RGBDisplay::GetKeyBoardKeyDimensions(int &x, int &y, int &w, int &h, TouchKbKeys kb_key_flag, int key_array_x = 0, int key_array_y = 0, int cursor_shift_right = 0) {
   switch(kb_key_flag) 
   {
     case KB_ALPHANUMERIC_KEY:
@@ -2085,8 +2088,6 @@ bool RGBDisplay::IsTouchWithin(TouchKbKeys kb_key_flag, int key_array_x = 0, int
       x = kBackButtonX1, y = kBackButtonY1, w = kBackButtonW, h = kBackButtonH;
       break;
   }
-  // tft.fillCircle(x, y, 2, 0x0FF0);
-  return ((((ts->GetTouchedPixel())->x>=x)&&((ts->GetTouchedPixel())->x<=x + w)) & (((ts->GetTouchedPixel())->y>=y)&&((ts->GetTouchedPixel())->y<=y + h)));
 }
 
 // credits: Andrew Mascolo https://github.com/AndrewMascolo/Adafruit_Stuff/blob/master/Sketches/Keyboard.ino

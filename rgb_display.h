@@ -158,6 +158,7 @@ private:
   void MakeKeyboard(const char type[][13], std::string label);
   void DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int key_array_x, int key_array_y, int cursor_shift_right, char letter);
   bool IsTouchWithin(TouchKbKeys kb_key_flag, int key_array_x, int key_array_y, int cursor_shift_right);
+  void GetKeyBoardKeyDimensions(int &x, int &y, int &w, int &h, TouchKbKeys kb_key_flag, int key_array_x, int key_array_y, int cursor_shift_right);
   bool GetKeyboardPress(char * textBuffer, std::string label, char * textReturn);
 
 
