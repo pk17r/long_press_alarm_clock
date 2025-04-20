@@ -156,10 +156,8 @@ private:
   void FastDrawTwoColorBitmapSpi(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
   // keyboard functions
   void MakeKeyboard(const char type[][13], std::string label);
-  void DrawKeyboardButton(int x, int y, int w, int h, char letter, const char* label, bool on, bool clicked);
-  void DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int key_array_x, int key_array_y);
-  bool IsTouchWithin(int x, int y, int w, int h);
-  bool IsTouchWithin(TouchKbKeys kb_key_flag, int key_array_x, int key_array_y);
+  void DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int key_array_x, int key_array_y, int cursor_shift_right, char letter);
+  bool IsTouchWithin(TouchKbKeys kb_key_flag, int key_array_x, int key_array_y, int cursor_shift_right);
   bool GetKeyboardPress(char * textBuffer, std::string label, char * textReturn);
 
 
@@ -515,6 +513,7 @@ private:
 
   // keyboard key sizes
   const int KB_ALL_KEY_H = 25;
+  const int KB_ALPHANUMERIC_KEY_W = 20;
 
   const int KB_DELETE_KEY_X = 250;
   const int KB_DELETE_KEY_Y = kTextAreaHeight + 0;

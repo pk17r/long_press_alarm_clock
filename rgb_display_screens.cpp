@@ -1988,47 +1988,16 @@ void RGBDisplay::DrawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &
 
 // make keyboard on screen
 
-void RGBDisplay::DrawKeyboardButton(int x, int y, int w, int h, char letter, const char* label, bool on, bool clicked) {
-
-  if(!clicked) {
-    // button outside shadow
-    tft.fillRoundRect(x - 3, y + 3, w, h, 3, 0x8888);    
-  }
-  else {
-    // push button down
-    x -= 1;
-    y += 1;
-  }
-
-  // button border
-  tft.fillRoundRect(x, y, w, h, 3, 0xffff);
-
-  // button inside fill
-  tft.fillRoundRect(x + 1, y + 1, w - 1 * 2, h - 1 * 2, 3, (clicked ? kButtonClickedFillColor : (on ? kTextHighLightColor : kKeyboardButtonFillColor)));
-
-  // button label
-  tft.setCursor(x + (w < 100 ? 4 : 18), y + h/5);
-  tft.setTextColor((on ? kDisplayBackroundColor : kTextRegularColor));
-  if(label == nullptr) {
-    tft.print(letter);
-  }
-  else {
-    tft.print(label);
-  }
-}
-
-void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int key_array_x = 0, int key_array_y = 0) {
+void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int key_array_x = 0, int key_array_y = 0, int cursor_shift_right = 0, char letter = 0) {
 
   int x = 0, y = 0, w = 0, h = 25;
   bool on = false;
-  char* label;
+  char* label = nullptr;
 
   switch(kb_key_flag) 
   {
     case KB_ALPHANUMERIC_KEY:
-      {
-
-      }
+      x = 8 + (23 * (key_array_x - 3)) + cursor_shift_right, y = kTextAreaHeight + (30 * key_array_y), w = KB_ALPHANUMERIC_KEY_W;
       break;
     case KB_DELETE_KEY:
       x = KB_DELETE_KEY_X, y = KB_DELETE_KEY_Y, w = KB_DELETE_KEY_W;
@@ -2062,38 +2031,62 @@ void RGBDisplay::DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int k
   }
   
   // draw key
-  DrawKeyboardButton(x, y, w, h, /*char letter */ 0, /* char* label */ label, /*bool on*/ on, /*bool clicked*/ clicked);
+
+  if(!clicked) {
+    // button outside shadow
+    tft.fillRoundRect(x - 3, y + 3, w, h, 3, 0x8888);    
+  }
+  else {
+    // push button down
+    x -= 1;
+    y += 1;
+  }
+
+  // button border
+  tft.fillRoundRect(x, y, w, h, 3, 0xffff);
+
+  // button inside fill
+  tft.fillRoundRect(x + 1, y + 1, w - 1 * 2, h - 1 * 2, 3, (clicked ? kButtonClickedFillColor : (on ? kTextHighLightColor : kKeyboardButtonFillColor)));
+
+  // button label
+  tft.setCursor(x + (w < 100 ? 4 : 18), y + h/5);
+  tft.setTextColor((on ? kDisplayBackroundColor : kTextRegularColor));
+  if(label == nullptr) {
+    tft.print(letter);
+  }
+  else {
+    tft.print(label);
+  }
 }
 
-bool RGBDisplay::IsTouchWithin(int x, int y, int w, int h) {
-  // tft.fillCircle(X, Y, 2, 0x0FF0);
-  return ((((ts->GetTouchedPixel())->x>=x)&&((ts->GetTouchedPixel())->x<=x + w)) & (((ts->GetTouchedPixel())->y>=y)&&((ts->GetTouchedPixel())->y<=y + h)));
-}
-
-
-bool RGBDisplay::IsTouchWithin(TouchKbKeys kb_key_flag, int key_array_x = 0, int key_array_y = 0) {
+bool RGBDisplay::IsTouchWithin(TouchKbKeys kb_key_flag, int key_array_x = 0, int key_array_y = 0, int cursor_shift_right = 0) {
+  int x = 0, y = 0, w = 0, h = 0;
   switch(kb_key_flag) 
   {
     case KB_ALPHANUMERIC_KEY:
-      {
-        
-      }
+      x = 8 + (23 * (key_array_x - 3)) + cursor_shift_right, y = kTextAreaHeight + (30 * key_array_y), w = KB_ALPHANUMERIC_KEY_W, h = KB_ALL_KEY_H;
       break;
     case KB_DELETE_KEY:
-      return IsTouchWithin(KB_DELETE_KEY_X, KB_DELETE_KEY_Y, KB_DELETE_KEY_W, KB_ALL_KEY_H);
+      x = KB_DELETE_KEY_X, y = KB_DELETE_KEY_Y, w = KB_DELETE_KEY_W, h = KB_ALL_KEY_H;
+      break;
     case KB_ENTER_KEY:
-      return IsTouchWithin(KB_ENTER_KEY_X, KB_ENTER_KEY_Y, KB_ENTER_KEY_W, KB_ALL_KEY_H);
+      x = KB_ENTER_KEY_X, y = KB_ENTER_KEY_Y, w = KB_ENTER_KEY_W, h = KB_ALL_KEY_H;
+      break;
     case KB_SHIFT_KEY:
-      return IsTouchWithin(KB_SHIFT_KEY_X, KB_SHIFT_KEY_Y, KB_SHIFT_KEY_W, KB_ALL_KEY_H);
+      x = KB_SHIFT_KEY_X, y = KB_SHIFT_KEY_Y, w = KB_SHIFT_KEY_W, h = KB_ALL_KEY_H;
+      break;
     case KB_SPACEBAR_KEY:
-      return IsTouchWithin(KB_SPACEBAR_KEY_X, KB_SPACEBAR_KEY_Y, KB_SPACEBAR_KEY_W, KB_ALL_KEY_H);
+      x = KB_SPACEBAR_KEY_X, y = KB_SPACEBAR_KEY_Y, w = KB_SPACEBAR_KEY_W, h = KB_ALL_KEY_H;
+      break;
     case KB_NUMPAD_KEY:
-      return IsTouchWithin(KB_NUMPAD_KEY_X, KB_NUMPAD_KEY_Y, KB_NUMPAD_KEY_W, KB_ALL_KEY_H);
+      x = KB_NUMPAD_KEY_X, y = KB_NUMPAD_KEY_Y, w = KB_NUMPAD_KEY_W, h = KB_ALL_KEY_H;
+      break;
     case KB_BACK_BUTTON:
-      return IsTouchWithin(kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH);
-    default:
-      return false;
+      x = kBackButtonX1, y = kBackButtonY1, w = kBackButtonW, h = kBackButtonH;
+      break;
   }
+  // tft.fillCircle(x, y, 2, 0x0FF0);
+  return ((((ts->GetTouchedPixel())->x>=x)&&((ts->GetTouchedPixel())->x<=x + w)) & (((ts->GetTouchedPixel())->y>=y)&&((ts->GetTouchedPixel())->y<=y + h)));
 }
 
 // credits: Andrew Mascolo https://github.com/AndrewMascolo/Adafruit_Stuff/blob/master/Sketches/Keyboard.ino
@@ -2111,14 +2104,11 @@ void RGBDisplay::MakeKeyboard(const char type[][13], std::string label) {
 
   // keys
   tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
-  for (int y = 0; y < (kb_numbers_only ? 1 : 3); y++)
-  {
-    int ShiftCursorRight = 10 * pgm_read_byte(&(type[y][0]));
-    for (int x = 3; x < 13; x++)
-    {
+  for (int y = 0; y < (kb_numbers_only ? 1 : 3); y++) {
+    int cursor_shift_right = 10 * pgm_read_byte(&(type[y][0]));
+    for (int x = 3; x < 13; x++) {
       if (x >= pgm_read_byte(&(type[y][1]))) break;
-      // draw key
-      DrawKeyboardButton(8 + (23 * (x - 3)) + ShiftCursorRight, kTextAreaHeight + (30 * y), 20, 25, /*char letter */ char(pgm_read_byte(&(type[y][x]))), /* char* label */ nullptr, /*bool on*/ false, /*bool clicked*/ false);
+      DrawKeyboardButton(KB_ALPHANUMERIC_KEY, /*bool clicked*/ false, x, y, cursor_shift_right, char(pgm_read_byte(&(type[y][x]))));
     }
   }
 
@@ -2145,7 +2135,7 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
   if (ts->IsTouched())
   {
     // check if back button is pressed
-    if (IsTouchWithin(kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH))
+    if (IsTouchWithin(KB_BACK_BUTTON))
     {
       DrawKeyboardButton(KB_BACK_BUTTON, /*bool clicked*/ true);
       delay(kUserInputDelayMs);
@@ -2214,20 +2204,20 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
 
     for (int y = 0; y < (kb_numbers_only ? 1 : 3); y++)
     {
-      int ShiftCursorRight;
+      int cursor_shift_right;
       if (GetKeyboardPress_numpad)
       {
         if (GetKeyboardPress_shift)
-          ShiftCursorRight = 10 * pgm_read_byte(&(Mobile_SymKeys[y][0]));
+          cursor_shift_right = 10 * pgm_read_byte(&(Mobile_SymKeys[y][0]));
         else
-          ShiftCursorRight = 10 * pgm_read_byte(&(Mobile_NumKeys[y][0]));
+          cursor_shift_right = 10 * pgm_read_byte(&(Mobile_NumKeys[y][0]));
       }
       else
       {
         if (GetKeyboardPress_shift)
-          ShiftCursorRight = 10 * pgm_read_byte(&(Mobile_KB_Capitals[y][0]));
+          cursor_shift_right = 10 * pgm_read_byte(&(Mobile_KB_Capitals[y][0]));
         else
-          ShiftCursorRight = 10 * pgm_read_byte(&(Mobile_KB_Smalls[y][0]));
+          cursor_shift_right = 10 * pgm_read_byte(&(Mobile_KB_Smalls[y][0]));
       }
 
       for (int x = 3; x < 13; x++)
@@ -2235,7 +2225,7 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
         if (x >=  (GetKeyboardPress_numpad ? (GetKeyboardPress_shift ? pgm_read_byte(&(Mobile_SymKeys[y][1])) : pgm_read_byte(&(Mobile_NumKeys[y][1]))) : pgm_read_byte(&(Mobile_KB_Capitals[y][1])) ))
           break;
 
-        if (IsTouchWithin(8 + (23 * (x - 3)) + ShiftCursorRight, kTextAreaHeight + (30 * y), 20,25))
+        if (IsTouchWithin(KB_ALPHANUMERIC_KEY, x, y, cursor_shift_right))
         {// this will draw the button on the screen by so many pixels
           if (bufIndex < (kWifiSsidPasswordLengthMax))
           {
@@ -2256,13 +2246,13 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
             //pressed_char = (pgm_read_byte(&(Mobile_KB_Capitals[y][x])) + (GetKeyboardPress_shift ? 0 : ('a' - 'A')));
 
             // draw pressed key
-            DrawKeyboardButton(8 + (23 * (x - 3)) + ShiftCursorRight, kTextAreaHeight + (30 * y), 20, 25, /*char letter */ pressed_char, /* char* label */ nullptr, /*bool on*/ false, /*bool clicked*/ true);
+            DrawKeyboardButton(KB_ALPHANUMERIC_KEY, /*bool clicked*/ true, x, y, cursor_shift_right, pressed_char);
             delay(kUserInputDelayMs);
 
             textBuffer[bufIndex] = pressed_char;
 
             // draw key
-            DrawKeyboardButton(8 + (23 * (x - 3)) + ShiftCursorRight, kTextAreaHeight + (30 * y), 20, 25, /*char letter */ pressed_char, /* char* label */ nullptr, /*bool on*/ false, /*bool clicked*/ false);
+            DrawKeyboardButton(KB_ALPHANUMERIC_KEY, /*bool clicked*/ false, x, y, cursor_shift_right, pressed_char);
 
             bufIndex++;
           }
