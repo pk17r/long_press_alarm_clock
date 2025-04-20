@@ -48,6 +48,16 @@ enum AlarmPageBtnAction {
   BTN_ISTOUCHED_BTM
 };
 
+enum TouchKbKeys {
+  KB_ALPHANUMERIC_KEY,
+  KB_DELETE_KEY,
+  KB_ENTER_KEY,
+  KB_SHIFT_KEY,
+  KB_SPACEBAR_KEY,
+  KB_NUMPAD_KEY,
+  KB_BACK_BUTTON,
+};
+
 class RGBDisplay {
 
 public:
@@ -146,10 +156,10 @@ private:
   void FastDrawTwoColorBitmapSpi(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
   // keyboard functions
   void MakeKeyboard(const char type[][13], std::string label);
-  void DrawKeyboardButton(int x, int y, int w, int h);
-  void DrawKeyboardButton(int x, int y, int w, int h, uint16_t kb_btn_fill_col);
   void DrawKeyboardButton(int x, int y, int w, int h, char letter, const char* label, bool on, bool clicked);
+  void DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int key_array_x, int key_array_y);
   bool IsTouchWithin(int x, int y, int w, int h);
+  bool IsTouchWithin(TouchKbKeys kb_key_flag, int key_array_x, int key_array_y);
   bool GetKeyboardPress(char * textBuffer, std::string label, char * textReturn);
 
 
@@ -501,8 +511,29 @@ private:
     {5, 8, 5, '.', ',', '?', '!', '\''}
   };
 
-  const int16_t kTextAreaHeight = 100;
+  const int16_t kTextAreaHeight = 95;
+
+  // keyboard key sizes
+  const int KB_ALL_KEY_H = 25;
+
+  const int KB_DELETE_KEY_X = 250;
+  const int KB_DELETE_KEY_Y = kTextAreaHeight + 0;
+  const int KB_DELETE_KEY_W = 50;
+  const int KB_ENTER_KEY_X = 240;
+  const int KB_ENTER_KEY_Y = kTextAreaHeight + 30;
+  const int KB_ENTER_KEY_W = 70;
+  const int KB_SHIFT_KEY_X = 220;
+  const int KB_SHIFT_KEY_Y = kTextAreaHeight + 60;
+  const int KB_SHIFT_KEY_W = 90;
+  const int KB_SPACEBAR_KEY_X = 40;
+  const int KB_SPACEBAR_KEY_Y = kTextAreaHeight + 90;
+  const int KB_SPACEBAR_KEY_W = 140;
+  const int KB_NUMPAD_KEY_X = 193;
+  const int KB_NUMPAD_KEY_Y = kTextAreaHeight + 90;
+  const int KB_NUMPAD_KEY_W = 90;
   
+
+
 
 };
 
