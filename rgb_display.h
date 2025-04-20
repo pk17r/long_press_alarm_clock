@@ -55,6 +55,7 @@ enum TouchKbKeys {
   KB_SHIFT_KEY,
   KB_SPACEBAR_KEY,
   KB_NUMPAD_KEY,
+  KB_SAVE_BUTTON,
   KB_BACK_BUTTON,
 };
 
@@ -524,27 +525,27 @@ private:
   const int KB_DELETE_KEY_X = 250;
   const int KB_DELETE_KEY_Y = kTextAreaHeight + 0;
   const int KB_DELETE_KEY_W = 60;
-  const int KB_DELETE_LABEL_X = 10;
+  const int KB_DELETE_LABEL_X = 14;
 
   const int KB_ENTER_KEY_X = 240;
   const int KB_ENTER_KEY_Y = kTextAreaHeight + 30;
   const int KB_ENTER_KEY_W = 70;
-  const int KB_ENTER_LABEL_X = 4;
+  const int KB_ENTER_LABEL_X = 6;
 
   const int KB_SHIFT_KEY_X = 220;
   const int KB_SHIFT_KEY_Y = kTextAreaHeight + 60;
   const int KB_SHIFT_KEY_W = 90;
-  const int KB_SHIFT_LABEL_X = 14;
-
-  const int KB_SPACEBAR_KEY_X = 40;
-  const int KB_SPACEBAR_KEY_Y = kTextAreaHeight + 90;
-  const int KB_SPACEBAR_KEY_W = 158;
-  const int KB_SPACEBAR_LABEL_X = 27;
+  const int KB_SHIFT_LABEL_X = 16;
 
   const int KB_NUMPAD_KEY_X = 220;
   const int KB_NUMPAD_KEY_Y = kTextAreaHeight + 90;
   const int KB_NUMPAD_KEY_W = 90;
-  const int KB_NUMPAD_LABEL_X = 14;
+  const int KB_NUMPAD_LABEL_X = 11;
+
+  const int KB_SPACEBAR_KEY_X = 39;
+  const int KB_SPACEBAR_KEY_Y = kTextAreaHeight + 90;
+  const int KB_SPACEBAR_KEY_W = 158;
+  const int KB_SPACEBAR_LABEL_X = 27;
 
 };
 

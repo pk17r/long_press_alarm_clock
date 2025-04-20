@@ -1933,6 +1933,8 @@ void ButtonClickAction() {
         SetPage(kWiFiScanNetworksPage);
       }
       else if(current_cursor == kWiFiSettingsPageChangePasswd) {
+        ButtonClickUiFeedback(kTurnOn_Delay);
+        LedFeedback(true);
         WiFiPasswordInputTouchAndNonTouch();
       }
       else if(current_cursor == kWiFiSettingsPageClearSsidAndPasswd) {
@@ -2136,8 +2138,9 @@ void ButtonClickAction() {
     }
     else if(current_page == kWiFiScanNetworksPage) {          // WIFI NETWORKS SCAN PAGE
       if(current_cursor == kWiFiScanNetworksPageList) {
-        ButtonClickUiFeedback(kTurnOn);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         LedFeedback(true);
+        delay(kUserInputDelayMs); // extra delay
         int index_of_selected_ssid = display->current_wifi_networks_scan_page_cursor + display->current_wifi_networks_scan_page_no * display->kWifiScanNetworksPageItems;
         PrintLn("index_of_selected_ssid = ", index_of_selected_ssid);
         if((index_of_selected_ssid > wifi_stuff->WiFiScanNetworksCount() - 1) || (index_of_selected_ssid < 0))
