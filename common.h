@@ -124,6 +124,8 @@ enum Cursor {
   kClockSettingsPageDisplaySettings,
   kClockSettingsPageUpdateFirmware,
   kDisplaySettingsPageRotateScreen,
+  kDisplaySettingsPageTestTouchscreenCalibration,
+  kDisplaySettingsPageCalibrateTouchscreen,
   kWeatherSettingsPageSetUnits,
   kWeatherSettingsPageFetch,
   kScreensaverSettingsPageMotion,

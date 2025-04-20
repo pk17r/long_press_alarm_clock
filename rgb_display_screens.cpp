@@ -2343,12 +2343,19 @@ bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, 
   return ret;
 }
 
-void RGBDisplay::TouchCalibrationScreen(int16_t x0, int16_t y0, int16_t x1, int16_t y1, bool touched, bool redraw) {
+void RGBDisplay::TouchCalibrationScreen(int16_t x0, int16_t y0, int16_t x1, int16_t y1, bool touched, bool redraw, bool calibration_done) {
   if(redraw) {
     tft.fillScreen(kDisplayBackroundColor);
     
-    std::string title_str = "Calibrate Touchscreen";
-    std::string direction_str = "\"Tap\" the shown line using\n a blunt 1-1.5mm dia stylus";
+    std::string title_str, direction_str;
+    if(!calibration_done) {
+      title_str = "Calibrate Touchscreen";
+      direction_str = "\"Tap\" the shown line using\n a blunt 1-1.5mm dia stylus";
+    }
+    else {
+      title_str = "Touchscreen Calibrated!";
+      direction_str = "New touchscreen calibration\n  values saved.";
+    }
 
     // set font
     tft.setFont(&FreeSansBold12pt7b);

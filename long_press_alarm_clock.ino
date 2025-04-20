@@ -941,13 +941,13 @@ void CalibrateTouchscreenFn() {
     std::string log_str;
     // top edge
     int16_t x0 = kTftWidth / kDivider, y0 = kTftHeight / kDivider, x1 = (kDivider-1) * kTftWidth / kDivider, y1 = kTftHeight / kDivider;
-    display->TouchCalibrationScreen(x0, y0, x1, y1, false, true); // first draw
+    display->TouchCalibrationScreen(x0, y0, x1, y1, /*touched*/ false, /*redraw*/ true); // first draw
     PrintLn();
     while(1) {
       ResetWatchdog();
       int16_t x = -1, y = -1;
       if(!(ts->GetUncalibratedTouch(x, y))) {
-        display->TouchCalibrationScreen(x0, y0, x1, y1, false, false);   // show no touch
+        display->TouchCalibrationScreen(x0, y0, x1, y1, /*touched*/ false, /*redraw*/ false);   // show no touch
       }
       else {
         // second reading is better
@@ -964,9 +964,9 @@ void CalibrateTouchscreenFn() {
         }
         log_str = "edge_num " + std::to_string(edge_num) + ", sample_num " + std::to_string(sample_num) + ", x " + std::to_string(x) + ", y " + std::to_string(y);
         PrintLn(log_str);
-        display->TouchCalibrationScreen(x0, y0, x1, y1, true, false);   // show touch
+        display->TouchCalibrationScreen(x0, y0, x1, y1, /*touched*/ true, /*redraw*/ false);   // show touch
         delay(kUserInputDelayMs);
-        display->TouchCalibrationScreen(x0, y0, x1, y1, false, false);   // show no touch
+        display->TouchCalibrationScreen(x0, y0, x1, y1, /*touched*/ false, /*redraw*/ false);   // show no touch
         delay(kUserInputDelayMs);
         sample_num++;
         if(sample_num >= kNumOfSamples) {
@@ -995,9 +995,6 @@ void CalibrateTouchscreenFn() {
           med_avg_val = 0;
           edge_num++;
           PrintLn();
-          // screen with no line
-          display->TouchCalibrationScreen(kTftWidth * 2, 0, kTftWidth * 2, kTftHeight - 1, false, true); // redraw
-          delay(2000);
           if(edge_num < kNumOfEdges) {
             // next edge
             if(edge_num == 1) {  // bottom
@@ -1009,9 +1006,15 @@ void CalibrateTouchscreenFn() {
             else {  // right
               x0 = (kDivider-1) * kTftWidth / kDivider, y0 = kTftHeight / kDivider, x1 = (kDivider-1) * kTftWidth / kDivider, y1 = (kDivider-1) * kTftHeight / kDivider;
             }
-            display->TouchCalibrationScreen(x0, y0, x1, y1, false, true);  // redraw
+            // screen with no line
+            display->TouchCalibrationScreen(kTftWidth * 2, 0, kTftWidth * 2, kTftHeight - 1, /*touched*/ false, /*redraw*/ true); // redraw
+            delay(2000);
+            display->TouchCalibrationScreen(x0, y0, x1, y1, /*touched*/ false, /*redraw*/ true);  // redraw
           }
           else {
+            // screen with no line
+            display->TouchCalibrationScreen(kTftWidth * 2, 0, kTftWidth * 2, kTftHeight - 1, /*touched*/ false, /*redraw*/ true, /*calibration_done*/ true); // redraw
+            delay(4000);
             break;
           }
         }
@@ -1054,15 +1057,8 @@ void CalibrateTouchscreenFn() {
     nvs_preferences->SaveTouchScreenCalibration(xMin, xMax, yMin, yMax);
   }
 
-  #if 1
-    // test touchscreen calibration
-    TestTouchscreenCalibrationFn();
-  #else
-    delay(2000);
-    // set main page back
-    SetPage(kMainPage);
-    inactivity_millis = 0;
-  #endif
+  // test touchscreen calibration
+  TestTouchscreenCalibrationFn();
 }
 
 void TestTouchscreenCalibrationFn() {
@@ -1107,8 +1103,8 @@ void TestTouchscreenCalibrationFn() {
     display->TouchCalibrationScreenTest(0, 0, 2 * kTftWidth, 2 * kTftHeight, true); // first draw
   }
   delay(2000);
-  // set main page back
-  SetPage(kMainPage);
+  // set back current page
+  SetPage(current_page);
   inactivity_millis = 0;
 }
 
@@ -1710,8 +1706,12 @@ void PopulateDisplayPages() {
   // DISPLAY SETTINGS PAGE
   display_pages_vec[kDisplaySettingsPage] = std::vector<DisplayButton*> {
     new DisplayButton{ kDisplaySettingsPageRotateScreen, kClickButtonWithLabel, "Rotate Screen:", false, 0,0,0,0, "ROTATE" },
-    page_back_button,
   };
+  if(ts != nullptr) {
+    display_pages_vec[kDisplaySettingsPage].push_back(new DisplayButton{ kDisplaySettingsPageTestTouchscreenCalibration, kClickButtonWithLabel, "Touchscreen Calibration", false, 0,0,0,0, "TEST" });
+    display_pages_vec[kDisplaySettingsPage].push_back(new DisplayButton{ kDisplaySettingsPageCalibrateTouchscreen, kClickButtonWithLabel, "Touchscreen", false, 0,0,0,0, "RE-CALIBRATION" });
+  }
+  display_pages_vec[kDisplaySettingsPage].push_back(page_back_button);
 
   // WEATHER SETTINGS PAGE
   display_pages_vec[kWeatherSettingsPage] = std::vector<DisplayButton*> {
@@ -2048,6 +2048,14 @@ void MainButtonClickAction() {
         if(ts != NULL)
           ts->SetTouchscreenOrientation();
         SetPage(kDisplaySettingsPage, /* bool move_cursor_to_first_button = */ false);
+      }
+      else if(current_cursor == kDisplaySettingsPageTestTouchscreenCalibration) {
+        LedButtonClickUiResponse(1);
+        TestTouchscreenCalibrationFn();
+      }
+      else if(current_cursor == kDisplaySettingsPageCalibrateTouchscreen) {
+        LedButtonClickUiResponse(1);
+        CalibrateTouchscreenFn();
       }
       else if(current_cursor == kPageBackButton) {
         LedButtonClickUiResponse(1);
