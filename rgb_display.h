@@ -90,7 +90,8 @@ public:
   void DisplayWiFiConnectionStatus();
   void DisplayBlankScreen();
   void TouchCalibrationScreen(int16_t x0, int16_t y0, int16_t x1, int16_t y1, bool touched, bool redraw, bool calibration_done = false);
-  void TouchCalibrationScreenTest(int16_t x_target, int16_t y_target, int16_t x_touch, int16_t y_touch, bool redraw);
+  bool TouchCalibrationScreenTest(int16_t x_target, int16_t y_target, int16_t x_touch, int16_t y_touch, bool redraw);
+  void DisplayMessage(std::string title_str, std::string message_str);
 
   // functions
   void Setup();

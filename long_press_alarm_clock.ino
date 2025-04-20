@@ -1014,7 +1014,7 @@ void CalibrateTouchscreenFn() {
           else {
             // screen with no line
             display->TouchCalibrationScreen(kTftWidth * 2, 0, kTftWidth * 2, kTftHeight - 1, /*touched*/ false, /*redraw*/ true, /*calibration_done*/ true); // redraw
-            delay(4000);
+            delay(2000);
             break;
           }
         }
@@ -1023,15 +1023,15 @@ void CalibrateTouchscreenFn() {
     // touch calibration inputs received
 
     // flip touchscreen if y_top_avg > y_btm_avg
+    bool touchscreen_flip;
     if(y_top_avg > y_btm_avg)
-      ts->touchscreen_flip = true;
+      touchscreen_flip = true;
     else
-      ts->touchscreen_flip = false;
-    nvs_preferences->SaveTouchscreenFlip(ts->touchscreen_flip);
+      touchscreen_flip = false;
     int16_t temp_val = y_top_avg;
     y_top_avg = y_btm_avg;
     y_btm_avg = temp_val;
-    log_str = "x_left_avg=" + std::to_string(x_left_avg) + ", x_right_avg=" + std::to_string(x_right_avg) + ", y_top_avg=" + std::to_string(y_top_avg) + ", y_btm_avg=" + std::to_string(y_btm_avg) + ", touchscreen_flip=" + std::to_string(ts->touchscreen_flip);
+    log_str = "x_left_avg=" + std::to_string(x_left_avg) + ", x_right_avg=" + std::to_string(x_right_avg) + ", y_top_avg=" + std::to_string(y_top_avg) + ", y_btm_avg=" + std::to_string(y_btm_avg) + ", touchscreen_flip=" + std::to_string(touchscreen_flip);
     PrintLn(log_str);
 
     // for ESP32 ADC touchscreen
@@ -1052,33 +1052,54 @@ void CalibrateTouchscreenFn() {
 
     // set new touchscreen calibration values
     ts->SetTouchscreenCalibration(xMin, xMax, yMin, yMax);
+    ts->touchscreen_flip = touchscreen_flip;
 
-    /* save calibration to NVS memory*/
-    nvs_preferences->SaveTouchScreenCalibration(xMin, xMax, yMin, yMax);
+    // test touchscreen calibration
+    bool accurate_calibration = TestTouchscreenCalibrationFn();
+
+    if(accurate_calibration) {
+      /* save calibration to NVS memory*/
+      nvs_preferences->SaveTouchScreenCalibration(xMin, xMax, yMin, yMax);
+      nvs_preferences->SaveTouchscreenFlip(ts->touchscreen_flip);
+
+      // display message
+      display->DisplayMessage(std::string("New Calibration Saved"), std::string(""));
+      delay(2000);
+    }
+    else {
+      // retrieve old calibration values
+      nvs_preferences->RetrieveTouchScreenCalibration(xMin, xMax, yMin, yMax);
+      touchscreen_flip = nvs_preferences->RetrieveTouchscreenFlip();
+      // set old touchscreen calibration values
+      ts->SetTouchscreenCalibration(xMin, xMax, yMin, yMax);
+      ts->touchscreen_flip = touchscreen_flip;
+
+      // display message
+      display->DisplayMessage(std::string("Re-Calibration Rejected"), std::string(""));
+      delay(2000);
+    }
   }
-
-  // test touchscreen calibration
-  TestTouchscreenCalibrationFn();
 }
 
-void TestTouchscreenCalibrationFn() {
+bool TestTouchscreenCalibrationFn() {
   display->SetMaxBrightness();
   if(ts != NULL) {
     // test calibration
     const int kNumOfSamples = 10, kDivider = 5;
-    uint8_t test_num = 0;
+    uint8_t test_num = 0, accurate_touches = 0;
 
     // first target coordinate
     int16_t x_target = (test_num / 2 + 1) * kTftWidth / (kNumOfSamples / 2 + 1);
     int16_t y_target = kTftHeight / kDivider;
-    display->TouchCalibrationScreenTest(x_target, y_target, 2 * kTftWidth, 2 * kTftHeight, true); // first draw
+    display->TouchCalibrationScreenTest(x_target, y_target, -1, -1, true); // first draw
 
     // begin touchscreen calibration test
     while(1) {
       ResetWatchdog();
       if(ts->GetTouchedPixel()->is_touched) {
         // show touch
-        display->TouchCalibrationScreenTest(x_target, y_target, ts->GetTouchedPixel()->x, ts->GetTouchedPixel()->y, false);
+        if(display->TouchCalibrationScreenTest(x_target, y_target, ts->GetTouchedPixel()->x, ts->GetTouchedPixel()->y, /* redraw = */ false))
+          accurate_touches++;
         // wait
         delay(2 * kUserInputDelayMs);
         test_num++;
@@ -1089,7 +1110,7 @@ void TestTouchscreenCalibrationFn() {
             y_target = kTftHeight / kDivider;
           else
             y_target = (kDivider-1) * kTftHeight / kDivider;
-          display->TouchCalibrationScreenTest(x_target, y_target, 2 * kTftWidth, 2 * kTftHeight, false); // new point
+          display->TouchCalibrationScreenTest(x_target, y_target, -1, -1, false); // new point
           // wait
           delay(2 * kUserInputDelayMs);
         }
@@ -1098,14 +1119,24 @@ void TestTouchscreenCalibrationFn() {
         }
       }
     }
+
+    delay(2000);
+    
+    // note touch accuracy
+    bool accurate_calibration = ((float)accurate_touches / kNumOfSamples >= 0.8 ? true : false);
+    if(accurate_calibration)
+      display->DisplayMessage(std::string("Good Calibration"), std::string(""));
+    else
+      display->DisplayMessage(std::string("Bad Calibration"), std::string(""));
+    delay(2000);
+
+    return accurate_calibration;
   }
   else {
-    display->TouchCalibrationScreenTest(0, 0, 2 * kTftWidth, 2 * kTftHeight, true); // first draw
+    display->TouchCalibrationScreenTest(0, 0, -1, -1, true); // first draw
+    delay(1000);
   }
-  delay(2000);
-  // set back current page
-  SetPage(current_page);
-  inactivity_millis = 0;
+  return false;
 }
 
 /* Take user inputs and configure
@@ -1259,6 +1290,9 @@ void SerialUserInput() {
       break;
     case 'l':   // CalibrateTouchscreenFn()
       CalibrateTouchscreenFn();
+      // set back current page
+      SetPage(current_page);
+      inactivity_millis = 0;
       break;
     case 'm':   // RotateScreen();
       display->RotateScreen();
@@ -1297,6 +1331,9 @@ void SerialUserInput() {
       break;
     case 'r':   // TestTouchscreenCalibrationFn()
       TestTouchscreenCalibrationFn();
+      // set back current page
+      SetPage(current_page);
+      inactivity_millis = 0;
       break;
     case 's':   // toggle screensaver
       #ifdef MORE_LOGS
@@ -2052,10 +2089,16 @@ void MainButtonClickAction() {
       else if(current_cursor == kDisplaySettingsPageTestTouchscreenCalibration) {
         LedButtonClickUiResponse(1);
         TestTouchscreenCalibrationFn();
+        // set back current page
+        SetPage(current_page);
+        inactivity_millis = 0;
       }
       else if(current_cursor == kDisplaySettingsPageCalibrateTouchscreen) {
         LedButtonClickUiResponse(1);
         CalibrateTouchscreenFn();
+        // set back current page
+        SetPage(current_page);
+        inactivity_millis = 0;
       }
       else if(current_cursor == kPageBackButton) {
         LedButtonClickUiResponse(1);
