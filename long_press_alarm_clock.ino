@@ -515,8 +515,8 @@ void loop1() {
   ResetWatchdog();
 
   // color LED Strip sequentially
-  if(rgb_led_strip_on && (current_led_strip_color != display->kColorPickerWheel[display->current_random_color_index_]))
-    SetRgbStripColor(display->kColorPickerWheel[display->current_random_color_index_], /* set_color_sequentially = */ true);
+  if(rgb_led_strip_on && (current_led_strip_color != display->ColorPickerWheel(/*pick_new =*/ false)))
+    SetRgbStripColor(display->ColorPickerWheel(/*pick_new =*/ false), /* set_color_sequentially = */ true);
 
   // code to try executing the task a few times until success
   uint8_t try_counts = 0;
@@ -1477,7 +1477,7 @@ void SetRgbStripColor(uint16_t rgb565_color, bool set_color_sequentially) {
     if(current_rgb_led_strip_index == rgb_strip_led_count) {
       current_rgb_led_strip_index = 0;
       // stop further color changes until screensaver color change
-      current_led_strip_color = display->kColorPickerWheel[display->current_random_color_index_];
+      current_led_strip_color = display->ColorPickerWheel(/*pick_new =*/ false);
     }
   }
   else {

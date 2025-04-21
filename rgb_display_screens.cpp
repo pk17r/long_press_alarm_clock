@@ -1248,11 +1248,11 @@ void RGBDisplay::Screensaver() {
     my_canvas_->fillScreen(kDisplayBackroundColor);
 
     // picknew random color
+    uint16_t randomColor = ColorPickerWheel(/*pick_new =*/ false);
     if(!new_minute_)  // pick new color only when time hits top or bottom row, not when a minute change is there
-      PickNewRandomColor();
+      randomColor = ColorPickerWheel(/*pick_new =*/ true);
     else
       new_minute_ = false;
-    uint16_t randomColor = kColorPickerWheel[current_random_color_index_];
 
     // print HH:MM
     my_canvas_->setFont(&ComingSoon_Regular70pt7b);
@@ -1353,18 +1353,21 @@ void RGBDisplay::Screensaver() {
   // paste the canvas on screen
   // tft.drawRGBBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h); // Copy to screen
   // tft.drawBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h, colorPickerWheelBright[currentRandomColorIndex], Display_Backround_Color); // Copy to screen
-  FastDrawTwoColorBitmapSpi(screensaver_x1_, screensaver_y1_, my_canvas_->getBuffer(), screensaver_w_, screensaver_h_, kColorPickerWheel[current_random_color_index_], kDisplayBackroundColor);
+  FastDrawTwoColorBitmapSpi(screensaver_x1_, screensaver_y1_, my_canvas_->getBuffer(), screensaver_w_, screensaver_h_, ColorPickerWheel(/*pick_new =*/ false), kDisplayBackroundColor);
   // // color LED Strip sequentially   ->   now done in loop1() by second core
 }
 
-void RGBDisplay::PickNewRandomColor() {
-  int newIndex = current_random_color_index_;
-  while(newIndex == current_random_color_index_)
-    newIndex = random(0, kColorPickerWheelSize - 1);
-  current_random_color_index_ = newIndex;
+uint16_t RGBDisplay::ColorPickerWheel(bool pick_new) {
+  if(pick_new) {
+    int newIndex = current_random_color_index_;
+    while(newIndex == current_random_color_index_)
+      newIndex = random(0, kColorPickerWheelSize - 1);
+    current_random_color_index_ = newIndex;
+  }
   #ifdef MORE_LOGS
   PrintLn("current_random_color_index_ = ", current_random_color_index_);
   #endif
+  return kColorPickerWheelArray[current_random_color_index_];
 }
 
 void RGBDisplay::DisplayTimeUpdate() {
@@ -1806,43 +1809,48 @@ void RGBDisplay::GoodMorningScreen() {
 
   std::string owner_name;
   nvs_preferences->RetrieveOwnerName(owner_name);
-  std::string good_morning_str = "GOOD MORNING";
+  owner_name += ":)";
+  std::string good__str = "GOOD ";
+  std::string morning_str = "MORNING";
+
+  const GFXfont* kGoodMorningStrFont = &FreeSans18pt7b;
+  GFXfont* kOwnerStrFont = nullptr;
+  if(owner_name.length() <= 10)
+    kOwnerStrFont = (GFXfont*)&BagelFatOne_Regular24pt7b;
+  else
+    kOwnerStrFont = (GFXfont*)&BagelFatOne_Regular20pt7b;
 
   // get bounds of good morning text on screen
-  tft.setFont(&FreeSans18pt7b);
+  tft.setFont(kGoodMorningStrFont);
   tft.setTextColor(kDisplayBackroundColor);
   uint16_t good_morning_str_h = 0, good_morning_str_w = 0;
   int16_t good_morning_str_gap_x = 0, good_morning_str_gap_y = 0;
-  tft.getTextBounds(good_morning_str.c_str(), 0, 0, &good_morning_str_gap_x, &good_morning_str_gap_y, &good_morning_str_w, &good_morning_str_h);
+  tft.getTextBounds((good__str + morning_str).c_str(), 0, 0, &good_morning_str_gap_x, &good_morning_str_gap_y, &good_morning_str_w, &good_morning_str_h);
 
   // get bounds of owner name text on screen
-  if(owner_name.length() <= 10)
-    tft.setFont(&FreeSans24pt7b);
-  else
-  tft.setFont(&FreeSans18pt7b);
+  tft.setFont(kOwnerStrFont);
   uint16_t owner_name_h = 0, owner_name_w = 0;
   int16_t owner_name_gap_x = 0, owner_name_gap_y = 0;
   tft.getTextBounds(owner_name.c_str(), 0, 0, &owner_name_gap_x, &owner_name_gap_y, &owner_name_w, &owner_name_h);
 
-  // change the text color to the background color
-  tft.setTextColor(kDisplayColorGreen);
-
-  // set font
-  tft.setFont(&FreeSans18pt7b);
-  // yes! home the cursor
+  // print Good Morning String
+  tft.setFont(kGoodMorningStrFont);
   tft.setCursor((kTftWidth - good_morning_str_w) / 2, good_morning_str_h);
-  // redraw the old value to erase
-  tft.print(good_morning_str.c_str());
+  tft.setTextColor(kDisplayColorGreen);
+  tft.print(good__str.c_str());
+  tft.setTextColor(kDisplayColorPurple);
+  tft.print(morning_str.c_str());
   
   // set font
-  if(owner_name.length() <= 10)
-    tft.setFont(&FreeSans24pt7b);
-  else
-    tft.setFont(&FreeSans18pt7b);
+  tft.setFont(kOwnerStrFont);
   // yes! home the cursor
   tft.setCursor((kTftWidth - owner_name_w) / 2, good_morning_str_h + owner_name_h + 5);
   // redraw the old value to erase
-  tft.print(owner_name.c_str());
+  for(int i = 0; i < owner_name.length(); i++) {
+    tft.setTextColor(ColorPickerWheel());
+    tft.print(owner_name[i]);
+  }
+  // tft.print(owner_name.c_str());
 
   // draw sun
   uint16_t edge = kTftHeight - (good_morning_str_h + owner_name_h);
@@ -1925,7 +1933,7 @@ void RGBDisplay::DrawSun(int16_t x0, int16_t y0, uint16_t edge, int &tone_note_i
     // tft.drawCircle(cx, cy, sr + variation, color);
     DrawDenseCircle(cx, cy, sr + variation, color);
     // show for sometime
-    delay(30);
+    // delay(30);
 
     // undraw rays
     DrawRays(cx, cy, r_variable, rl, rw, rn, i, background);

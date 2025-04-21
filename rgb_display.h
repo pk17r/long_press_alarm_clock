@@ -14,26 +14,41 @@
 #elif defined(DISPLAY_IS_ILI9488)
   #include "ILI9488_t3.h"   // Teensy Hardware DMA accelerated library
 #endif
-#include "Fonts/ComingSoon_Regular70pt7b_numbers_only.h"   // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/ and reduced in size
-#include "Fonts/FreeSansBold48pt7b_numbers_only.h"         // from https://rop.nl/truetype2gfx/ and reduced in size
-#include "Fonts/Satisfy_Regular24pt7b.h"     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
-// #include "Fonts/FreeSansBold24pt7b.h"       // from Adafruit_GFX library
-#include "Fonts/FreeSans24pt7b.h"           // from Adafruit_GFX library
-// #include "Fonts/Satisfy_Regular18pt7b.h"     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
-// #include "Fonts/FreeSansBold18pt7b.h"           // from Adafruit_GFX library
-#include "Fonts/FreeSans18pt7b.h"           // from Adafruit_GFX library
-#include "Fonts/FreeSansBold12pt7b.h"       // from Adafruit_GFX library
-#include "Fonts/FreeSans12pt7b.h"           // from Adafruit_GFX library
-#include "Fonts/FreeMonoBold12pt7b.h"       // from Adafruit_GFX library
-#include "Fonts/FreeMono12pt7b.h"       // from Adafruit_GFX library
-#include "Fonts/FreeMonoBold9pt7b.h"        // from Adafruit_GFX library
-#include "Fonts/FreeMono9pt7b.h"            // from Adafruit_GFX library
 #include <SPI.h>
 #if defined(MCU_IS_ESP32)
   #include <pgmspace.h>
 #else
   #include <avr/pgmspace.h>
 #endif
+
+// Fonts
+
+#include "Fonts/ComingSoon_Regular70pt7b_numbers_only.h"   // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/ and reduced in size
+
+#include "Fonts/BagelFatOne_Regular24pt7b.h"     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
+#include "Fonts/BagelFatOne_Regular20pt7b.h"     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
+
+// #include "Fonts/BungeeShade_Regular20pt7b.h"     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
+// #include "Fonts/BungeeShade_Regular17pt7b.h"     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
+
+#include "Fonts/Satisfy_Regular24pt7b.h"     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
+#include "Fonts/Satisfy_Regular18pt7b.h"     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
+
+#include "Fonts/FreeSansBold48pt7b_numbers_only.h"         // from https://rop.nl/truetype2gfx/ and reduced in size
+// #include "Fonts/FreeSansBold24pt7b.h"       // from Adafruit_GFX library
+// #include "Fonts/FreeSansBold18pt7b.h"           // from Adafruit_GFX library
+#include "Fonts/FreeSansBold12pt7b.h"       // from Adafruit_GFX library
+
+#include "Fonts/FreeSans24pt7b.h"           // from Adafruit_GFX library
+#include "Fonts/FreeSans18pt7b.h"           // from Adafruit_GFX library
+#include "Fonts/FreeSans12pt7b.h"           // from Adafruit_GFX library
+
+#include "Fonts/FreeMonoBold12pt7b.h"       // from Adafruit_GFX library
+#include "Fonts/FreeMonoBold9pt7b.h"        // from Adafruit_GFX library
+
+#include "Fonts/FreeMono12pt7b.h"       // from Adafruit_GFX library
+#include "Fonts/FreeMono9pt7b.h"            // from Adafruit_GFX library
+
 
 enum AlarmPageBtnType {
   BTN_HOUR,
@@ -104,6 +119,7 @@ public:
   void CheckPhotoresistorAndSetBrightness();
   void CheckTimeAndSetBrightness();
   void ScreensaverControl(bool turnOn);
+  uint16_t ColorPickerWheel(bool pick_new = true);  // for screensaver
   void RotateScreen();
 
 // PUBLIC VARIABLES / CONSTANTS
@@ -137,9 +153,6 @@ public:
 
   // screensaver color and motion flags
   bool show_colored_edge_screensaver_ = true;
-  int current_random_color_index_ = 0;
-  constexpr static uint8_t kColorPickerWheelSize = 33;
-  const uint16_t kColorPickerWheel[kColorPickerWheelSize] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xE019, 0xB81F, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
   bool screensaver_bounce_not_fly_horizontally_ = true;
 
   // wifi networks scan page
@@ -154,7 +167,6 @@ private:
   void DrawSun(int16_t x0, int16_t y0, uint16_t edge, int &tone_note_index, unsigned long &next_tone_change_time);
   void DrawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color);
   void DrawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color);
-  void PickNewRandomColor();  // for screensaver
   bool AlarmPageButtonFn(AlarmPageBtnType btn_type, AlarmPageBtnAction btn_action, uint8_t btn_highlight_flags);
   void DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, const char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
   void DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
@@ -180,6 +192,9 @@ private:
   // screensaver
   bool screensaver_move_down_ = true, screensaver_move_right_ = true;
   GFXcanvas1* my_canvas_ = NULL;
+
+  // color picker wheel
+  int current_random_color_index_ = 0;
 
   // location of various display text strings
   int16_t gap_right_x_ = 0, gap_up_y_ = 0;
@@ -254,6 +269,10 @@ private:
   #define RGB565_Golden_yellow                                               		0xFEE0         // Golden yellow                           	#FFDF00			https://en.wikipedia.org/wiki/Gold_(color)#Golden_yellow
   #define RGB565_Yellow_rgb_x11_yellow                                       		0xFFE0         // Yellow (RGB) (X11 yellow)               	#FFFF00			https://en.wikipedia.org/wiki/Shades_of_yellow#Yellow_rgb_x11_yellow
   #define RGB565_Lime_color_wheel                                            		0xBFE0         // Lime (color wheel)                      	#BFFF00			https://en.wikipedia.org/wiki/Lime_(color)
+
+  // color picker wheel
+  constexpr static uint8_t kColorPickerWheelSize = 33;
+  const uint16_t kColorPickerWheelArray[kColorPickerWheelSize] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xE019, 0xB81F, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
 
   // colors used by us
   const uint16_t kDisplayColorBlack        = 0x0000;
