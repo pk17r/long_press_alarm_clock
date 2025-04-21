@@ -555,7 +555,7 @@ const char index_html_location_details[] PROGMEM = R"rawliteral(
   <form action="/get" target="hidden-form">
   	<a href="https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release" target="_blank"><h3>Long Press Alarm Clock</h3></a>
     <label>Owner Name:</label><br>
-    <input type="text" name="html_owner_name" value="%html_owner_name%" oninput="this.value = this.value.toUpperCase()"><br><br>
+    <input type="text" name="html_owner_name" value="%html_owner_name%"><br><br>
     <h4>Enter Location Details:</h4>
     <label>Location ZIP/PIN Code:</label><br>
     <input type="number" name="html_zip_pin" value="%html_zip_pin%"><br><br>

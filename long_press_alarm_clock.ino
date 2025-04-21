@@ -1134,7 +1134,7 @@ bool TestTouchscreenCalibrationFn() {
     delay(2000);
     
     // note touch accuracy
-    bool accurate_calibration = ((float)accurate_touches / kNumOfSamples >= 0.8 ? true : false);
+    bool accurate_calibration = ((int)accurate_touches == kNumOfSamples ? true : false);
     if(accurate_calibration)
       display->DisplayMessage(std::string("Good Calibration"), std::string(""));
     else
@@ -1987,7 +1987,7 @@ void ButtonClickAction() {
             returnText[i] = owner_name[i];
           }
           // get User Name input from screen
-          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool alphabets_only = */ true);
+          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool alphabets_only = */ false);
           PrintLn(returnText);
           if(ret) {
             display->DisplayBlankScreen();
