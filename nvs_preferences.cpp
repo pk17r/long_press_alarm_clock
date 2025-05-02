@@ -53,14 +53,14 @@ NvsPreferences::NvsPreferences() {
   else {
     // older firmware present, means device has older buzzer 12085 with rated frequency 2048 Hz
     if(!preferences.isKey(kBuzzerFrequencyKey))   // if key is not present then it is older buzzer
-      preferences.putUShort(kBuzzerFrequencyKey, 2048);
+      preferences.putUShort(kBuzzerFrequencyKey, 2048);   // dont change 2048 magic number here
   }
   if(!preferences.isKey(kBuzzerFrequencyKey))
     preferences.putUShort(kBuzzerFrequencyKey, kBuzzerFrequency);
   if(!preferences.isKey(kCpuSpeedMhzKey))
     preferences.putUChar(kCpuSpeedMhzKey, cpu_speed_mhz);
   if(!preferences.isKey(kScreensaverMotionTypeKey))
-    preferences.putBool(kScreensaverMotionTypeKey, true);
+    preferences.putBool(kScreensaverMotionTypeKey, kScreensaverMotionType);
   if(!preferences.isKey(kNightTimeDimHourKey))
     preferences.putUChar(kNightTimeDimHourKey, kNightTimeDimHour);
   if(!preferences.isKey(kScreenOrientationKey))
@@ -91,6 +91,8 @@ NvsPreferences::NvsPreferences() {
     preferences.putShort(kTouchCalibYMinKey, kTouchCalibYMin);
   if(!preferences.isKey(kTouchCalibYMaxKey))
     preferences.putShort(kTouchCalibYMaxKey, kTouchCalibYMax);
+  if(!preferences.isKey(kScreensaverSleepFriendlyColorAtNightKey))
+    preferences.putBool(kScreensaverSleepFriendlyColorAtNightKey, kScreensaverSleepFriendlyColorAtNight);
 
 
   // save new key values
@@ -251,6 +253,21 @@ void NvsPreferences::SaveScreensaverBounceNotFlyHorizontally(bool screensaver_bo
   preferences.putBool(kScreensaverMotionTypeKey, screensaver_bounce_not_fly_horiontally);
   preferences.end();
   PrintLn(__func__, screensaver_bounce_not_fly_horiontally);
+}
+
+bool NvsPreferences::RetrieveScreensaverSleepFriendNightColor() {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  bool sleep_friendly_color_at_night = preferences.getBool(kScreensaverSleepFriendlyColorAtNightKey);
+  preferences.end();
+  PrintLn(__func__, sleep_friendly_color_at_night);
+  return sleep_friendly_color_at_night;
+}
+
+void NvsPreferences::SaveScreensaverSleepFriendNightColor(bool sleep_friendly_color_at_night) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  preferences.putBool(kScreensaverSleepFriendlyColorAtNightKey, sleep_friendly_color_at_night);
+  preferences.end();
+  PrintLn(__func__, sleep_friendly_color_at_night);
 }
 
 uint8_t NvsPreferences::RetrieveNightTimeDimHour() {

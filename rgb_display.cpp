@@ -95,6 +95,8 @@ void RGBDisplay::Setup() {
   // set screensaver motion
   screensaver_bounce_not_fly_horizontally_ = nvs_preferences->RetrieveScreensaverBounceNotFlyHorizontally();
 
+  sleep_friendly_color_at_night = nvs_preferences->RetrieveScreensaverSleepFriendNightColor();
+
   PrintLn("Display", kInitializedStr);
 }
 
@@ -185,4 +187,23 @@ void RGBDisplay::ScreensaverControl(bool turnOn) {
     screensaver_move_right_ = true;
   redraw_display_ = true;
   PrepareTimeDayDateArrays();
+}
+
+uint16_t RGBDisplay::ColorPickerWheel(bool pick_new) {
+  // if display is at min brightness then show constant sleep-friendly color, otherwise pick-new/old color
+  if(current_brightness_ == kNightBrightness && sleep_friendly_color_at_night) {
+    return kDisplayColorRed;
+  }
+  else {
+    if(pick_new) {
+      int newIndex = current_random_color_index_;
+      while(newIndex == current_random_color_index_)
+        newIndex = random(0, kColorPickerWheelSize - 1);
+      current_random_color_index_ = newIndex;
+    }
+    #ifdef MORE_LOGS
+    PrintLn("current_random_color_index_ = ", current_random_color_index_);
+    #endif
+    return kColorPickerWheelArray[current_random_color_index_];
+  }
 }

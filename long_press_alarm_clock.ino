@@ -1709,8 +1709,9 @@ void PopulateDisplayPages() {
   display_pages_vec[kSettingsPage] = std::vector<DisplayButton*> {
     new DisplayButton{ kSettingsPageWiFi, kClickButtonWithLabel, "WiFi Settings:", false, 0,0,0,0, "WIFI" },
     new DisplayButton{ kSettingsPageClock, kClickButtonWithLabel, "Clock & Time Settings:", false, 0,0,0,0, "CLOCK" },
-    new DisplayButton{ kSettingsPageScreensaver, kClickButtonWithLabel, "Set RGB LEDs &:", false, 0,0,0,0, "SCREENSAVER" },
-    new DisplayButton{ kSettingsPageWeather, kClickButtonWithLabel, "Weather Settings:", false, 0,0,0,0, "WEATHER" },
+    new DisplayButton{ kSettingsPageScreensaver, kClickButtonWithLabel, "Screensaver Settings:", false, 0,0,0,0, "SCREENSAVER" },
+    new DisplayButton{ kSettingsPageRgbLed, kClickButtonWithLabel, "RGB LED Settings:", false, 0,0,0,0, "RGB LEDs" },
+    new DisplayButton{ kSettingsPageWeather, kClickButtonWithLabel, "Weather Page:", false, 0,0,0,0, "WEATHER" },
     page_back_button,
   };
 
@@ -1780,9 +1781,15 @@ void PopulateDisplayPages() {
     new DisplayButton{ kScreensaverSettingsPageMotion, kClickButtonWithLabel, "Screensaver Motion:", false, 0,0,0,0, (display->screensaver_bounce_not_fly_horizontally_ ? kBounceScreensaverStr : kFlyOutScreensaverStr) },
     new DisplayButton{ kScreensaverSettingsPageSpeed, kClickButtonWithLabel, "Screensaver Speed:", false, 0,0,0,0, (cpu_speed_mhz == 80 ? kSlowStr : (cpu_speed_mhz == 160 ? kMediumStr : kFastStr)) },
     new DisplayButton{ kScreensaverSettingsPageRun, kClickButtonWithLabel, "Run Screensaver:", false, 0,0,0,0, "RUN" },
-    new DisplayButton{ kScreensaverSettingsPageRgbLedStripMode, kClickButtonWithLabel, "RGB LEDs Mode:", false, 0,0,0,0, RgbLedSettingString() },
-    new DisplayButton{ kScreensaverSettingsPageNightTmDimHr, kClickButtonWithLabel, ("Evening time is " + std::to_string(kEveningTimeMinutes / 60 - 12) + "PM to:"), false, 0,0,0,0, (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM") },
-    new DisplayButton{ kScreensaverSettingsPageRgbLedBrightness, kClickButtonWithLabel, "RGB LEDs Brightness:", false, 0,0,0,0, (std::to_string(int(static_cast<float>(rgb_strip_led_brightness) / 255 * 100)) + "%") },
+    new DisplayButton{ kScreensaverSettingsPageNightTimeColorChange, kClickButtonWithLabel, "Sleep-friendly color at night:", false, 0,0,0,0, (display->sleep_friendly_color_at_night ? kYesStr : kNoStr) },
+    page_back_button,
+  };
+
+  // RGB LED SETTINGS PAGE
+  display_pages_vec[kRgbLedSettingsPage] = std::vector<DisplayButton*> {
+    new DisplayButton{ kRgbLedSettingsPageRgbLedStripMode, kClickButtonWithLabel, "RGB LEDs Mode:", false, 0,0,0,0, RgbLedSettingString() },
+    new DisplayButton{ kRgbLedSettingsPageNightTmDimHr, kClickButtonWithLabel, ("Evening time is " + std::to_string(kEveningTimeMinutes / 60 - 12) + "PM to:"), false, 0,0,0,0, (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM") },
+    new DisplayButton{ kRgbLedSettingsPageRgbLedBrightness, kClickButtonWithLabel, "RGB LEDs Brightness:", false, 0,0,0,0, (std::to_string(int(static_cast<float>(rgb_strip_led_brightness) / 255 * 100)) + "%") },
     page_back_button,
   };
 
@@ -1905,12 +1912,9 @@ void ButtonClickAction() {
         ButtonClickUiFeedback(kTurnOn_Delay);
         SetPage(kScreensaverSettingsPage);
       }
-      else if(current_cursor == kDisplaySettingsPageRotateScreen) {
-        // rotate screen 180 degrees
-        display->RotateScreen();
-        if(ts != NULL)
-          ts->SetTouchscreenOrientation();
-        SetPage(kSettingsPage, /* bool move_cursor_to_first_button = */ false);
+      else if(current_cursor == kSettingsPageRgbLed) {
+        ButtonClickUiFeedback(kTurnOn_Delay);
+        SetPage(kRgbLedSettingsPage);
       }
       else if(current_cursor == kSettingsPageWeather) {
         ButtonClickUiFeedback(kTurnOn);
@@ -2256,7 +2260,20 @@ void ButtonClickAction() {
         ButtonClickUiFeedback(kTurnOn_Delay);
         SetPage(kScreensaverPage);
       }
-      else if(current_cursor == kScreensaverSettingsPageNightTmDimHr) {
+      else if(current_cursor == kScreensaverSettingsPageNightTimeColorChange) {
+        display->sleep_friendly_color_at_night = !display->sleep_friendly_color_at_night;
+        nvs_preferences->SaveScreensaverSleepFriendNightColor(display->sleep_friendly_color_at_night);
+        display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (display->sleep_friendly_color_at_night ? kYesStr : kNoStr);
+        ButtonClickUiFeedback(kTurnOn_Delay_TurnOff);
+      }
+      else if(current_cursor == kPageBackButton) {
+        ButtonClickUiFeedback(kTurnOn_Delay);
+        current_cursor = kSettingsPageScreensaver;
+        SetPage(kSettingsPage, /* bool move_cursor_to_first_button = */ false);
+      }
+    }
+    else if(current_page == kRgbLedSettingsPage) {        // RGB LED SETTINGS PAGE
+      if(current_cursor == kRgbLedSettingsPageNightTmDimHr) {
         // change hours
         uint8_t night_time_dim_hour = nvs_preferences->RetrieveNightTimeDimHour();
         if(night_time_dim_hour < 11)
@@ -2268,7 +2285,7 @@ void ButtonClickAction() {
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (std::to_string(night_time_dim_hour) + "PM");
         ButtonClickUiFeedback(kTurnOn_Delay_TurnOff);
       }
-      else if(current_cursor == kScreensaverSettingsPageRgbLedStripMode) {
+      else if(current_cursor == kRgbLedSettingsPageRgbLedStripMode) {
         if(autorun_rgb_led_strip_mode < 3)
           autorun_rgb_led_strip_mode++;
         else
@@ -2278,7 +2295,7 @@ void ButtonClickAction() {
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = RgbLedSettingString();
         ButtonClickUiFeedback(kTurnOn_Delay_TurnOff);
       }
-      else if(current_cursor == kScreensaverSettingsPageRgbLedBrightness) {
+      else if(current_cursor == kRgbLedSettingsPageRgbLedBrightness) {
         ButtonClickUiFeedback(kTurnOn_Delay);
         // change brightness
         if(rgb_strip_led_brightness < 255)

@@ -33,6 +33,8 @@ public:
   void SaveCpuSpeed();
   bool RetrieveScreensaverBounceNotFlyHorizontally();
   void SaveScreensaverBounceNotFlyHorizontally(bool screensaverBounceNotFlyHorizontally);
+  void SaveScreensaverSleepFriendNightColor(bool sleep_friendly_color_at_night);
+  bool RetrieveScreensaverSleepFriendNightColor();
   uint8_t RetrieveNightTimeDimHour();
   void SaveNightTimeDimHour(uint8_t night_time_dim_hour);
   uint8_t RetrieveScreenOrientation();
@@ -116,6 +118,10 @@ private:
   const char* kCpuSpeedMhzKey = "CpuSpeedMhz";  // 1 byte
 
   const char* kScreensaverMotionTypeKey = "ScSvrMotionTy";
+  const bool kScreensaverMotionType = true;
+
+  const char* kScreensaverSleepFriendlyColorAtNightKey = "ScSvrSlpColor";
+  const bool kScreensaverSleepFriendlyColorAtNight = true;
 
   const char* kNightTimeDimHourKey = "NightTmDimHour";
   const uint8_t kNightTimeDimHour = 10;

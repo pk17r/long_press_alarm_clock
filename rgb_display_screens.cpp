@@ -779,6 +779,7 @@ void RGBDisplay::DisplayCurrentPage() {
     case kClockSettingsPage: title_str = "CLOCK SETTINGS PAGE"; break;
     case kWeatherSettingsPage: title_str = "WEATHER PAGE"; break;
     case kDisplaySettingsPage: title_str = "DISPLAY SETTINGS PAGE"; break;
+    case kRgbLedSettingsPage: title_str = "RGB LED SETTINGS PAGE"; break;
     default: title_str = "Not Implemented!";
   }
   tft.print(title_str.c_str());
@@ -1355,19 +1356,6 @@ void RGBDisplay::Screensaver() {
   // tft.drawBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h, colorPickerWheelBright[currentRandomColorIndex], Display_Backround_Color); // Copy to screen
   FastDrawTwoColorBitmapSpi(screensaver_x1_, screensaver_y1_, my_canvas_->getBuffer(), screensaver_w_, screensaver_h_, ColorPickerWheel(/*pick_new =*/ false), kDisplayBackroundColor);
   // // color LED Strip sequentially   ->   now done in loop1() by second core
-}
-
-uint16_t RGBDisplay::ColorPickerWheel(bool pick_new) {
-  if(pick_new) {
-    int newIndex = current_random_color_index_;
-    while(newIndex == current_random_color_index_)
-      newIndex = random(0, kColorPickerWheelSize - 1);
-    current_random_color_index_ = newIndex;
-  }
-  #ifdef MORE_LOGS
-  PrintLn("current_random_color_index_ = ", current_random_color_index_);
-  #endif
-  return kColorPickerWheelArray[current_random_color_index_];
 }
 
 void RGBDisplay::DisplayTimeUpdate() {

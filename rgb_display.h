@@ -154,6 +154,7 @@ public:
   // screensaver color and motion flags
   bool show_colored_edge_screensaver_ = true;
   bool screensaver_bounce_not_fly_horizontally_ = true;
+  bool sleep_friendly_color_at_night = true;
 
   // wifi networks scan page
   const int kWifiScanNetworksPageItems = 9;

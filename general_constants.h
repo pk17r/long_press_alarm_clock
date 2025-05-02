@@ -80,6 +80,7 @@ const char kSaveStr[5] = "SAVE", kBackStr[5] = "BACK", kCancelStr[2] = "X", kRes
 const char kSlowStr[5] = "SLOW", kMediumStr[7] = "MEDIUM", kFastStr[5] = "FAST", kFlyOutScreensaverStr[8] = "FLY OUT", kBounceScreensaverStr[7] = "BOUNCE";
 const char kMetricUnitStr[9] = "METRIC\'C", kImperialUnitStr[11] = "IMPERIAL\'F";
 const char kManualOffStr[11] = "MANUAL-OFF", kManualOnStr[10] = "MANUAL-ON", kEveningStr[13] = "AUTO-EVENING", kSunDownStr[14] = "AUTO-SUN-DOWN";
+const char kYesStr[4] = "YES", kNoStr[3] = "NO";
 
 // time of day at which its respective brightness starts
 const uint16_t kDayTimeMinutes = 420;   // 7AM
