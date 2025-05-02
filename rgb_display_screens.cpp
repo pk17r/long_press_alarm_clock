@@ -1206,6 +1206,7 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
 
 void RGBDisplay::Screensaver() {
   const int16_t GAP_BAND = 5;
+  const uint16_t kMinGapToMoveCanvas = 10;
   if(refresh_screensaver_canvas_) {
     #ifdef MORE_LOGS
     // map time
@@ -1218,18 +1219,23 @@ void RGBDisplay::Screensaver() {
       my_canvas_ = NULL;
     }
 
+    // fonts
+    const GFXfont* kTimeFont = &ComingSoon_Regular70pt7b;
+    GFXfont* dateStrFont = nullptr;
+    // if(rtc->hour() >= 10)
+    //   dateStrFont = (GFXfont*)&FreeSans24pt7b;
+    // else
+      dateStrFont = (GFXfont*)&FreeSans18pt7b;
+
     // get bounds of HH:MM text on screen
-    tft.setFont(&ComingSoon_Regular70pt7b);
+    tft.setFont(kTimeFont);
     tft.setTextColor(kDisplayBackroundColor);
     tft.getTextBounds(new_display_data_.time_HHMM, 0, 0, &gap_right_x_, &gap_up_y_, &tft_HHMM_w_, &tft_HHMM_h_);
 
     // get bounds of date string
     uint16_t date_h = 0, date_w = 0;
     int16_t date_gap_x = 0, date_gap_y = 0;
-    if(rtc->hour() >= 10)
-      tft.setFont(&FreeSans24pt7b);
-    else
-      tft.setFont(&FreeSans18pt7b);
+    tft.setFont(dateStrFont);
     tft.getTextBounds(new_display_data_.date_str, 0, 0, &date_gap_x, &date_gap_y, &date_w, &date_h);
     
     int16_t date_x0 = GAP_BAND - date_gap_x;
@@ -1256,16 +1262,13 @@ void RGBDisplay::Screensaver() {
       new_minute_ = false;
 
     // print HH:MM
-    my_canvas_->setFont(&ComingSoon_Regular70pt7b);
+    my_canvas_->setFont(kTimeFont);
     my_canvas_->setTextColor(randomColor);
     my_canvas_->setCursor(tft_HHMM_x0_ + GAP_BAND, GAP_BAND - gap_up_y_);
     my_canvas_->print(new_display_data_.time_HHMM);
 
     // print date string
-    if(rtc->hour() >= 10)
-      my_canvas_->setFont(&FreeSans24pt7b);
-    else
-      my_canvas_->setFont(&FreeSans18pt7b);
+    my_canvas_->setFont(dateStrFont);
     my_canvas_->setTextColor(randomColor);
     my_canvas_->setCursor(date_x0 /*+ GAP_BAND */, screensaver_h_ - 4 * GAP_BAND);
 
@@ -1276,9 +1279,9 @@ void RGBDisplay::Screensaver() {
       my_canvas_->drawBitmap(my_canvas_->getCursorX() + 2*GAP_BAND, screensaver_h_ - alarm_icon_h - 3 * GAP_BAND, (new_display_data_.alarm_ON ? kBellSmallBitmap : kBellFallenSmallBitmap), alarm_icon_w, alarm_icon_h, randomColor);
     }
     else {
-      my_canvas_->setFont(&FreeMonoBold9pt7b);
+      // my_canvas_->setFont(&FreeMonoBold9pt7b);
       // print firmware updated string
-      std::string fw_updated_str = "Firmware Updated " + kFirmwareVersion + "!";
+      std::string fw_updated_str = "Updated " + kFirmwareVersion + "!";
       my_canvas_->print(fw_updated_str.c_str());
     }
 
@@ -1289,7 +1292,7 @@ void RGBDisplay::Screensaver() {
       my_canvas_->drawRect(0,0, screensaver_w_, screensaver_h_, kDisplayColorWhite);  // canvas border
 
     // re-center canvas if it is wider than tft width
-    if(screensaver_bounce_not_fly_horizontally_ && screensaver_w_ >= kTftWidth) {
+    if(screensaver_bounce_not_fly_horizontally_ && screensaver_w_ >= kTftWidth - kMinGapToMoveCanvas) {
       screensaver_x1_ = ((int16_t)kTftWidth - (int16_t)screensaver_w_) / 2;
     }
 
@@ -1314,10 +1317,13 @@ void RGBDisplay::Screensaver() {
     const int16_t kAdder = 1;
     const int16_t kHitLimit = 2;
     if(screensaver_bounce_not_fly_horizontally_) {
-      if(!screensaver_move_right_ && screensaver_x1_ > -kHitLimit)
-        screensaver_x1_ -= kAdder;
-      else if(screensaver_move_right_ && screensaver_x1_ + screensaver_w_ < kTftWidth + 1 + kHitLimit)
-        screensaver_x1_ += kAdder;
+      // move canvas horizontally only if it is small enough
+      if(screensaver_w_ < kTftWidth - kMinGapToMoveCanvas) {
+        if(!screensaver_move_right_ && screensaver_x1_ > -kHitLimit)
+          screensaver_x1_ -= kAdder;
+        else if(screensaver_move_right_ && screensaver_x1_ + screensaver_w_ < kTftWidth + 1 + kHitLimit)
+          screensaver_x1_ += kAdder;
+      }
     }
     else {    // fly through right edge
       screensaver_x1_ += kAdder;
