@@ -1800,6 +1800,7 @@ void RGBDisplay::ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, b
 
 void RGBDisplay::GoodMorningScreen() {
   tft.fillScreen(kDisplayBackroundColor);
+  SetMaxBrightness();
 
   std::string owner_name;
   nvs_preferences->RetrieveOwnerName(owner_name);

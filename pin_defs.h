@@ -17,7 +17,7 @@
   const uint8_t TFT_CS = 10;
   const uint8_t TFT_RST = 14;  // Or set to -1 and connect to Arduino RESET pin
   const uint8_t TFT_DC = 21;
-  const uint8_t TFT_BL = 47;  //  controls TFT Display backlight as output of PWM pin
+  const uint8_t TFT_BL = 47;  //  controls TFT Display backlight as output of PWM pin **** NEEDS TO BE AN ADC PIN!!!! *****
 
   const uint8_t TS_CIPO = 13;    // don't connect CIPO (MISO) to TFT
   const uint8_t TS_CS_PIN = 17;

@@ -10,6 +10,7 @@ void RGBDisplay::Setup() {
 
   // tft display backlight control PWM output pin
   pinMode(TFT_BL, OUTPUT);
+  // ledcAttach(TFT_BL, /*frequency*/ 1000, /*resolution*/ 8);
 
 #if defined(DISPLAY_IS_ST7789V)
 
@@ -113,14 +114,12 @@ void RGBDisplay::RotateScreen() {
 void RGBDisplay::SetBrightness(int brightness) {
   if(current_brightness_ != brightness) {
     analogWrite(TFT_BL, brightness);
+    // ledcWrite(TFT_BL, brightness);
+    current_brightness_ = brightness;
     #ifdef MORE_LOGS
-    if(debug_mode)
       PrintLn("Display Brightness set to ", brightness);
     #endif
   }
-  // if(debug_mode)
-  //   RealTimeOnScreenOutput(std::to_string(brightness), 50);
-  current_brightness_ = brightness;
   if(use_photoresistor) {
     // hysteresis in background color on / off
     if(!show_colored_edge_screensaver_ && brightness >= kBrightnessBackgroundColorThreshold + 5)
@@ -133,6 +132,7 @@ void RGBDisplay::SetBrightness(int brightness) {
 }
 
 void RGBDisplay::SetMaxBrightness() {
+  inactivity_millis = 0;
   if(current_brightness_ != kMaxBrightness)
     SetBrightness(kMaxBrightness);
 }
