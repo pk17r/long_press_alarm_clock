@@ -75,7 +75,6 @@ Prashant Kumar
 #include "alarm_clock.h"
 #include "rgb_display.h"
 #include "touchscreen.h"
-#include <esp_task_wdt.h>   // ESP32 Watchdog header
 #include <Adafruit_I2CDevice.h>
 #include <Adafruit_NeoPixel.h>
 
@@ -94,6 +93,21 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 
 #if defined(ESP32_DUAL_CORE)
   TaskHandle_t Task1;
+#endif
+// watchdog
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+  // Code for version 3.x
+  #include "esp_system.h"
+  #include "rom/ets_sys.h"
+  hw_timer_t *watchdog_timer = NULL;
+
+  void ARDUINO_ISR_ATTR resetModule() {
+    ets_printf("reboot\n");
+    esp_restart();
+  }
+#else
+  // Code for version 2.x
+  #include <esp_task_wdt.h>   // ESP32 Watchdog header
 #endif
 
 // Arduino SPI Class Object
@@ -881,15 +895,19 @@ void SetWatchdogTime(unsigned long ms) {
   PrintLn(__func__, ms);
   #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
   // Code for version 3.x
-    // esp32 watchdog example https://iotassistant.io/esp32/fixing-error-hardware-wdt-arduino-esp32/
-    esp_task_wdt_config_t twdt_config = {
-        .timeout_ms = ms,
-        .idle_core_mask = (1 << CONFIG_FREERTOS_NUMBER_OF_CORES) - 1,    // Bitmask of all cores
-        .trigger_panic = true,
-    };
-    esp_task_wdt_deinit(); //wdt is enabled by default, so we need to deinit it first
-    esp_task_wdt_init(&twdt_config); //enable panic so ESP32 restarts
-    esp_task_wdt_add(NULL); //add current thread to WDT watch
+    // // esp32 watchdog example https://iotassistant.io/esp32/fixing-error-hardware-wdt-arduino-esp32/
+    // esp_task_wdt_deinit(); //wdt is enabled by default, so we need to deinit it first
+    // esp_task_wdt_config_t twdt_config = {
+    //     .timeout_ms = ms,
+    //     .idle_core_mask = (1 << CONFIG_FREERTOS_NUMBER_OF_CORES) - 1,    // Bitmask of all cores
+    //     .trigger_panic = true,
+    //     .panic_action = ESP_TASK_WDT_PANIC_ACTION_RESTART,
+    // };
+    // esp_task_wdt_init(&twdt_config); //enable panic so ESP32 restarts
+    // esp_task_wdt_add(NULL); //add current thread to WDT watch
+    watchdog_timer = timerBegin(1000);                     //timer 1khz resolution
+    timerAttachInterrupt(watchdog_timer, &resetModule);       //attach callback
+    timerAlarm(watchdog_timer, ms, false, 0);  //set time in us
   #else
   // Code for version 2.x
     // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
@@ -904,9 +922,15 @@ void SetWatchdogTime(unsigned long ms) {
 void ResetWatchdog() {
   // reset MCU if not in debug mode
   if(!debug_mode) {
-    // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
-    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
-    esp_task_wdt_reset();
+    #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+    // Code for version 3.x
+      timerWrite(watchdog_timer, 0);  //reset timer (feed watchdog)
+    #else
+    // Code for version 2.x
+      // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
+      // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
+      esp_task_wdt_reset();
+    #endif
   }
 }
 
