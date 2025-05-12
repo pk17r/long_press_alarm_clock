@@ -9,8 +9,8 @@ void RGBDisplay::Setup() {
   /* INITIALIZE DISPLAYS */
 
   // tft display backlight control PWM output pin
-  pinMode(TFT_BL, OUTPUT);
-  // ledcAttach(TFT_BL, /*frequency*/ 1000, /*resolution*/ 8);
+  pinMode(TFT_BL(), OUTPUT);
+  // ledcAttach(TFT_BL(), /*frequency*/ 1000, /*resolution*/ 8);
 
 #if defined(DISPLAY_IS_ST7789V)
 
@@ -113,8 +113,8 @@ void RGBDisplay::RotateScreen() {
 // set display brightness function
 void RGBDisplay::SetBrightness(int brightness) {
   if(current_brightness_ != brightness) {
-    analogWrite(TFT_BL, brightness);
-    // ledcWrite(TFT_BL, brightness);
+    analogWrite(TFT_BL(), brightness);
+    // ledcWrite(TFT_BL(), brightness);
     current_brightness_ = brightness;
     #ifdef MORE_LOGS
       PrintLn("Display Brightness set to ", brightness);
@@ -147,7 +147,7 @@ void RGBDisplay::CheckPhotoresistorAndSetBrightness() {
     lcd_brightness_val2 = max(lcd_brightness_val2, kNonNightMinBrightness);
   #ifdef MORE_LOGS
   if(debug_mode)
-    Serial.print("photodiode_light_raw"); Serial.print(photodiode_light_raw); Serial.print("lcd_brightness_val2"); Serial.println(lcd_brightness_val2);
+    Serial.print("photodiode_light_raw="); Serial.print(photodiode_light_raw); Serial.print(", lcd_brightness_val2="); Serial.println(lcd_brightness_val2);
   #endif
   SetBrightness(lcd_brightness_val2);
 }

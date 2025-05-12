@@ -148,6 +148,26 @@ void WiFiPasswordInputTouchAndNonTouch();
 // setup core1
 void setup() {
 
+  // a delay to let currents stabalize and not have phantom serial inputs
+  delay(200);
+  Serial.begin(115200);
+  Serial.println(F("\nSerial OK"));
+  PrintLn("Hellow World!");
+
+  // Firmware version and date on program
+  PrintLn("kFirmwareVersion:", kFirmwareVersion);
+  PrintLn("kFirmwareDate:", kFirmwareDate);
+
+  // setup nvs preferences data (needs to be first)
+  nvs_preferences = new NvsPreferences();
+  PrintLn("My_Hw_Version = ", My_Hw_Version);
+  // check if firmware was updated
+  std::string saved_firmware_version = nvs_preferences->RetrieveSavedFirmwareVersion();
+  if(strcmp(saved_firmware_version.c_str(), kFirmwareVersion.c_str()) != 0) {
+    firmware_updated_flag_user_information = true;
+    nvs_preferences->SaveCurrentFirmwareVersion();
+  }
+
   // LED Pin High
   pinMode(LED_PIN, OUTPUT);
   LedFeedback(HIGH);
@@ -174,12 +194,6 @@ void setup() {
   pinMode(TFT_RST, OUTPUT);
   digitalWrite(TFT_RST, LOW);
 
-  // a delay to let currents stabalize and not have phantom serial inputs
-  delay(1000);
-  Serial.begin(115200);
-  Serial.println(F("\nSerial OK"));
-  PrintLn("Hellow World!");
-
   // check if in debug mode
   debug_mode = !digitalRead(DEBUG_PIN);
   // debug_mode = true;
@@ -202,20 +216,7 @@ void setup() {
   inc_button = new PushButtonTaps(INC_BUTTON_PIN);
   dec_button = new PushButtonTaps(DEC_BUTTON_PIN);
 
-  // Firmware version and date on program
-  PrintLn("kFirmwareVersion:", kFirmwareVersion);
-  PrintLn("kFirmwareDate:", kFirmwareDate);
-
   // initialize modules
-  // setup nvs preferences data (needs to be first)
-  nvs_preferences = new NvsPreferences();
-  // check if firmware was updated
-  std::string saved_firmware_version = nvs_preferences->RetrieveSavedFirmwareVersion();
-  if(strcmp(saved_firmware_version.c_str(), kFirmwareVersion.c_str()) != 0) {
-    firmware_updated_flag_user_information = true;
-    nvs_preferences->SaveCurrentFirmwareVersion();
-  }
-
   // setup rtc (needs to be before alarm clock)
   rtc = new RTC();
   // setup alarm clock (needs to be before display)
@@ -676,6 +677,8 @@ const char* RgbLedSettingString() {
 }
 
 // GLOBAL VARIABLES AND FUNCTIONS
+
+uint8_t My_Hw_Version = 0x00;   // Set My_Hw_Version using nvs_preferences.h to get correct pins for your hardware!
 
 bool use_photoresistor = false;
 

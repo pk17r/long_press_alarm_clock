@@ -59,6 +59,7 @@ public:
   void RemoveKey(std::string remove_key);
   void RetrieveTouchScreenCalibration(int16_t &xMin, int16_t &xMax, int16_t &yMin, int16_t &yMax);
   void SaveTouchScreenCalibration(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax);
+  uint8_t RetrieveHwVersion();
 
 private:
 
@@ -67,6 +68,21 @@ private:
   Preferences preferences;
 
   const char* kNvsDataKey = "longPressData";
+
+  /*      HARDWARE VERSION
+   *  Sets My_Hw_Version and controls Pin Selection in pin_defs.h for following hardwares:
+   *  ESP32 S3 HW Versions: 1
+   *  ESP32 S2 HW Versions: 1
+   *  ESP32 DevKit HW Versions: 1
+   */
+  const char* kHwVersionKey = "HwVersion";
+  #if defined(MCU_IS_ESP32_S3)
+    const uint8_t kHwVersion = 0x01;
+  #elif defined(MCU_IS_ESP32_S2_MINI)
+    const uint8_t kHwVersion = 0x01;
+  #elif defined(MCU_IS_ESP32_WROOM_DA_MODULE)
+    const uint8_t kHwVersion = 0x01;
+  #endif
 
   const char* kOwnerNameKey = "OwnerName";
   const std::string kOwnerName = "?";

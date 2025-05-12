@@ -93,11 +93,16 @@ NvsPreferences::NvsPreferences() {
     preferences.putShort(kTouchCalibYMaxKey, kTouchCalibYMax);
   if(!preferences.isKey(kScreensaverSleepFriendlyColorAtNightKey))
     preferences.putBool(kScreensaverSleepFriendlyColorAtNightKey, kScreensaverSleepFriendlyColorAtNight);
+  if(!preferences.isKey(kHwVersionKey))
+    preferences.putUChar(kHwVersionKey, kHwVersion);
 
 
   // save new key values
   // ADD NEW KEYS ABOVE
   preferences.end();
+
+  // set HW Version
+  My_Hw_Version = RetrieveHwVersion();
 
   PrintLn(__func__, kInitializedStr);
 }
@@ -453,4 +458,12 @@ void NvsPreferences::SaveTouchScreenCalibration(int16_t xMin, int16_t xMax, int1
   preferences.putShort(kTouchCalibYMaxKey, yMax);
   preferences.end();
   PrintLn(__func__, ("xMin=" + std::to_string(xMin) + ", xMax=" + std::to_string(xMax) + ", yMin=" + std::to_string(yMin) + ", yMax=" + std::to_string(yMax)));
+}
+
+uint8_t NvsPreferences::RetrieveHwVersion() {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  uint8_t hw_version = preferences.getUChar(kHwVersionKey, 0);
+  preferences.end();
+  PrintLn(__func__, hw_version);
+  return hw_version;
 }
