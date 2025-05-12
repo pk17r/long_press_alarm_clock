@@ -8,7 +8,7 @@ extern uint8_t My_Hw_Version;
 // define pins
 #if defined(MCU_IS_ESP32_S3)
 
-  // FOR ESP32 S3 DECKIT C1 MODULE
+  // FOR ESP32 S3 MODULE, with/out OPSI PSRAM, 4Mb flash gets used up around 90% with ESP_ARDUINO_VERSION 2.x.x
   // dual core
 
   #define MCU_IS_ESP32
@@ -19,7 +19,7 @@ extern uint8_t My_Hw_Version;
   const uint8_t TFT_CS = 10;
   const uint8_t TFT_RST = 14;  // Or set to -1 and connect to Arduino RESET pin
   const uint8_t TFT_DC = 21;
-  //  controls TFT Display backlight as output of PWM pin **** NEEDS TO BE AN ADC PIN!!!! *****
+  //  controls TFT Display backlight as output of PWM pin. analogWrite works on PWM not ADC.
   static uint8_t TFT_BL() { return (My_Hw_Version == 0x01 ? 47 : (My_Hw_Version == 0x02 ? 6 : 0xff)); }
 
   const uint8_t TS_CIPO = 13;    // don't connect CIPO (MISO) to TFT
@@ -49,7 +49,7 @@ extern uint8_t My_Hw_Version;
 
 #elif defined(MCU_IS_ESP32_S2_MINI)
 
-  // FOR ESP32 S2 MINI MODULE
+  // FOR ESP32 S2 MINI MODULE, with/out PSRAM, 4Mb flash gets used upto around 87% with ESP_ARDUINO_VERSION 2.x.x
   // single core
 
   #define MCU_IS_ESP32
@@ -60,7 +60,7 @@ extern uint8_t My_Hw_Version;
   const uint8_t TFT_CS = 34;
   const uint8_t TFT_RST = 33;  // Or set to -1 and connect to Arduino RESET pin
   const uint8_t TFT_DC = 38;
-  //  controls TFT Display backlight as output of PWM pin **** NEEDS TO BE AN ADC PIN!!!! *****
+  //  controls TFT Display backlight as output of PWM pin. analogWrite works on PWM not ADC.
   static const uint8_t TFT_BL() { return 17; }
 
   const uint8_t TS_CIPO = 37;    // don't connect CIPO (MISO) to TFT
@@ -98,7 +98,7 @@ extern uint8_t My_Hw_Version;
   const uint8_t TFT_CS = 16;
   const uint8_t TFT_RST = 27;  // Or set to -1 and connect to Arduino RESET pin
   const uint8_t TFT_DC = 26;
-  //  controls TFT Display backlight as output of PWM pin **** NEEDS TO BE AN ADC PIN!!!! *****
+  //  controls TFT Display backlight as output of PWM pin. analogWrite works on PWM not ADC.
   static const uint8_t TFT_BL() { return 14; }
 
   const uint8_t TS_CIPO = 19;    // don't connect CIPO (MISO) to TFT

@@ -12,8 +12,8 @@ public:
   WiFiStuff();
   void SaveWiFiDetails();
   std::string WiFiDetailsShortString();
-  void SaveWeatherLocationDetails();
-  void SaveWeatherUnits();
+  void SaveNewLocationAndClearCity();
+  void SaveNewWeatherUnits();
   bool TurnWiFiOn();
   void TurnWiFiOff();
   bool GetTodaysWeatherInfo();

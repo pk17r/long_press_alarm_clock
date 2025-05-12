@@ -24,8 +24,9 @@ public:
   void SaveAlarm(uint8_t alarmHr, uint8_t alarmMin, bool alarmIsAm, bool alarmOn);
   void RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_password);
   void SaveWiFiDetails(std::string wifi_ssid, std::string wifi_password);
-  void RetrieveWeatherLocationForWiFiStuff(std::string &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial);
-  void SaveWeatherLocationFromWiFiStuff(std::string location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial);
+  void RetrieveLocationDetails(std::string &location_zip_code, std::string &location_country_code, std::string &city_name);
+  void SaveLocationDetails(std::string location_zip_code, std::string location_country_code, std::string city_name);
+  bool RetrieveWeatherUnits();
   void SaveWeatherUnits(bool weather_units_metric_not_imperial);
   std::string RetrieveSavedFirmwareVersion();
   void SaveCurrentFirmwareVersion();
@@ -60,6 +61,8 @@ public:
   void RetrieveTouchScreenCalibration(int16_t &xMin, int16_t &xMax, int16_t &yMin, int16_t &yMax);
   void SaveTouchScreenCalibration(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax);
   uint8_t RetrieveHwVersion();
+  void RetrieveCityName(std::string &city_name);
+  void SaveCityName(std::string city_name);
 
 private:
 
@@ -85,7 +88,10 @@ private:
   #endif
 
   const char* kOwnerNameKey = "OwnerName";
-  const std::string kOwnerName = "?";
+  const std::string kOwnerName = "<name>";
+
+  const char* kCityNameKey = "City";
+  const std::string kCityName = "";
 
   const char* kAlarmHrKey = "AlarmHr";
   const uint8_t kAlarmHr = 7;

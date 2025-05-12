@@ -280,6 +280,22 @@ void setup() {
 
   ResetWatchdog();
   SerialInputFlush();
+
+  //////////////////////////////////////////////////
+
+  // House-cleaning zone
+
+  // rename old default owner name
+  {
+    const std::string kOwnerName_old = "?";
+    const std::string kOwnerName_new = "<name>";
+    std::string OwnerName_current;
+    nvs_preferences->RetrieveOwnerName(OwnerName_current);
+    if(OwnerName_current == kOwnerName_old)
+      nvs_preferences->SaveOwnerName(kOwnerName_new);
+  }
+
+  //////////////////////////////////////////////////
 }
 
 // arduino loop function on core0 - High Priority one with time update tasks
@@ -2056,15 +2072,10 @@ void ButtonClickAction() {
           bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ true, /* bool alphabets_only = */ false);
           PrintLn(returnText);
           if(ret) {
-            // clear current city
-            wifi_stuff->city_ = "";
-
             display->DisplayBlankScreen();
             LedFeedbackOnOff();
             std::string new_location_zip_str = returnText;
             wifi_stuff->location_zip_code_ = new_location_zip_str;
-            wifi_stuff->SaveWeatherLocationDetails();
-            wifi_stuff->got_weather_info_ = false;
 
             // get Country Code
 
@@ -2078,12 +2089,15 @@ void ButtonClickAction() {
               LedFeedback(true);
               display->DisplayBlankScreen();
               wifi_stuff->location_country_code_ = returnText;
-              wifi_stuff->SaveWeatherLocationDetails();
               // update new location Zip/Pin code on button
               int display_pages_vec_location_button_index = DisplayPagesVecButtonIndex(kClockSettingsPage, kClockSettingsPageSetLocation);
               std::string location_str = (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_);
               display_pages_vec[kClockSettingsPage][display_pages_vec_location_button_index]->btn_value = location_str;
             }
+
+            // save new location details
+            wifi_stuff->SaveNewLocationAndClearCity();
+
             // get new location, update time and weather info
             AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
             WaitForExecutionOfSecondCoreTask();
@@ -2222,8 +2236,7 @@ void ButtonClickAction() {
         ButtonClickUiFeedback(kTurnOn);
         LedFeedback(true);
         wifi_stuff->weather_units_metric_not_imperial_ = !wifi_stuff->weather_units_metric_not_imperial_;
-        wifi_stuff->SaveWeatherUnits();
-        wifi_stuff->got_weather_info_ = false;
+        wifi_stuff->SaveNewWeatherUnits();
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (wifi_stuff->weather_units_metric_not_imperial_ ? kMetricUnitStr : kImperialUnitStr);
         // fetch weather info in new units
         AddSecondCoreTaskIfNotThere(kGetWeatherInfo);

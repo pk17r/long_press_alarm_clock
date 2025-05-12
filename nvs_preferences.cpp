@@ -95,6 +95,10 @@ NvsPreferences::NvsPreferences() {
     preferences.putBool(kScreensaverSleepFriendlyColorAtNightKey, kScreensaverSleepFriendlyColorAtNight);
   if(!preferences.isKey(kHwVersionKey))
     preferences.putUChar(kHwVersionKey, kHwVersion);
+  if(!preferences.isKey(kCityNameKey)) {
+    String kCityNameString = kCityName.c_str();
+    preferences.putString(kCityNameKey, kCityNameString);
+  }
 
 
   // save new key values
@@ -199,26 +203,36 @@ void NvsPreferences::SaveCurrentFirmwareVersion() {
   PrintLn(__func__, kFirmwareVersion);
 }
 
-void NvsPreferences::RetrieveWeatherLocationForWiFiStuff(std::string &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial) {
+void NvsPreferences::RetrieveLocationDetails(std::string &location_zip_code, std::string &location_country_code, std::string &city_name) {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   String location_zip_code_String = preferences.getString(kWeatherZipCodeNewKey);
   location_zip_code = location_zip_code_String.c_str();
   String location_country_code_String = preferences.getString(kWeatherCountryCodeKey);
   location_country_code = location_country_code_String.c_str();
-  weather_units_metric_not_imperial = preferences.getBool(kWeatherUnitsMetricNotImperialKey);
+  String city_name_string = preferences.getString(kCityNameKey);
+  city_name = city_name_string.c_str();
   preferences.end();
-  PrintLn(__func__, (location_zip_code + " " + location_country_code + " " + (weather_units_metric_not_imperial ? kMetricUnitStr : kImperialUnitStr)));
+  PrintLn(__func__, (location_zip_code + " " + location_country_code + " " + city_name));
 }
 
-void NvsPreferences::SaveWeatherLocationFromWiFiStuff(std::string location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial) {
+void NvsPreferences::SaveLocationDetails(std::string location_zip_code, std::string location_country_code, std::string city_name) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   String kWeatherZipCodeString = location_zip_code.c_str();
   preferences.putString(kWeatherZipCodeNewKey, kWeatherZipCodeString);
   String kWeatherCountryCodeString = location_country_code.c_str();
   preferences.putString(kWeatherCountryCodeKey, kWeatherCountryCodeString);
-  preferences.putBool(kWeatherUnitsMetricNotImperialKey, weather_units_metric_not_imperial);
+  String city_name_string = city_name.c_str();
+  preferences.putString(kCityNameKey, city_name_string);
   preferences.end();
-  PrintLn(__func__, (location_zip_code + " " + location_country_code + " " + (weather_units_metric_not_imperial ? kMetricUnitStr : kImperialUnitStr)));
+  PrintLn(__func__, (location_zip_code + " " + location_country_code + " " + city_name));
+}
+
+bool NvsPreferences::RetrieveWeatherUnits() {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  bool weather_units_metric_not_imperial = preferences.getBool(kWeatherUnitsMetricNotImperialKey);
+  preferences.end();
+  PrintLn(__func__, weather_units_metric_not_imperial);
+  return weather_units_metric_not_imperial;
 }
 
 void NvsPreferences::SaveWeatherUnits(bool weather_units_metric_not_imperial) {
@@ -466,4 +480,20 @@ uint8_t NvsPreferences::RetrieveHwVersion() {
   preferences.end();
   PrintLn(__func__, hw_version);
   return hw_version;
+}
+
+void NvsPreferences::RetrieveCityName(std::string &city_name) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  String city_name_string = preferences.getString(kCityNameKey);
+  city_name = city_name_string.c_str();
+  preferences.end();
+  PrintLn(__func__, city_name);
+}
+
+void NvsPreferences::SaveCityName(std::string city_name) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  String city_name_string = city_name.c_str();
+  preferences.putString(kCityNameKey, city_name_string);
+  preferences.end();
+  PrintLn(__func__, city_name);
 }

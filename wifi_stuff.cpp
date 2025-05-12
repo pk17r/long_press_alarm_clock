@@ -20,7 +20,8 @@ WiFiStuff::WiFiStuff() {
 
   nvs_preferences->RetrieveWiFiDetails(wifi_ssid_, wifi_password_);
 
-  nvs_preferences->RetrieveWeatherLocationForWiFiStuff(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
+  nvs_preferences->RetrieveLocationDetails(location_zip_code_, location_country_code_, city_);
+  weather_units_metric_not_imperial_ = nvs_preferences->RetrieveWeatherUnits();
 
   TurnWiFiOff();
 
@@ -47,13 +48,16 @@ std::string WiFiStuff::WiFiDetailsShortString() {
   return wifi_ssid_.substr(0,16);
 }
 
-void WiFiStuff::SaveWeatherLocationDetails() {
-  nvs_preferences->SaveWeatherLocationFromWiFiStuff(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
+void WiFiStuff::SaveNewLocationAndClearCity() {
+  city_ = "";
+  nvs_preferences->SaveLocationDetails(location_zip_code_, location_country_code_, city_);
   incorrect_zip_code = false;
+  got_weather_info_ = false;
 }
 
-void WiFiStuff::SaveWeatherUnits() {
+void WiFiStuff::SaveNewWeatherUnits() {
   nvs_preferences->SaveWeatherUnits(weather_units_metric_not_imperial_);
+  got_weather_info_ = false;
 }
 
 bool WiFiStuff::TurnWiFiOn() {
@@ -208,6 +212,7 @@ bool WiFiStuff::GetTodaysWeatherInfo() {
       weather_humidity_.assign(JSONVar::stringify(myObject["main"]["humidity"]).c_str());
       weather_humidity_ = weather_humidity_ + '%';
       city_.assign(myObject["name"]);
+      nvs_preferences->SaveCityName(city_);
       gmt_offset_sec_ = atoi(JSONVar::stringify(myObject["timezone"]).c_str());
       #ifdef MORE_LOGS
         PrintLn("weather_main ", weather_main_.c_str());
@@ -502,7 +507,7 @@ void WiFiStuff::StopSetLocationLocalServer() {
     nvs_preferences->SaveOwnerName(owner_name);
     location_zip_code_ = temp_zip_pin_str.c_str();
     location_country_code_ = temp_country_code_str.c_str();
-    SaveWeatherLocationDetails();
+    SaveNewLocationAndClearCity();
   }
 
   got_SAP_user_input_ = false;
