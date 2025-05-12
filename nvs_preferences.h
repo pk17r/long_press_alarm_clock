@@ -63,6 +63,8 @@ public:
   uint8_t RetrieveHwVersion();
   void RetrieveCityName(std::string &city_name);
   void SaveCityName(std::string city_name);
+  uint8_t RetrieveDisplayMinBrightnessAdder();
+  void SaveDisplayMinBrightnessAdder(uint8_t display_min_brightness_adder);
 
 private:
 
@@ -145,17 +147,26 @@ private:
   const char* kScreensaverSleepFriendlyColorAtNightKey = "ScSvrSlpColor";
   const bool kScreensaverSleepFriendlyColorAtNight = true;
 
+  const char* kUseLDRKey = "UseLDR";
+  const bool kUseLDR = true;
+
+  const char* kDisplayMinBrightnessAdderKey = "DispMinBright";
+  const uint8_t kDisplayMinBrightnessAdder = 2;
+
   const char* kNightTimeDimHourKey = "NightTmDimHour";
   const uint8_t kNightTimeDimHour = 10;
 
   const char* kAutorunRgbLedStripModeKey = "RgbLedStripMode";
   const uint8_t kAutorunRgbLedStripMode = 2;
 
+  const char* kRgbStripLedCountKey = "RgbLedCount";
+  const uint8_t kRgbStripLedCount = 4;
+
+  const char* kRgbStripLedBrightnessKey = "RgbLedBright";
+  const uint8_t kRgbStripLedBrightness = 255;
+
   const char* kScreenOrientationKey = "ScreenOrient";
   const uint8_t kScreenOrientation = 3;
-
-  const char* kUseLDRKey = "UseLDR";
-  const bool kUseLDR = true;
 
   const char* kTouchscreenTypeKey = "Touchscreen";
   const uint8_t kTouchscreenType = 1;       // 0 = no touch, 1 = Resistive read using XPT2046, 2 = Resistive read using MCU ADC
@@ -174,12 +185,6 @@ private:
   const int16_t kTouchCalibYMin = (kTouchscreenType == 1 ? 221 : 113);
   const char* kTouchCalibYMaxKey = "TouchCalibYMax";
   const int16_t kTouchCalibYMax = (kTouchscreenType == 1 ? 3767 : 914);
-
-  const char* kRgbStripLedCountKey = "RgbLedCount";
-  const uint8_t kRgbStripLedCount = 4;
-
-  const char* kRgbStripLedBrightnessKey = "RgbLedBright";
-  const uint8_t kRgbStripLedBrightness = 255;
 
   const char* kRtcTypeKey = "RtcType";
   const uint8_t kRtcType = 2;     // 1 = URTCLIB_MODEL_DS1307, 2 = URTCLIB_MODEL_DS3231

@@ -461,12 +461,7 @@ void loop() {
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
       else if(current_page == kLocationInputsLocalServerPage)
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
-      if(use_photoresistor)
-        // check photoresistor brightness and adjust display brightness
-        display->CheckPhotoresistorAndSetBrightness();
-      else
-        // set display brightness based on time
-        display->CheckTimeAndSetBrightness();
+      display->ReAdjustDisplayBrightness();
       // auto disconnect wifi if connected and inactivity millis is over limit
       if(wifi_stuff->wifi_connected_ && second_core_tasks_queue.empty()) {
         AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
@@ -1823,6 +1818,7 @@ void PopulateDisplayPages() {
     new DisplayButton{ kScreensaverSettingsPageSpeed, kClickButtonWithLabel, "Screensaver Speed:", false, 0,0,0,0, (cpu_speed_mhz == 80 ? kSlowStr : (cpu_speed_mhz == 160 ? kMediumStr : kFastStr)) },
     new DisplayButton{ kScreensaverSettingsPageRun, kClickButtonWithLabel, "Run Screensaver:", false, 0,0,0,0, "RUN" },
     new DisplayButton{ kScreensaverSettingsPageNightTimeColorChange, kClickButtonWithLabel, "Sleep-friendly color at night:", false, 0,0,0,0, (display->sleep_friendly_color_at_night ? kYesStr : kNoStr) },
+    new DisplayButton{ kScreensaverSettingsPageMinBrightness, kClickButtonWithLabel, "Min Brightness Adder:", false, 0,0,0,0, ("  " + std::to_string(display->min_brightness_adder) + "  ") },
     page_back_button,
   };
 
@@ -2292,6 +2288,26 @@ void ButtonClickAction() {
         nvs_preferences->SaveScreensaverSleepFriendNightColor(display->sleep_friendly_color_at_night);
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (display->sleep_friendly_color_at_night ? kYesStr : kNoStr);
         ButtonClickUiFeedback(kTurnOn_Delay_TurnOff);
+      }
+      else if(current_cursor == kScreensaverSettingsPageMinBrightness) {
+        ButtonClickUiFeedback(kTurnOn_Delay);
+        // change brightness
+        if(display->min_brightness_adder < 4)
+          display->min_brightness_adder++;
+        else if(display->min_brightness_adder == 4)
+          display->min_brightness_adder = 7;
+        else if(display->min_brightness_adder == 7)
+          display->min_brightness_adder = 10;
+        else if(display->min_brightness_adder == 10)
+          display->min_brightness_adder = 15;
+        else if(display->min_brightness_adder == 15)
+          display->min_brightness_adder = 20;
+        else
+          display->min_brightness_adder = 0;
+        display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = ("  " + std::to_string(display->min_brightness_adder) + "  ");
+        nvs_preferences->SaveDisplayMinBrightnessAdder(display->min_brightness_adder);
+        display->SetBrightness(display->min_brightness_adder + display->kNightBrightness);
+        ButtonClickUiFeedback(kTurnOff);
       }
       else if(current_cursor == kPageBackButton) {
         ButtonClickUiFeedback(kTurnOn_Delay);

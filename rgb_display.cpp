@@ -10,7 +10,6 @@ void RGBDisplay::Setup() {
 
   // tft display backlight control PWM output pin
   pinMode(TFT_BL(), OUTPUT);
-  // ledcAttach(TFT_BL(), /*frequency*/ 1000, /*resolution*/ 8);
 
 #if defined(DISPLAY_IS_ST7789V)
 
@@ -80,18 +79,15 @@ void RGBDisplay::Setup() {
   PrintLn("use_photoresistor", use_photoresistor);
   #endif
 
+  // fetch display min brightness adder
+  min_brightness_adder = nvs_preferences->RetrieveDisplayMinBrightnessAdder();
+
   if(use_photoresistor) {
     // configure Photoresistor pin
     pinMode(PHOTORESISTOR_PIN, INPUT);
     analogReadResolution(kAdcResolutionBits);
-
-    // set display brightness
-    CheckPhotoresistorAndSetBrightness();
   }
-  else {
-    // set display brightness based on time of day
-    CheckTimeAndSetBrightness();
-  }
+  ReAdjustDisplayBrightness();
 
   // set screensaver motion
   screensaver_bounce_not_fly_horizontally_ = nvs_preferences->RetrieveScreensaverBounceNotFlyHorizontally();
@@ -114,7 +110,6 @@ void RGBDisplay::RotateScreen() {
 void RGBDisplay::SetBrightness(int brightness) {
   if(current_brightness_ != brightness) {
     analogWrite(TFT_BL(), brightness);
-    // ledcWrite(TFT_BL(), brightness);
     current_brightness_ = brightness;
     #ifdef MORE_LOGS
       PrintLn("Display Brightness set to ", brightness);
@@ -122,9 +117,9 @@ void RGBDisplay::SetBrightness(int brightness) {
   }
   if(use_photoresistor) {
     // hysteresis in background color on / off
-    if(!show_colored_edge_screensaver_ && brightness >= kBrightnessBackgroundColorThreshold + 5)
+    if(!show_colored_edge_screensaver_ && brightness >= kBrightnessBackgroundColorThreshold + 5 + min_brightness_adder)
       show_colored_edge_screensaver_ = true;
-    else if(show_colored_edge_screensaver_ && brightness <= kBrightnessBackgroundColorThreshold - 5)
+    else if(show_colored_edge_screensaver_ && brightness <= kBrightnessBackgroundColorThreshold - 5 + min_brightness_adder)
       show_colored_edge_screensaver_ = false;
   }
   else
@@ -140,11 +135,11 @@ void RGBDisplay::SetMaxBrightness() {
 void RGBDisplay::CheckPhotoresistorAndSetBrightness() {
   int photodiode_light_raw = analogRead(PHOTORESISTOR_PIN);
   // int lcd_brightness_val = max(photodiode_light_raw * kBrightnessInactiveMax / kPhotodiodeLightRawMax, 1);
-  int lcd_brightness_val2 = max((int)map(photodiode_light_raw, 0.2 / 3.3 * kPhotodiodeLightRawMax, kPhotodiodeLightRawMax, kNightBrightness, kBrightnessInactiveMax), kNightBrightness);
+  int lcd_brightness_val2 = max((int)map(photodiode_light_raw, 0.2 / 3.3 * kPhotodiodeLightRawMax, kPhotodiodeLightRawMax, (kNightBrightness + min_brightness_adder), kBrightnessInactiveMax), (kNightBrightness + min_brightness_adder));
   if(rgb_led_strip_on)
-    lcd_brightness_val2 = max(lcd_brightness_val2, kRgbStripOnDispMinBrightness);
+    lcd_brightness_val2 = max(lcd_brightness_val2, kRgbStripOnDispMinBrightness + min_brightness_adder);
   else if(rtc->todays_minutes < night_time_minutes && rtc->todays_minutes >= kDayTimeMinutes)
-    lcd_brightness_val2 = max(lcd_brightness_val2, kNonNightMinBrightness);
+    lcd_brightness_val2 = max(lcd_brightness_val2, kNonNightMinBrightness + min_brightness_adder);
   #ifdef MORE_LOGS
   if(debug_mode)
     Serial.print("photodiode_light_raw="); Serial.print(photodiode_light_raw); Serial.print(", lcd_brightness_val2="); Serial.println(lcd_brightness_val2);
@@ -161,14 +156,23 @@ void RGBDisplay::CheckTimeAndSetBrightness() {
   }
   else {
     if(rtc->todays_minutes >= night_time_minutes)
-      SetBrightness(kNightBrightness);
+      SetBrightness(kNightBrightness + min_brightness_adder);
     else if(rtc->todays_minutes >= kEveningTimeMinutes)
       SetBrightness(kEveningBrightness);
     else if(rtc->todays_minutes >= kDayTimeMinutes)
       SetBrightness(kDayBrightness);
     else
-      SetBrightness(kNightBrightness);
+      SetBrightness(kNightBrightness + min_brightness_adder);
   }
+}
+
+void RGBDisplay::ReAdjustDisplayBrightness() {
+  if(use_photoresistor)
+    // check photoresistor brightness and adjust display brightness
+    CheckPhotoresistorAndSetBrightness();
+  else
+    // set display brightness based on time
+    CheckTimeAndSetBrightness();
 }
 
 void RGBDisplay::ScreensaverControl(bool turnOn) {
@@ -191,7 +195,7 @@ void RGBDisplay::ScreensaverControl(bool turnOn) {
 
 uint16_t RGBDisplay::ColorPickerWheel(bool pick_new) {
   // if display is at min brightness then show constant sleep-friendly color, otherwise pick-new/old color
-  if(current_brightness_ == kNightBrightness && sleep_friendly_color_at_night) {
+  if((current_brightness_ == (kNightBrightness + min_brightness_adder)) && sleep_friendly_color_at_night) {
     return kDisplayColorRed;
   }
   else {

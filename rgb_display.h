@@ -116,8 +116,7 @@ public:
   void Setup();
   void SetBrightness(int brightness);
   void SetMaxBrightness();
-  void CheckPhotoresistorAndSetBrightness();
-  void CheckTimeAndSetBrightness();
+  void ReAdjustDisplayBrightness();
   void ScreensaverControl(bool turnOn);
   uint16_t ColorPickerWheel(bool pick_new = true);  // for screensaver
   void RotateScreen();
@@ -161,6 +160,10 @@ public:
   uint8_t current_wifi_networks_scan_page_no = 0;
   uint8_t current_wifi_networks_scan_page_cursor = -1;
 
+  // screen min brightness
+  int min_brightness_adder = 0;
+  const int kNightBrightness = 1;
+
 private:
 
 // PRIVATE FUNCTIONS
@@ -172,6 +175,8 @@ private:
   void DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, const char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
   void DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
   void FastDrawTwoColorBitmapSpi(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
+  void CheckPhotoresistorAndSetBrightness();
+  void CheckTimeAndSetBrightness();
   // keyboard functions
   void MakeKeyboard(std::string label);
   void DrawKeyboardButton(TouchKbKeys kb_key_flag, bool clicked, int key_array_x, int key_array_y, int cursor_shift_right, char letter);
@@ -189,6 +194,7 @@ private:
 
   // current screen brightness
   int current_brightness_ = 0;
+  // int min_brightness_adder = 0;
 
   // screensaver
   bool screensaver_move_down_ = true, screensaver_move_right_ = true;
@@ -227,7 +233,7 @@ private:
   const int kPhotodiodeLightRawMax = pow(2, kAdcResolutionBits) - 1;
 
   // display brightness constants
-  const int kNightBrightness = 1;
+  // const int kNightBrightness = 1;
   const int kNonNightMinBrightness = 5;
   const int kRgbStripOnDispMinBrightness = 10;
   const int kEveningBrightness = 100;

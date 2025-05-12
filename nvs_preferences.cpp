@@ -99,6 +99,8 @@ NvsPreferences::NvsPreferences() {
     String kCityNameString = kCityName.c_str();
     preferences.putString(kCityNameKey, kCityNameString);
   }
+  if(!preferences.isKey(kDisplayMinBrightnessAdderKey))
+    preferences.putUChar(kDisplayMinBrightnessAdderKey, kDisplayMinBrightnessAdder);
 
 
   // save new key values
@@ -496,4 +498,19 @@ void NvsPreferences::SaveCityName(std::string city_name) {
   preferences.putString(kCityNameKey, city_name_string);
   preferences.end();
   PrintLn(__func__, city_name);
+}
+
+uint8_t NvsPreferences::RetrieveDisplayMinBrightnessAdder() {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  uint8_t display_min_brightness_adder = preferences.getUChar(kDisplayMinBrightnessAdderKey, 0);
+  preferences.end();
+  PrintLn(__func__, display_min_brightness_adder);
+  return display_min_brightness_adder;
+}
+
+void NvsPreferences::SaveDisplayMinBrightnessAdder(uint8_t display_min_brightness_adder) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  preferences.putUChar(kDisplayMinBrightnessAdderKey, display_min_brightness_adder);
+  preferences.end();
+  PrintLn(__func__, display_min_brightness_adder);
 }

@@ -134,6 +134,7 @@ enum Cursor {
   kScreensaverSettingsPageSpeed,
   kScreensaverSettingsPageRun,
   kScreensaverSettingsPageNightTimeColorChange,
+  kScreensaverSettingsPageMinBrightness,
   kRgbLedSettingsPageNightTmDimHr,
   kRgbLedSettingsPageRgbLedStripMode,
   kRgbLedSettingsPageRgbLedBrightness,
