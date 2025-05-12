@@ -1784,10 +1784,8 @@ void PopulateDisplayPages() {
   };
 
   // CLOCK SETTINGS PAGE
-  std::string owner_name;
-  nvs_preferences->RetrieveOwnerName(owner_name);
   display_pages_vec[kClockSettingsPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ kClockSettingsPageOwnerName, kClickButtonWithLabel, "Owner Name:", false, 0,0,0,0, owner_name },
+    new DisplayButton{ kClockSettingsPageOwnerName, kClickButtonWithLabel, "Owner:", false, 0,0,0,0, "EDIT" },
     new DisplayButton{ kClockSettingsPageSetLocation, kClickButtonWithLabel, "City:", false, 0,0,0,0, (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_) },
     new DisplayButton{ kClockSettingsPageUpdateTime, kClickButtonWithLabel, "Update Time:", false, 0,0,0,0, "UPDATE TIME" },
     new DisplayButton{ kClockSettingsPageAlarmLongPressTime, kClickButtonWithLabel, "Long Press Alarm Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
@@ -2041,12 +2039,6 @@ void ButtonClickAction() {
             LedFeedbackOnOff();
             std::string owner_name_str = returnText;
             nvs_preferences->SaveOwnerName(owner_name_str);
-            delay(100);
-            nvs_preferences->RetrieveOwnerName(owner_name);
-
-            // update new owner name
-            int display_pages_vec_owner_name_button_index = DisplayPagesVecButtonIndex(kClockSettingsPage, kClockSettingsPageOwnerName);
-            display_pages_vec[kClockSettingsPage][display_pages_vec_owner_name_button_index]->btn_value = owner_name;
           }
           SetPage(kClockSettingsPage);
         }
@@ -2269,11 +2261,6 @@ void ButtonClickAction() {
         int display_pages_vec_location_button_index = DisplayPagesVecButtonIndex(kClockSettingsPage, kClockSettingsPageSetLocation);
         std::string location_str = (wifi_stuff->location_zip_code_ + " " + wifi_stuff->location_country_code_);
         display_pages_vec[kClockSettingsPage][display_pages_vec_location_button_index]->btn_value = location_str;
-        // update new owner name
-        std::string owner_name;
-        nvs_preferences->RetrieveOwnerName(owner_name);
-        int display_pages_vec_owner_name_button_index = DisplayPagesVecButtonIndex(kClockSettingsPage, kClockSettingsPageOwnerName);
-        display_pages_vec[kClockSettingsPage][display_pages_vec_owner_name_button_index]->btn_value = owner_name;
         // get new location, update time and weather info
         AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
       }

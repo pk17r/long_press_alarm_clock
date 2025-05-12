@@ -739,6 +739,14 @@ void RGBDisplay::DisplayCurrentPageButtonRow(DisplayButton* button, int button_i
         tft.setTextColor(kDisplayColorGreen);
         tft.print(wifi_stuff->city_.c_str());
       }
+      // Special case -> Clock settings page owner name
+      else if(current_page == kClockSettingsPage && button->btn_cursor_id == kClockSettingsPageOwnerName) {
+        std::string owner_name;
+        nvs_preferences->RetrieveOwnerName(owner_name);
+        tft.setFont(&FreeMonoBold9pt7b);
+        tft.setTextColor(kDisplayColorGreen);
+        tft.print(owner_name.c_str());
+      }
     }
   }
 
