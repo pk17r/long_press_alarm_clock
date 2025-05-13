@@ -28,7 +28,7 @@
 
 #define ESP32_S3_FIRMWARE_VERSION                 "v3.8"
 #define ESP32_S2_MINI_FIRMWARE_VERSION            "v3.8"
-#define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "2.4"
+#define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "v3.8"
 const std::string kFirmwareDate = "May 11, 2025";
 
 const std::string kChangeLog = "- Adjust Min Screensaver\n  Brightness!\n- Software improvements.";
