@@ -91,6 +91,18 @@ void RTC::RtcSetup() {
     delay(100);
   }
 
+  #ifdef MORE_LOGS
+  uint8_t hr_mode = rtc_hw_.hourModeAndAmPm();
+  std::string hr_mode_str = "RTC Hour Mode = ";
+  if(hr_mode == 0)
+    hr_mode_str += "24-hr mode";
+  else if(hr_mode == 1)
+    hr_mode_str += "12-hr mode AM";
+  else
+    hr_mode_str += "12-hr mode PM";
+  PrintLn(hr_mode_str);
+  #endif
+
 
   // Check if time is up to date
   // Lost power status:

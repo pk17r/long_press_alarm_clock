@@ -415,7 +415,18 @@ uint8_t NvsPreferences::RetrieveRtcType() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   uint8_t rtc_type = preferences.getUChar(kRtcTypeKey, 0);
   preferences.end();
-  PrintLn(__func__, rtc_type);
+  std::string rtc_str = "";
+  switch(rtc_type) {
+    case 1:
+      rtc_str = "DS1307";
+      break;
+    case 2:
+      rtc_str = "DS3231";
+      break;
+    default:
+      rtc_str = "Unknown";
+  }
+  PrintLn(__func__, (std::to_string(rtc_type) + ":" + rtc_str));
   return rtc_type;
 }
 

@@ -1252,10 +1252,10 @@ void SerialUserInput() {
     case 'e':   // toggle rtc type DS1307/DS3231
       {
         uint8_t rtc_type = nvs_preferences->RetrieveRtcType();
-        if(rtc_type == 1)
-          nvs_preferences->SaveRtcType(2);
-        else
-          nvs_preferences->SaveRtcType(1);
+        if(rtc_type == URTCLIB_MODEL_DS1307)
+          nvs_preferences->SaveRtcType(URTCLIB_MODEL_DS3231);
+        else  // URTCLIB_MODEL_DS3231
+          nvs_preferences->SaveRtcType(URTCLIB_MODEL_DS1307);
         rtc->RtcSetup();
       }
       break;
@@ -1263,12 +1263,32 @@ void SerialUserInput() {
       {
         #ifdef MORE_LOGS
         PrintLn("**** toggle 12 / 24 hour mode ****");
+        uint8_t hr_mode = rtc->hourModeAndAmPm();
+        std::string hr_mode_str = "current mode = ";
+        if(hr_mode == 0)
+          hr_mode_str += "24-hr mode";
+        else if(hr_mode == 1)
+          hr_mode_str += "12-hr mode AM";
+        else
+          hr_mode_str += "12-hr mode PM";
+        PrintLn(hr_mode_str);
         #endif
         if(rtc->hourModeAndAmPm() == 0)
           rtc->set_12hour_mode(true);
         else
           rtc->set_12hour_mode(false);
         PrintLn(rtc->hourModeAndAmPm());
+        #ifdef MORE_LOGS
+        hr_mode = rtc->hourModeAndAmPm();
+        hr_mode_str = "new mode = ";
+        if(hr_mode == 0)
+          hr_mode_str += "24-hr mode";
+        else if(hr_mode == 1)
+          hr_mode_str += "12-hr mode AM";
+        else
+          hr_mode_str += "12-hr mode PM";
+        PrintLn(hr_mode_str);
+        #endif
       }
       break;
     case 'g':   // good morning
