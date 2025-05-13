@@ -1935,14 +1935,7 @@ void ButtonClickAction() {
         SetPage(kWiFiSettingsPage);
       }
       else if(current_cursor == kSettingsPageClock) {
-        if(wifi_stuff->city_.length() == 0) {
-          ButtonClickUiFeedback(kTurnOn);
-          LedFeedback(true);
-          AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
-          WaitForExecutionOfSecondCoreTask();
-        }
-        else
-          ButtonClickUiFeedback(kTurnOn_Delay);
+        ButtonClickUiFeedback(kTurnOn_Delay);
         SetPage(kClockSettingsPage);
       }
       else if(current_cursor == kSettingsPageScreensaver) {
