@@ -31,7 +31,11 @@
 #define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "2.4"
 const std::string kFirmwareDate = "May 11, 2025";
 
+<<<<<<< HEAD
 const std::string kChangeLog = "- Adjust Minimum Display\n  Brightness!\n- Software improvements.";
+=======
+const std::string kChangeLog = "- Adjust Min Screensaver\n  Brightness!\n- Software improvements.";
+>>>>>>> main
 
 
 // #define MORE_LOGS
