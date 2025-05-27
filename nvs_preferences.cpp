@@ -51,12 +51,21 @@ NvsPreferences::NvsPreferences() {
     preferences.putString(kFirmwareVersionKey, kFirmwareVersionString);
   }
   else {
-    // older firmware present, means device has older buzzer 12085 with rated frequency 2048 Hz
-    if(!preferences.isKey(kBuzzerFrequencyKey))   // if key is not present then it is older buzzer
+    // a firmware is already present on device.
+    // means device can have older 12085 buzzer with rated frequency of 2048 Hz
+    // if already a firmware is present on device, then it can have either the older 12085 buzzer or newer SMD buzzer with a different frequency
+    // firmware with 12085 buzzer did not have a buzzer frequency key. kBuzzerFrequencyKey was added when newer SMD buzzer was introduced.
+    // devices with newer SMD buzzer, already have kBuzzerFrequencyKey defined.
+    if(!preferences.isKey(kBuzzerFrequencyKey))   // if kBuzzerFrequencyKey is not present then this HW has older buzzer
       preferences.putUShort(kBuzzerFrequencyKey, 2048);   // dont change 2048 magic number here
+    // if device already has a firmware, then it is HW1 device
+    if(!preferences.isKey(kHwVersionKey))
+      preferences.putUChar(kHwVersionKey, 0x01);
   }
   if(!preferences.isKey(kBuzzerFrequencyKey))
-    preferences.putUShort(kBuzzerFrequencyKey, kBuzzerFrequency);
+    preferences.putUShort(kBuzzerFrequencyKey, (kHwVersion == 0x01 ? kBuzzerFrequency_HW1 : kBuzzerFrequency_HW2));
+  if(!preferences.isKey(kHwVersionKey))
+    preferences.putUChar(kHwVersionKey, kHwVersion);
   if(!preferences.isKey(kCpuSpeedMhzKey))
     preferences.putUChar(kCpuSpeedMhzKey, cpu_speed_mhz);
   if(!preferences.isKey(kScreensaverMotionTypeKey))
@@ -93,8 +102,6 @@ NvsPreferences::NvsPreferences() {
     preferences.putShort(kTouchCalibYMaxKey, kTouchCalibYMax);
   if(!preferences.isKey(kScreensaverSleepFriendlyColorAtNightKey))
     preferences.putBool(kScreensaverSleepFriendlyColorAtNightKey, kScreensaverSleepFriendlyColorAtNight);
-  if(!preferences.isKey(kHwVersionKey))
-    preferences.putUChar(kHwVersionKey, kHwVersion);
   if(!preferences.isKey(kCityNameKey)) {
     String kCityNameString = kCityName.c_str();
     preferences.putString(kCityNameKey, kCityNameString);
@@ -107,7 +114,7 @@ NvsPreferences::NvsPreferences() {
   // ADD NEW KEYS ABOVE
   preferences.end();
 
-  // set HW Version
+  // retrieve HW Version for pin definitions based on HW version
   My_Hw_Version = RetrieveHwVersion();
 
   PrintLn(__func__, kInitializedStr);
@@ -128,7 +135,7 @@ void NvsPreferences::SaveLongPressSeconds(uint8_t long_press_seconds) {
 
 void NvsPreferences::RetrieveBuzzerFrequency(uint16_t &buzzer_freq) {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
-  buzzer_freq = preferences.getUShort(kBuzzerFrequencyKey, kBuzzerFrequency);
+  buzzer_freq = preferences.getUShort(kBuzzerFrequencyKey);
   preferences.end();
   PrintLn(__func__, buzzer_freq);
 }

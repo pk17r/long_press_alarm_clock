@@ -83,7 +83,8 @@ bool WiFiStuff::TurnWiFiOn() {
     #ifdef MORE_LOGS
     PrintLn("WiFiStuff::TurnWiFiOn(): WiFi Connected.");
     #endif
-    digitalWrite(WIFI_LED, HIGH);
+    if(0x01 == My_Hw_Version)
+      digitalWrite(WIFI_LED(), HIGH);
     wifi_connected_ = true;
     incorrect_wifi_details_ = false;
   }
@@ -91,7 +92,8 @@ bool WiFiStuff::TurnWiFiOn() {
     #ifdef MORE_LOGS
     PrintLn("WiFiStuff::TurnWiFiOn(): Could NOT connect to WiFi.");
     #endif
-    digitalWrite(WIFI_LED, LOW);
+    if(0x01 == My_Hw_Version)
+      digitalWrite(WIFI_LED(), LOW);
     wifi_connected_ = false;
     incorrect_wifi_details_ = true;
   }
@@ -106,7 +108,8 @@ void WiFiStuff::TurnWiFiOff() {
   WiFi.mode(WIFI_OFF);
   delay(1);
   WiFi.disconnect();
-  digitalWrite(WIFI_LED, LOW);
+  if(0x01 == My_Hw_Version)
+    digitalWrite(WIFI_LED(), LOW);
   wifi_connected_ = false;
 }
 
@@ -421,7 +424,8 @@ void WiFiStuff::StartSetWiFiSoftAP() {
   PrintLn(__func__, soft_AP_IP);
 
   server->begin();
-  digitalWrite(WIFI_LED, HIGH);
+  if(0x01 == My_Hw_Version)
+    digitalWrite((WIFI_LED()), HIGH);
 
   _SoftAPWiFiDetails();
 }
@@ -756,7 +760,7 @@ void WiFiStuff::UpdateFirmware() {
   else
     client.setInsecure();//skip verification
 
-  httpUpdate.setLedPin(LED_PIN, HIGH);
+  httpUpdate.setLedPin(LED_PIN(), HIGH);
 
   // increase watchdog timeout to 90s to accomodate OTA update
   if(!debug_mode) SetWatchdogTime(kWatchdogTimeoutOtaUpdateMs);

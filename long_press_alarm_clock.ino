@@ -151,6 +151,7 @@ void setup() {
   // a delay to let currents stabalize and not have phantom serial inputs
   delay(200);
   Serial.begin(115200);
+  // while (!Serial);
   Serial.println(F("\nSerial OK"));
   PrintLn("Hellow World!");
 
@@ -169,12 +170,14 @@ void setup() {
   }
 
   // LED Pin High
-  pinMode(LED_PIN, OUTPUT);
+  pinMode(LED_PIN(), OUTPUT);
   LedFeedback(HIGH);
 
   // WIFI_LED Low
-  pinMode(WIFI_LED, OUTPUT);
-  digitalWrite(WIFI_LED, LOW);
+  if(0x01 == My_Hw_Version) {
+    pinMode(WIFI_LED(), OUTPUT);
+    digitalWrite(WIFI_LED(), LOW);
+  }
 
   // make all spi CS pins high
   pinMode(TFT_CS, OUTPUT);
@@ -184,8 +187,8 @@ void setup() {
   digitalWrite(TS_CS_PIN, HIGH);
 
   // make buzzer pin low
-  pinMode(BUZZER_PIN, OUTPUT);
-  digitalWrite(BUZZER_PIN, LOW);
+  pinMode(BUZZER_PIN(), OUTPUT);
+  digitalWrite(BUZZER_PIN(), LOW);
 
   // pullup debug pin
   pinMode(DEBUG_PIN, INPUT_PULLUP);
@@ -212,7 +215,7 @@ void setup() {
   spi_obj->begin(TFT_CLK, TS_CIPO, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
 
   // initialize push button
-  push_button = new PushButtonTaps(BUTTON_PIN);
+  push_button = new PushButtonTaps(BUTTON_PIN());
   inc_button = new PushButtonTaps(INC_BUTTON_PIN);
   dec_button = new PushButtonTaps(DEC_BUTTON_PIN);
 
@@ -652,7 +655,7 @@ void InitializeRgbLed() {
   }
   rgb_strip_led_count = nvs_preferences->RetrieveRgbStripLedCount();
   rgb_strip_led_brightness = nvs_preferences->RetrieveRgbStripLedBrightness();
-  rgb_led_strip = new Adafruit_NeoPixel(rgb_strip_led_count, RGB_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
+  rgb_led_strip = new Adafruit_NeoPixel(rgb_strip_led_count, RGB_LED_STRIP_PIN(), NEO_GRB + NEO_KHZ800);
   rgb_led_strip->begin();
   autorun_rgb_led_strip_mode = nvs_preferences->RetrieveAutorunRgbLedStripMode();
 }
@@ -1657,9 +1660,9 @@ void MoveCursor(bool increment) {
     first_click_button_index++;
   while(display_pages_vec[current_page][last_click_button_index]->btn_type == kLabelOnlyNoClickButton)
     last_click_button_index--;
-  PrintLn("first_click_button_index = ", first_click_button_index);
-  PrintLn("last_click_button_index = ", last_click_button_index);
-  PrintLn("increment = ", increment);
+  // PrintLn("first_click_button_index = ", first_click_button_index);
+  // PrintLn("last_click_button_index = ", last_click_button_index);
+  // PrintLn("increment = ", increment);
   // special case of WiFi Scan Networks Page:
   bool find_next_button = false;
   if((current_page == kWiFiScanNetworksPage) && (current_cursor == kWiFiScanNetworksPageList)) {
@@ -1728,7 +1731,7 @@ void MoveCursor(bool increment) {
       }
     }
   }
-  PrintLn("current_cursor = ", current_cursor);
+  // PrintLn("current_cursor = ", current_cursor);
 
   display->DisplayCursorHighlight(/*highlight_On = */ true);
   // wait a little
@@ -1838,7 +1841,7 @@ void PopulateDisplayPages() {
     new DisplayButton{ kScreensaverSettingsPageSpeed, kClickButtonWithLabel, "Screensaver Speed:", false, 0,0,0,0, (cpu_speed_mhz == 80 ? kSlowStr : (cpu_speed_mhz == 160 ? kMediumStr : kFastStr)) },
     new DisplayButton{ kScreensaverSettingsPageRun, kClickButtonWithLabel, "Run Screensaver:", false, 0,0,0,0, "RUN" },
     new DisplayButton{ kScreensaverSettingsPageNightTimeColorChange, kClickButtonWithLabel, "Sleep-friendly color at night:", false, 0,0,0,0, (display->sleep_friendly_color_at_night ? kYesStr : kNoStr) },
-    new DisplayButton{ kScreensaverSettingsPageMinBrightness, kClickButtonWithLabel, "Min Brightness Adder:", false, 0,0,0,0, ("  " + std::to_string(display->min_brightness_adder) + "  ") },
+    new DisplayButton{ kScreensaverSettingsPageMinBrightness, kClickButtonWithLabel, "Minimum Brightness:", false, 0,0,0,0, ("  " + std::to_string(display->min_brightness_adder) + "  ") },
     page_back_button,
   };
 
@@ -1875,7 +1878,7 @@ void LedFeedbackOnOff() {
 }
 
 void LedFeedback(bool value) {
-  digitalWrite(LED_PIN, value);
+  digitalWrite(LED_PIN(), value);
 }
 
 // takes in WiFi Password input using Touchscreen or by creating a SoftAP

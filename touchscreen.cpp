@@ -12,7 +12,7 @@ Touchscreen::Touchscreen() {
 
   if(touchscreen_type == 2) {       // MCU ADC
   #ifdef MCU_IS_ESP32_S3
-    touchscreen_r_ptr_ = new TouchscreenResistive(TOUCHSCREEN_XP, TOUCHSCREEN_XM, TOUCHSCREEN_YP, TOUCHSCREEN_YM, 310);
+    touchscreen_r_ptr_ = new TouchscreenResistive(TOUCHSCREEN_XP, TOUCHSCREEN_XM_ADC(), TOUCHSCREEN_YP_ADC, TOUCHSCREEN_YM, 310);
     analogReadResolution(kAdcResolutionBits);
     touchscreen_r_ptr_->setAdcResolutionAndThreshold(kAdcResolutionBits);
     SetTouchscreenCalibration(xMin, xMax, yMin, yMax);

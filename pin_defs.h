@@ -20,30 +20,30 @@ extern uint8_t My_Hw_Version;
   const uint8_t TFT_RST = 14;  // Or set to -1 and connect to Arduino RESET pin
   const uint8_t TFT_DC = 21;
   //  controls TFT Display backlight as output of PWM pin. analogWrite works on PWM not ADC.
-  static uint8_t TFT_BL() { return (My_Hw_Version == 0x01 ? 47 : (My_Hw_Version == 0x02 ? 6 : 0xff)); }
+  const uint8_t TFT_BL = 47;
 
-  const uint8_t TS_CIPO = 13;    // don't connect CIPO (MISO) to TFT
+  const uint8_t TS_CIPO = 13;    // don't connect CIPO (MISO) to Display
   const uint8_t TS_CS_PIN = 17;
   const uint8_t TS_IRQ_PIN = 48;
 
   // Sqw Alarm Interrupt Pin
+  static uint8_t SDA_PIN() { return (My_Hw_Version == 0x01 ? 8 : (My_Hw_Version == 0x02 ? 16 : 0xff)); }
+  static uint8_t SCL_PIN() { return (My_Hw_Version == 0x01 ? 9 : (My_Hw_Version == 0x02 ? 17 : 0xff)); }
   const uint8_t SQW_INT_PIN = 18;
-  const uint8_t SDA_PIN = 8;
-  const uint8_t SCL_PIN = 9;
-  const uint8_t BUTTON_PIN = 1;
+  static uint8_t BUTTON_PIN() { return (My_Hw_Version == 0x01 ? 1 : (My_Hw_Version == 0x02 ? 8 : 0xff)); }
   const uint8_t INC_BUTTON_PIN = 2;
   const uint8_t DEC_BUTTON_PIN = 42;
   // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  const uint8_t LED_PIN = 41;
-  const uint8_t WIFI_LED = 39;
-  const uint8_t BUZZER_PIN = 16;
+  static uint8_t LED_PIN() { return (My_Hw_Version == 0x01 ? 41 : (My_Hw_Version == 0x02 ? 6 : 0xff)); }
+  static uint8_t WIFI_LED() { return (My_Hw_Version == 0x01 ? 39 : 0xff); }
+  static uint8_t BUZZER_PIN() { return (My_Hw_Version == 0x01 ? 16 : (My_Hw_Version == 0x02 ? 38 : 0xff)); }
   const uint8_t DEBUG_PIN = 40;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
-  const uint8_t PHOTORESISTOR_PIN = 4;    // ADC1 GPIO
-  const uint8_t RGB_LED_STRIP_PIN = 15;
-  const uint8_t TOUCH_PIN_5 = 5;
+  static uint8_t PHOTORESISTOR_PIN() { return (My_Hw_Version == 0x01 ? 4 : (My_Hw_Version == 0x02 ? 7 : 0xff)); }    // ADC1 GPIO
+  static uint8_t RGB_LED_STRIP_PIN() { return (My_Hw_Version == 0x01 ? 15 : (My_Hw_Version == 0x02 ? 5 : 0xff)); }
+  // const uint8_t TOUCH_PIN_5 = 5;
   const uint8_t TOUCHSCREEN_XP = 19;
-  const uint8_t TOUCHSCREEN_XM = 7;   // ADC1 GPIO
-  const uint8_t TOUCHSCREEN_YP = 3;   // ADC1 GPIO
+  static uint8_t TOUCHSCREEN_XM_ADC() { return (My_Hw_Version == 0x01 ? 7 : (My_Hw_Version == 0x02 ? 9 : 0xff)); }     // ADC1 GPIO
+  const uint8_t TOUCHSCREEN_YP_ADC = 3;   // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YM = 20;
 
 
@@ -61,27 +61,27 @@ extern uint8_t My_Hw_Version;
   const uint8_t TFT_RST = 33;  // Or set to -1 and connect to Arduino RESET pin
   const uint8_t TFT_DC = 38;
   //  controls TFT Display backlight as output of PWM pin. analogWrite works on PWM not ADC.
-  static const uint8_t TFT_BL() { return 17; }
+  const uint8_t TFT_BL = 17;
 
-  const uint8_t TS_CIPO = 37;    // don't connect CIPO (MISO) to TFT
+  const uint8_t TS_CIPO = 37;    // don't connect CIPO (MISO) to Display
   const uint8_t TS_CS_PIN = 2;
   const uint8_t TS_IRQ_PIN = 3;
 
   // Sqw Alarm Interrupt Pin
+  static uint8_t SDA_PIN() { return 8; }
+  static uint8_t SCL_PIN() { return 9; }
   const uint8_t SQW_INT_PIN = 7;
-  const uint8_t SDA_PIN = 8;
-  const uint8_t SCL_PIN = 9;
-  const uint8_t BUTTON_PIN = 6;
+  static uint8_t BUTTON_PIN() { return 6; }
   const uint8_t INC_BUTTON_PIN = 10;
   const uint8_t DEC_BUTTON_PIN = 11;
   // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  const uint8_t LED_PIN = 5;
+  static uint8_t LED_PIN() { return 5; }
   // const uint8_t LED_BUILTIN = 15;   // pre-defined
-  const uint8_t WIFI_LED = 15;
-  const uint8_t BUZZER_PIN = 4;
+  static uint8_t WIFI_LED() { return 15; }
+  static const uint8_t BUZZER_PIN() { return 4; }
   const uint8_t DEBUG_PIN = 21;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug
-  const uint8_t PHOTORESISTOR_PIN = 1;
-  const uint8_t RGB_LED_STRIP_PIN = 14;
+  static const uint8_t PHOTORESISTOR_PIN() { return 1; }
+  static uint8_t RGB_LED_STRIP_PIN() { return 14; }
 
 
 
@@ -99,27 +99,27 @@ extern uint8_t My_Hw_Version;
   const uint8_t TFT_RST = 27;  // Or set to -1 and connect to Arduino RESET pin
   const uint8_t TFT_DC = 26;
   //  controls TFT Display backlight as output of PWM pin. analogWrite works on PWM not ADC.
-  static const uint8_t TFT_BL() { return 14; }
+  const uint8_t TFT_BL = 14;
 
-  const uint8_t TS_CIPO = 19;    // don't connect CIPO (MISO) to TFT
+  const uint8_t TS_CIPO = 19;    // don't connect CIPO (MISO) to Display
   const uint8_t TS_CS_PIN = 33;
   const uint8_t TS_IRQ_PIN = 34;
 
   // Sqw Alarm Interrupt Pin
+  static uint8_t SDA_PIN() { return 21; }
+  static uint8_t SCL_PIN() { return 22; }
   const uint8_t SQW_INT_PIN = 4;
-  const uint8_t SDA_PIN = 21;
-  const uint8_t SCL_PIN = 22;
-  const uint8_t BUTTON_PIN = 35;
+  static uint8_t BUTTON_PIN() { return 35; }
   #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
   const uint8_t INC_BUTTON_PIN = 34;
   const uint8_t DEC_BUTTON_PIN = 33;
-  const uint8_t LED_PIN = 32;
+  static uint8_t LED_PIN() { return 32; }
   // const uint8_t LED_BUILTIN = 2;
-  const uint8_t WIFI_LED = 2;
-  const uint8_t BUZZER_PIN = 13;
+  static uint8_t WIFI_LED() { return 2; }
+  static const uint8_t BUZZER_PIN() { return 13; }
   const uint8_t DEBUG_PIN = 12;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
-  const uint8_t PHOTORESISTOR_PIN = 25;
-  const uint8_t RGB_LED_STRIP_PIN = 5;
+  static const uint8_t PHOTORESISTOR_PIN() { return 25; }
+  static uint8_t RGB_LED_STRIP_PIN() { return 5; }
 
 
 #endif

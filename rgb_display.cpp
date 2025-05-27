@@ -9,7 +9,7 @@ void RGBDisplay::Setup() {
   /* INITIALIZE DISPLAYS */
 
   // tft display backlight control PWM output pin
-  pinMode(TFT_BL(), OUTPUT);
+  pinMode(TFT_BL, OUTPUT);
 
 #if defined(DISPLAY_IS_ST7789V)
 
@@ -84,7 +84,7 @@ void RGBDisplay::Setup() {
 
   if(use_photoresistor) {
     // configure Photoresistor pin
-    pinMode(PHOTORESISTOR_PIN, INPUT);
+    pinMode(PHOTORESISTOR_PIN(), INPUT);
     analogReadResolution(kAdcResolutionBits);
   }
   ReAdjustDisplayBrightness();
@@ -109,7 +109,7 @@ void RGBDisplay::RotateScreen() {
 // set display brightness function
 void RGBDisplay::SetBrightness(int brightness) {
   if(current_brightness_ != brightness) {
-    analogWrite(TFT_BL(), brightness);
+    analogWrite(TFT_BL, brightness);
     current_brightness_ = brightness;
     #ifdef MORE_LOGS
       PrintLn("Display Brightness set to ", brightness);
@@ -133,7 +133,7 @@ void RGBDisplay::SetMaxBrightness() {
 }
 
 void RGBDisplay::CheckPhotoresistorAndSetBrightness() {
-  int photodiode_light_raw = analogRead(PHOTORESISTOR_PIN);
+  int photodiode_light_raw = analogRead(PHOTORESISTOR_PIN());
   // int lcd_brightness_val = max(photodiode_light_raw * kBrightnessInactiveMax / kPhotodiodeLightRawMax, 1);
   int lcd_brightness_val2 = max((int)map(photodiode_light_raw, 0.2 / 3.3 * kPhotodiodeLightRawMax, kPhotodiodeLightRawMax, (kNightBrightness + min_brightness_adder), kBrightnessInactiveMax), (kNightBrightness + min_brightness_adder));
   if(rgb_led_strip_on)

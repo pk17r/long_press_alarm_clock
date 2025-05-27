@@ -82,7 +82,7 @@ private:
    */
   const char* kHwVersionKey = "HwVersion";
   #if defined(MCU_IS_ESP32_S3)
-    const uint8_t kHwVersion = 0x01;
+    const uint8_t kHwVersion = 0x02;
   #elif defined(MCU_IS_ESP32_S2_MINI)
     const uint8_t kHwVersion = 0x01;
   #elif defined(MCU_IS_ESP32_WROOM_DA_MODULE)
@@ -135,7 +135,8 @@ private:
   const uint8_t kAlarmLongPressSeconds = 15;
 
   const char* kBuzzerFrequencyKey = "BuzzerFreq";
-  const uint16_t kBuzzerFrequency = 2731;       // older selection of 12085 through hole buzzer had 2048Hz rated frequency. New selection of KLJ-7525-5027 SMD buzzer has 2731Hz as rated frequency.
+  const uint16_t kBuzzerFrequency_HW1 = 2731;       // older selection of 12085 through hole buzzer had 2048Hz rated frequency. New selection of KLJ-7525-5027 SMD buzzer has 2731Hz as rated frequency.
+  const uint16_t kBuzzerFrequency_HW2 = 3100;       // KSSGJ4D20-H SMD buzzer has 3100Hz as rated frequency.
 
   const char* kFirmwareVersionKey = "FwVersion";  // 6 bytes
 

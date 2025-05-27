@@ -9,7 +9,10 @@ RTC::RTC() {
   /* INITIALIZE RTC */
 
   // initialize Wire lib
-  URTCLIB_WIRE.begin(SDA_PIN, SCL_PIN);
+  // URTCLIB_WIRE.setPins(SDA_PIN(), SCL_PIN());
+  // URTCLIB_WIRE = Wire;
+  // Wire.setPins(SDA_PIN(), SCL_PIN());
+  URTCLIB_WIRE.begin(SDA_PIN(), SCL_PIN());
 
   // setup DS1307/DS3231 rtc
   RtcSetup();

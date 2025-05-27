@@ -11,8 +11,8 @@ void AlarmClock::Setup() {
   // setup alarm clock program
 
   // initialize buzzer
-  pinMode(BUZZER_PIN, OUTPUT);
-  digitalWrite(BUZZER_PIN, LOW);
+  pinMode(BUZZER_PIN(), OUTPUT);
+  digitalWrite(BUZZER_PIN(), LOW);
 
   // retrieve alarm settings
   nvs_preferences->RetrieveAlarmSettings(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_);
@@ -150,7 +150,7 @@ void IRAM_ATTR AlarmClock::PassiveBuzzerTimerISR() {
     LedFeedback(beep_toggle_);
   }
   buzzer_square_wave_toggle_ = !buzzer_square_wave_toggle_;
-  digitalWrite(BUZZER_PIN, buzzer_square_wave_toggle_ && beep_toggle_);
+  digitalWrite(BUZZER_PIN(), buzzer_square_wave_toggle_ && beep_toggle_);
 }
 
 void AlarmClock::BuzzerEnable() {
@@ -188,7 +188,7 @@ void AlarmClock::BuzzerDisable() {
   // Code for version 2.x
     timerAlarmDisable(passive_buzzer_timer_ptr_);
   #endif
-  digitalWrite(BUZZER_PIN, LOW);
+  digitalWrite(BUZZER_PIN(), LOW);
   LedFeedback(LOW);
   buzzer_square_wave_toggle_ = false;
   beep_toggle_ = false;
@@ -224,10 +224,10 @@ void AlarmClock::playNote(int frequency, int duration, bool hold) {
     // For a note that's held play it a little longer than the specified duration
     // so it blends into the next tone (but there's still a small delay to
     // hear the next note).
-    tone(BUZZER_PIN, frequency, duration + duration / 32);
+    tone(BUZZER_PIN(), frequency, duration + duration / 32);
   } else {
     // For a note that isn't held just play it for the specified duration.
-    tone(BUZZER_PIN, frequency, duration);
+    tone(BUZZER_PIN(), frequency, duration);
   }
 }
 
