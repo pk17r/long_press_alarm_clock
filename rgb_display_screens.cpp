@@ -1315,7 +1315,7 @@ void RGBDisplay::Screensaver() {
 
     // WiFi Connected Symbol
     if(wifi_stuff->wifi_connected_) {
-      my_canvas_->drawBitmap(screensaver_w_ - kWiFiSymWidth - 2, kWiFiSymY1, kWiFiSymBitmap, kWiFiSymWidth, kWiFiSymHeight, kDisplayColorWhite); // Copy to screen
+      my_canvas_->drawBitmap(screensaver_w_ - kWiFiSymWidth - 2, 2, kWiFiSymBitmap, kWiFiSymWidth, kWiFiSymHeight, kDisplayColorWhite); // Copy to screen
       screensaver_wifi_flag_active = true;
     }
     else
