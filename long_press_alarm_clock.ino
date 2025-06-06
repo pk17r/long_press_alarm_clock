@@ -1758,7 +1758,7 @@ void PopulateDisplayPages() {
 
   // MAIN PAGE
   display_pages_vec[kMainPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ /* No Selection */ kCursorNoSelection, kClickButtonWithIcon, "", true, 0, 0, 0, 0, "" },
+    new DisplayButton{ /* No Selection */ kCursorNoSelection, kClickButtonWithIcon, "", true, -5, -5, 0, 0, "" },
     new DisplayButton{ /* Settings Wheel */ kMainPageSettingsWheel, kClickButtonWithIcon, "", true, kSettingsGearX1, kSettingsGearY1, kSettingsGearWidth, kSettingsGearHeight, "" },
     new DisplayButton{ /* Alarms Row     */ kMainPageSetAlarm, kClickButtonWithIcon, "", true, 1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, "" },
   };
