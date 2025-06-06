@@ -5,8 +5,8 @@
 
 // SELECT MCU
 
-// #define MCU_IS_ESP32_S3
-#define MCU_IS_ESP32_S2_MINI
+#define MCU_IS_ESP32_S3
+// #define MCU_IS_ESP32_S2_MINI
 // #define MCU_IS_ESP32_WROOM_DA_MODULE
 
 

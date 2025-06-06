@@ -792,6 +792,10 @@ void RGBDisplay::DisplayCurrentPage() {
   }
   tft.print(title_str.c_str());
 
+  // WiFi Connected Symbol
+  if(wifi_stuff->wifi_connected_)
+    tft.drawBitmap(kWiFiSymX1, kWiFiSymY1, kWiFiSymBitmap, kWiFiSymWidth, kWiFiSymHeight, kDisplayColorBlue); // Copy to screen
+
   // Page Body
   for (int i = 0; i < display_pages_vec[current_page].size(); i++) {
     DisplayCurrentPageButtonRow(i, false);
@@ -1215,6 +1219,11 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
 void RGBDisplay::Screensaver() {
   const int16_t GAP_BAND = 5;
   const uint16_t kMinGapToMoveCanvas = 10;
+
+  static bool screensaver_wifi_flag_active = false;
+  if(screensaver_wifi_flag_active != wifi_stuff->wifi_connected_)
+    refresh_screensaver_canvas_ = true;
+
   if(refresh_screensaver_canvas_) {
     #ifdef MORE_LOGS
     // map time
@@ -1303,6 +1312,14 @@ void RGBDisplay::Screensaver() {
     if(screensaver_bounce_not_fly_horizontally_ && screensaver_w_ >= kTftWidth - kMinGapToMoveCanvas) {
       screensaver_x1_ = ((int16_t)kTftWidth - (int16_t)screensaver_w_) / 2;
     }
+
+    // WiFi Connected Symbol
+    if(wifi_stuff->wifi_connected_) {
+      my_canvas_->drawBitmap(screensaver_w_ - kWiFiSymWidth - 2, kWiFiSymY1, kWiFiSymBitmap, kWiFiSymWidth, kWiFiSymHeight, kDisplayColorWhite); // Copy to screen
+      screensaver_wifi_flag_active = true;
+    }
+    else
+      screensaver_wifi_flag_active = false;
 
     if(rtc->year() < 2024) {
       IncorrectTimeBanner();
@@ -1403,23 +1420,23 @@ void RGBDisplay::DisplayTimeUpdate() {
       FastDrawTwoColorBitmapSpi(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0IncorrectTime, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
     }
     else {
-      my_canvas_ = new GFXcanvas1(kTftWidth, kTimeRowY0 + 6);
-      my_canvas_->fillScreen(kDisplayBackroundColor);
-      my_canvas_->setTextWrap(false);
+      GFXcanvas16* my_canvas16_ = new GFXcanvas16(kTftWidth, kTimeRowY0 + 6);
+      my_canvas16_->fillScreen(kDisplayBackroundColor);
+      my_canvas16_->setTextWrap(false);
 
       // HH:MM
 
       // set font
-      my_canvas_->setFont(&FreeSansBold48pt7b);
+      my_canvas16_->setFont(&FreeSansBold48pt7b);
 
       // home the cursor
-      my_canvas_->setCursor(kTimeRowX0 + hh_gap_x, kTimeRowY0);
+      my_canvas16_->setCursor(kTimeRowX0 + hh_gap_x, kTimeRowY0);
 
       // change the text color to foreground color
-      my_canvas_->setTextColor(kDisplayTimeColor);
+      my_canvas16_->setTextColor(kDisplayTimeColor);
 
       // draw the new time value
-      my_canvas_->print(new_display_data_.time_HHMM);
+      my_canvas16_->print(new_display_data_.time_HHMM);
       // tft.setTextSize(1);
       // delay(2000);
 
@@ -1429,23 +1446,23 @@ void RGBDisplay::DisplayTimeUpdate() {
 
       // AM/PM
 
-      int16_t x0_pos = my_canvas_->getCursorX();
+      int16_t x0_pos = my_canvas16_->getCursorX();
 
       // set font
-      my_canvas_->setFont(&FreeSans18pt7b);
+      my_canvas16_->setFont(&FreeSans18pt7b);
 
       // draw new AM/PM
       if(new_display_data_._12_hour_mode) {
 
         // home the cursor
-        my_canvas_->setCursor(x0_pos + kDisplayTextGap, kAM_PM_row_Y0);
+        my_canvas16_->setCursor(x0_pos + kDisplayTextGap, kAM_PM_row_Y0);
         // Serial.print("tft_AmPm_x0 "); Serial.print(tft_AmPm_x0); Serial.print(" y0 "); Serial.print(tft_AmPm_y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
 
         // draw the new time value
         if(new_display_data_.pm_not_am)
-          my_canvas_->print(kPmLabel);
+          my_canvas16_->print(kPmLabel);
         else
-          my_canvas_->print(kAmLabel);
+          my_canvas16_->print(kAmLabel);
       }
 
       // and remember the new value
@@ -1456,16 +1473,29 @@ void RGBDisplay::DisplayTimeUpdate() {
       // :SS
 
       // home the cursor
-      my_canvas_->setCursor(x0_pos + kDisplayTextGap, kTimeRowY0);
+      my_canvas16_->setCursor(x0_pos + kDisplayTextGap, kTimeRowY0);
 
       // draw the new time value
-      my_canvas_->print(new_display_data_.time_SS);
+      my_canvas16_->print(new_display_data_.time_SS);
 
       // and remember the new value
       strcpy(displayed_data_.time_SS, new_display_data_.time_SS);
 
+      // WiFi Connected Symbol
+      if(wifi_stuff->wifi_connected_)
+        my_canvas16_->drawBitmap(kWiFiSymX1, kWiFiSymY1, kWiFiSymBitmap, kWiFiSymWidth, kWiFiSymHeight, kDisplayColorBlue); // Copy to screen
+
       // draw canvas to tft   fastDrawBitmap
-      FastDrawTwoColorBitmapSpi(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0 + 6, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
+      // FastDrawTwoColorBitmapSpi(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0 + 6, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
+      tft.drawRGBBitmap(0, 0, my_canvas16_->getBuffer(), kTftWidth, kTimeRowY0 + 6); // Copy to screen
+
+      // delete created canvas and null the pointer
+      delete my_canvas16_;
+
+      // WiFi Connected Symbol
+      // if(wifi_stuff->wifi_connected_)
+      //   tft.drawBitmap(kWiFiSymX1, 0, kWiFiSymBitmap, kWiFiSymWidth, kWiFiSymHeight, kDisplayColorBlue); // Copy to screen
+
     }
 
     // delete created canvas and null the pointer
@@ -1537,7 +1567,7 @@ void RGBDisplay::DisplayTimeUpdate() {
       // clear old AM/PM
       if(rtc->second() != 0 && !isThisTheFirstTime && displayed_data_._12_hour_mode) {
         // home the cursor
-        tft.setCursor(tft_AmPm_x0_, tft_AmPm_y0_);
+        tft.setCursor(tft_AmPm_x0_, kAM_PM_row_Y0);
 
         // change the text color to the background color
         tft.setTextColor(kDisplayBackroundColor);
@@ -1553,10 +1583,9 @@ void RGBDisplay::DisplayTimeUpdate() {
       if(new_display_data_._12_hour_mode) {
         // set test location of Am/Pm
         tft_AmPm_x0_ = kTimeRowX0 + hh_gap_x + gap_right_x_ + tft_HHMM_w_ + 2 * kDisplayTextGap;
-        tft_AmPm_y0_ = kTimeRowY0 + gap_up_y_ / 2;
 
         // home the cursor
-        tft.setCursor(tft_AmPm_x0_, tft_AmPm_y0_);
+        tft.setCursor(tft_AmPm_x0_, kAM_PM_row_Y0);
         // Serial.print("tft_AmPm_x0 "); Serial.print(tft_AmPm_x0); Serial.print(" y0 "); Serial.print(tft_AmPm_y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
 
         // change the text color to the background color
@@ -1568,12 +1597,8 @@ void RGBDisplay::DisplayTimeUpdate() {
         tft.getTextBounds((new_display_data_.pm_not_am ? kPmLabel : kAmLabel), tft.getCursorX(), tft.getCursorY(), &tft_AmPm_x1, &tft_AmPm_y1, &tft_AmPm_w, &tft_AmPm_h);
         // Serial.print("AmPm_x1 "); Serial.print(tft_AmPm_x1); Serial.print(" y1 "); Serial.print(tft_AmPm_y1); Serial.print(" w "); Serial.print(tft_AmPm_w); Serial.print(" h "); Serial.println(tft_AmPm_h); 
 
-        // calculate tft_AmPm_y0 to align top with HH:MM
-        tft_AmPm_y0_ -= tft_AmPm_y1 - kTimeRowY0 - gap_up_y_;
-        // Serial.print("tft_AmPm_y0 "); Serial.println(tft_AmPm_y0);
-
         // home the cursor
-        tft.setCursor(tft_AmPm_x0_, tft_AmPm_y0_);
+        tft.setCursor(tft_AmPm_x0_, kAM_PM_row_Y0);
 
         // change the text color to foreground color
         tft.setTextColor(kDisplayTimeColor);
@@ -1593,7 +1618,7 @@ void RGBDisplay::DisplayTimeUpdate() {
     // :SS string
     if (rtc->second() == 0 || strcmp(new_display_data_.time_SS, displayed_data_.time_SS) != 0 || redraw_display_) {
       // set font
-      tft.setFont(&FreeSans24pt7b);
+      tft.setFont(&FreeSans18pt7b);
 
       // clear old seconds
       if(rtc->second() != 0 && !isThisTheFirstTime) {
@@ -1625,6 +1650,13 @@ void RGBDisplay::DisplayTimeUpdate() {
       // and remember the new value
       strcpy(displayed_data_.time_SS, new_display_data_.time_SS);
     }
+
+    // WiFi Connected Symbol
+    if(wifi_stuff->wifi_connected_)
+      tft.drawBitmap(kWiFiSymX1, 0, kWiFiSymBitmap, kWiFiSymWidth, kWiFiSymHeight, kDisplayColorBlue); // Copy to screen
+    else
+      tft.drawBitmap(kWiFiSymX1, 0, kWiFiSymBitmap, kWiFiSymWidth, kWiFiSymHeight, kDisplayBackroundColor); // Copy to screen
+
   }
 
   // date string center aligned
