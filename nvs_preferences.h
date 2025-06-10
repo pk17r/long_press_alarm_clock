@@ -84,7 +84,7 @@ private:
   #if defined(MCU_IS_ESP32_S3)
     const uint8_t kHwVersion = 0x02;
   #elif defined(MCU_IS_ESP32_S2_MINI)
-    const uint8_t kHwVersion = 0x01;
+    const uint8_t kHwVersion = 0x02;
   #elif defined(MCU_IS_ESP32_WROOM_DA_MODULE)
     const uint8_t kHwVersion = 0x01;
   #endif
@@ -170,25 +170,26 @@ private:
   const uint8_t kScreenOrientation = 3;
 
   const char* kTouchscreenTypeKey = "Touchscreen";
-  const uint8_t kTouchscreenType = 1;       // 0 = no touch, 1 = Resistive read using XPT2046, 2 = Resistive read using MCU ADC
+  const uint8_t kTouchscreenType = (kHwVersion == 1 ? 1 : 2);       // 0 = no touch, 1 = Resistive read using XPT2046, 2 = Resistive read using MCU ADC
+  
 
   const char* kTouchscreenFlipKey = "TouchFlip";
   const bool kTouchscreenFlip = true;
 
   // touchscreen calibration
   // if(touchscreen_type == 1) // XPT2046     232, 3686, 221, 3767
-  // if(touchscreen_type == 2) // MCU ADC     41, 881, 113, 914
+  // if(touchscreen_type == 2) // MCU ADC     for HW2   94, 1147, 161, 1131      for HW1   41, 881, 113, 914
   const char* kTouchCalibXMinKey = "TouchCalibXMin";
-  const int16_t kTouchCalibXMin = (kTouchscreenType == 1 ? 232 : 41);
+  const int16_t kTouchCalibXMin = (kTouchscreenType == 1 ? 232 : 94);
   const char* kTouchCalibXMaxKey = "TouchCalibXMax";
-  const int16_t kTouchCalibXMax = (kTouchscreenType == 1 ? 3686 : 881);
+  const int16_t kTouchCalibXMax = (kTouchscreenType == 1 ? 3686 : 1147);
   const char* kTouchCalibYMinKey = "TouchCalibYMin";
-  const int16_t kTouchCalibYMin = (kTouchscreenType == 1 ? 221 : 113);
+  const int16_t kTouchCalibYMin = (kTouchscreenType == 1 ? 221 : 161);
   const char* kTouchCalibYMaxKey = "TouchCalibYMax";
-  const int16_t kTouchCalibYMax = (kTouchscreenType == 1 ? 3767 : 914);
+  const int16_t kTouchCalibYMax = (kTouchscreenType == 1 ? 3767 : 1131);
 
   const char* kRtcTypeKey = "RtcType";
-  const uint8_t kRtcType = 2;     // 1 = URTCLIB_MODEL_DS1307, 2 = URTCLIB_MODEL_DS3231
+  const uint8_t kRtcType = (kHwVersion == 1 ? 2 : 1);     // 1 = URTCLIB_MODEL_DS1307, 2 = URTCLIB_MODEL_DS3231
 
 };
 

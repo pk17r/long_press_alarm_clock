@@ -5,9 +5,7 @@
 #ifdef XPT2046_OPTION
 #include <XPT2046_Touchscreen.h>
 #endif
-#ifdef MCU_IS_ESP32_S3
 #include <TouchscreenResistive.h>
-#endif
 
 // struct declerations
 struct TouchPixel {
@@ -51,10 +49,8 @@ private:
   XPT2046_Touchscreen* touchscreen_ptr_ = NULL;
 #endif
 
-#ifdef MCU_IS_ESP32_S3
   // Direct touchscreen measurements using MCU ADC
   TouchscreenResistive* touchscreen_r_ptr_ = NULL;
-#endif
 
 // FUNCTIONS
 

@@ -31,8 +31,8 @@ extern uint8_t My_Hw_Version;
   static uint8_t SCL_PIN() { return (My_Hw_Version == 0x01 ? 9 : (My_Hw_Version == 0x02 ? 17 : 0xff)); }
   const uint8_t SQW_INT_PIN = 18;
   static uint8_t BUTTON_PIN() { return (My_Hw_Version == 0x01 ? 1 : (My_Hw_Version == 0x02 ? 8 : 0xff)); }
-  const uint8_t INC_BUTTON_PIN = 2;
-  const uint8_t DEC_BUTTON_PIN = 42;
+  static uint8_t INC_BUTTON_PIN() { return (My_Hw_Version == 0x01 ? 2 : 0xff); }
+  static uint8_t DEC_BUTTON_PIN() { return (My_Hw_Version == 0x01 ? 42 : 0xff); }
   // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
   static uint8_t LED_PIN() { return (My_Hw_Version == 0x01 ? 41 : (My_Hw_Version == 0x02 ? 6 : 0xff)); }
   static uint8_t WIFI_LED() { return (My_Hw_Version == 0x01 ? 39 : 0xff); }
@@ -68,20 +68,20 @@ extern uint8_t My_Hw_Version;
   const uint8_t TS_IRQ_PIN = 3;
 
   // Sqw Alarm Interrupt Pin
-  static uint8_t SDA_PIN() { return (My_Hw_Version == 0x01 ? 8 : (My_Hw_Version == 0x02 ? 5 : 0xff)); }
-  static uint8_t SCL_PIN() { return (My_Hw_Version == 0x01 ? 9 : (My_Hw_Version == 0x02 ? 6 : 0xff)); }
+  static uint8_t SDA_PIN() { return (My_Hw_Version == 0x01 ? 8 : (My_Hw_Version == 0x02 ? 4 : 0xff)); }
+  static uint8_t SCL_PIN() { return (My_Hw_Version == 0x01 ? 9 : (My_Hw_Version == 0x02 ? 5 : 0xff)); }
   const uint8_t SQW_INT_PIN = 7;
   static uint8_t BUTTON_PIN() { return (My_Hw_Version == 0x01 ? 6 : (My_Hw_Version == 0x02 ? 8 : 0xff)); }
-  const uint8_t INC_BUTTON_PIN = 10;
-  const uint8_t DEC_BUTTON_PIN = 11;
+  static uint8_t INC_BUTTON_PIN() { return (My_Hw_Version == 0x01 ? 10 : 0xff); }
+  static uint8_t DEC_BUTTON_PIN() { return (My_Hw_Version == 0x01 ? 11 : 0xff); }
   // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  static uint8_t LED_PIN() { return (My_Hw_Version == 0x01 ? 5 : (My_Hw_Version == 0x02 ? 3 : 0xff)); }
+  static uint8_t LED_PIN() { return (My_Hw_Version == 0x01 ? 5 : (My_Hw_Version == 0x02 ? 2 : 0xff)); }
   // const uint8_t LED_BUILTIN = 15;   // pre-defined
   static uint8_t WIFI_LED() { return 15; }
   static const uint8_t BUZZER_PIN() { return (My_Hw_Version == 0x01 ? 4 : (My_Hw_Version == 0x02 ? 40 : 0xff)); }
   const uint8_t DEBUG_PIN = 21;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug
-  static const uint8_t PHOTORESISTOR_PIN() { return (My_Hw_Version == 0x01 ? 1 : (My_Hw_Version == 0x02 ? 4 : 0xff)); }
-  static uint8_t RGB_LED_STRIP_PIN() { return (My_Hw_Version == 0x01 ? 14 : (My_Hw_Version == 0x02 ? 2 : 0xff)); }
+  static const uint8_t PHOTORESISTOR_PIN() { return (My_Hw_Version == 0x01 ? 1 : (My_Hw_Version == 0x02 ? 3 : 0xff)); }
+  static uint8_t RGB_LED_STRIP_PIN() { return (My_Hw_Version == 0x01 ? 14 : (My_Hw_Version == 0x02 ? 1 : 0xff)); }
   const uint8_t TOUCHSCREEN_XP = 12;
   static uint8_t TOUCHSCREEN_XM_ADC() { return 10; }     // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YP_ADC = 9;   // ADC1 GPIO
@@ -114,8 +114,8 @@ extern uint8_t My_Hw_Version;
   const uint8_t SQW_INT_PIN = 4;
   static uint8_t BUTTON_PIN() { return 35; }
   #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  const uint8_t INC_BUTTON_PIN = 34;
-  const uint8_t DEC_BUTTON_PIN = 33;
+  static uint8_t INC_BUTTON_PIN() { return (My_Hw_Version == 0x01 ? 34 : 0xff); }
+  static uint8_t DEC_BUTTON_PIN() { return (My_Hw_Version == 0x01 ? 33 : 0xff); }
   static uint8_t LED_PIN() { return 32; }
   // const uint8_t LED_BUILTIN = 2;
   static uint8_t WIFI_LED() { return 2; }

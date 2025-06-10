@@ -216,8 +216,10 @@ void setup() {
 
   // initialize push button
   push_button = new PushButtonTaps(BUTTON_PIN());
-  inc_button = new PushButtonTaps(INC_BUTTON_PIN);
-  dec_button = new PushButtonTaps(DEC_BUTTON_PIN);
+  if(My_Hw_Version == 0x01) {
+    inc_button = new PushButtonTaps(INC_BUTTON_PIN());
+    dec_button = new PushButtonTaps(DEC_BUTTON_PIN());
+  }
 
   // initialize modules
   // setup rtc (needs to be before alarm clock)
@@ -305,8 +307,12 @@ void setup() {
 void loop() {
   // note if button pressed or touchscreen touched
   bool push_button_pressed = push_button->buttonActiveDebounced();
-  bool inc_button_pressed = inc_button->buttonActiveDebounced();
-  bool dec_button_pressed = dec_button->buttonActiveDebounced();
+  bool inc_button_pressed = false;
+  if(inc_button_pressed != NULL)
+    inc_button_pressed = inc_button->buttonActiveDebounced();
+  bool dec_button_pressed = false;
+  if(dec_button != NULL)
+    dec_button_pressed = dec_button->buttonActiveDebounced();
 
   // if user presses main LED Push button, show instant response by turning On LED
   LedFeedback(push_button_pressed);
