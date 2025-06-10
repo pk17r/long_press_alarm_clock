@@ -151,7 +151,9 @@ void setup() {
   // a delay to let currents stabalize and not have phantom serial inputs
   delay(200);
   Serial.begin(115200);
-  // while (!Serial);
+  // while (!Serial) {
+  //   delay(500);
+  // }
   Serial.println(F("\nSerial OK"));
   PrintLn("Hellow World!");
 
@@ -308,7 +310,7 @@ void loop() {
   // note if button pressed or touchscreen touched
   bool push_button_pressed = push_button->buttonActiveDebounced();
   bool inc_button_pressed = false;
-  if(inc_button_pressed != NULL)
+  if(inc_button != NULL)
     inc_button_pressed = inc_button->buttonActiveDebounced();
   bool dec_button_pressed = false;
   if(dec_button != NULL)
@@ -1570,7 +1572,11 @@ void TurnOffRgbStrip() {
 }
 
 bool AnyButtonPressed() {
-  if(push_button->buttonActiveDebounced() || inc_button->buttonActiveDebounced() || dec_button->buttonActiveDebounced())
+  if(push_button->buttonActiveDebounced())
+    return true;
+  else if((inc_button != NULL) &&  inc_button->buttonActiveDebounced())
+    return true;
+  else if((dec_button != NULL) &&  dec_button->buttonActiveDebounced())
     return true;
   else
     return false;

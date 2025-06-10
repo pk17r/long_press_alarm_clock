@@ -78,9 +78,9 @@ extern uint8_t My_Hw_Version;
   static uint8_t LED_PIN() { return (My_Hw_Version == 0x01 ? 5 : (My_Hw_Version == 0x02 ? 2 : 0xff)); }
   // const uint8_t LED_BUILTIN = 15;   // pre-defined
   static uint8_t WIFI_LED() { return 15; }
-  static const uint8_t BUZZER_PIN() { return (My_Hw_Version == 0x01 ? 4 : (My_Hw_Version == 0x02 ? 40 : 0xff)); }
+  static uint8_t BUZZER_PIN() { return (My_Hw_Version == 0x01 ? 4 : (My_Hw_Version == 0x02 ? 40 : 0xff)); }
   const uint8_t DEBUG_PIN = 21;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug
-  static const uint8_t PHOTORESISTOR_PIN() { return (My_Hw_Version == 0x01 ? 1 : (My_Hw_Version == 0x02 ? 3 : 0xff)); }
+  static uint8_t PHOTORESISTOR_PIN() { return (My_Hw_Version == 0x01 ? 1 : (My_Hw_Version == 0x02 ? 3 : 0xff)); }
   static uint8_t RGB_LED_STRIP_PIN() { return (My_Hw_Version == 0x01 ? 14 : (My_Hw_Version == 0x02 ? 1 : 0xff)); }
   const uint8_t TOUCHSCREEN_XP = 12;
   static uint8_t TOUCHSCREEN_XM_ADC() { return 10; }     // ADC1 GPIO
@@ -119,9 +119,9 @@ extern uint8_t My_Hw_Version;
   static uint8_t LED_PIN() { return 32; }
   // const uint8_t LED_BUILTIN = 2;
   static uint8_t WIFI_LED() { return 2; }
-  static const uint8_t BUZZER_PIN() { return 13; }
+  static uint8_t BUZZER_PIN() { return 13; }
   const uint8_t DEBUG_PIN = 12;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
-  static const uint8_t PHOTORESISTOR_PIN() { return 25; }
+  static uint8_t PHOTORESISTOR_PIN() { return 25; }
   static uint8_t RGB_LED_STRIP_PIN() { return 5; }
 
 
