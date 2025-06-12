@@ -375,13 +375,22 @@ void loop() {
   if (rtc->rtc_hw_sec_update_) {
     rtc->rtc_hw_sec_update_ = false;
 
+    #if defined(WIFI_IS_USED)
     // if time is lost because of power failure
-    if((rtc->year() < 2024) && !(wifi_stuff->incorrect_wifi_details_) && !(wifi_stuff->incorrect_zip_code)) {
+    if((rtc->year() < 2024) && !(wifi_stuff->could_not_connect_to_wifi_) && !(wifi_stuff->incorrect_zip_code)) {
       // PrintLn("**** Update RTC HW Time from NTP Server ****");
       // update time from NTP server
       AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
       WaitForExecutionOfSecondCoreTask();
     }
+
+    // auto update time at 45th second of every hour
+    if(!(wifi_stuff->incorrect_zip_code) && (rtc->minute() == 0) && (rtc->second() == 45)) {
+      // update time from NTP server
+      AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
+      // PrintLn("Get Time Update from NTP Server");
+    }
+    #endif
 
     // new minute!
     if (rtc->rtc_hw_min_update_) {
@@ -413,27 +422,18 @@ void loop() {
       }
 
       #if defined(WIFI_IS_USED)
-        // try to get weather info 5 mins before alarm time
-        if(alarm_clock->alarm_ON_ && (inactivity_millis > kInactivityMillisLimit) && !(wifi_stuff->incorrect_zip_code) && (alarm_clock->MinutesToAlarm() == 5)) {
+        // try to get weather info 2 mins before alarm time
+        if(alarm_clock->alarm_ON_ && (inactivity_millis > kInactivityMillisLimit) && !(wifi_stuff->incorrect_zip_code) && (alarm_clock->MinutesToAlarm() == 2)) {
           AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
-        }
-
-        // reset time updated today to false at midnight, for auto update of time at 3:05AM
-        if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 12)
-          wifi_stuff->auto_updated_time_today_ = false;
-
-        // auto update time at 3:05 AM  every morning
-        // (daylight savings time that kicks in and ends at 2AM in March and November once every year. At exactly 2AM, server time might not have updated)
-        // try for upto 55 times - once per min until successful time update
-        // time update will be checked using wifi_stuff->auto_updated_time_today_
-        if(!(wifi_stuff->incorrect_zip_code) && !(wifi_stuff->auto_updated_time_today_) && (rtc->hourModeAndAmPm() == 1 && rtc->hour() == 3 && rtc->minute() >= 5)) {
-          // update time from NTP server
-          AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
-          // PrintLn("Get Time Update from NTP Server");
         }
 
         // check for firmware update everyday
         if(rtc->todays_minutes == ota_update_minute) {
+
+          // reset wifi_stuff->incorrect_zip_code once everyday
+          if(wifi_stuff->incorrect_zip_code)
+            wifi_stuff->incorrect_zip_code = false;
+
           AddSecondCoreTaskIfNotThere(kFirmwareVersionCheck);
           WaitForExecutionOfSecondCoreTask();
         }
@@ -441,6 +441,14 @@ void loop() {
         // auto disconnect wifi if connected and inactivity millis is over limit
         if(wifi_stuff->wifi_connected_ && (inactivity_millis > kInactivityMillisLimit)) {
           AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
+        }
+
+        // reset wifi_stuff->could_not_connect_to_wifi_ after 5 mins
+        if(wifi_stuff->could_not_connect_to_wifi_) {
+          if(wifi_stuff->mins_from_last_wifi_connect_try_ < 5)
+            wifi_stuff->mins_from_last_wifi_connect_try_++;
+          else
+            wifi_stuff->could_not_connect_to_wifi_ = false;
         }
       #endif
 
@@ -573,7 +581,7 @@ void loop1() {
       // get today's weather info
       success = wifi_stuff->GetTodaysWeatherInfo();
     }
-    else if(current_task == kUpdateTimeFromNtpServer) {       // && ((wifi_stuff->last_ntp_server_time_update_time_ms == 0) || (millis() - wifi_stuff->last_ntp_server_time_update_time_ms > 10*1000))) {
+    else if(current_task == kUpdateTimeFromNtpServer) {
       // get time from NTP server
       success = wifi_stuff->GetTimeFromNtpServer();
       if(success)
@@ -1385,7 +1393,6 @@ void SerialUserInput() {
       PrintLn("**** Update RTC HW Time from NTP Server ****");
       #endif
       // update time from NTP server
-      wifi_stuff->auto_updated_time_today_ = false;
       AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
       break;
     case 'o':   // On Screen User Text Input

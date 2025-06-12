@@ -65,9 +65,7 @@ public:
   const unsigned long kFetchWeatherInfoMinIntervalMs = 5*1000;    //  5 seconds
   bool incorrect_zip_code = false;
 
-  bool auto_updated_time_today_ = false;   // auto update time once every day at 2:01 AM
   bool manual_time_update_successful_ = false;   // flag used to know if manual time update fetch was success
-  unsigned long last_ntp_server_time_update_time_ms = 0;
 
   std::string location_zip_code_ = "92104";
 
@@ -78,7 +76,8 @@ public:
   volatile bool wifi_connected_ = false;
 
   // flag to stop trying auto connect to WiFi
-  bool incorrect_wifi_details_ = false;
+  bool could_not_connect_to_wifi_ = false;
+  uint8_t mins_from_last_wifi_connect_try_ = 0;
 
   std::string soft_AP_IP = "";
   bool got_SAP_user_input_ = false;

@@ -30,7 +30,7 @@ WiFiStuff::WiFiStuff() {
 
 void WiFiStuff::SaveWiFiDetails() {
   nvs_preferences->SaveWiFiDetails(wifi_ssid_, wifi_password_);
-  incorrect_wifi_details_ = false;
+  could_not_connect_to_wifi_ = false;
 }
 
 std::string WiFiStuff::WiFiDetailsShortString() {
@@ -63,6 +63,7 @@ void WiFiStuff::SaveNewWeatherUnits() {
 bool WiFiStuff::TurnWiFiOn() {
 
   PrintLn(__func__);
+  mins_from_last_wifi_connect_try_ = 0;
   WiFi.mode(WIFI_STA);
   delay(1);
   WiFi.persistent(true);
@@ -86,7 +87,7 @@ bool WiFiStuff::TurnWiFiOn() {
     if(0x01 == My_Hw_Version)
       digitalWrite(WIFI_LED(), HIGH);
     wifi_connected_ = true;
-    incorrect_wifi_details_ = false;
+    could_not_connect_to_wifi_ = false;
   }
   else {
     #ifdef MORE_LOGS
@@ -95,7 +96,7 @@ bool WiFiStuff::TurnWiFiOn() {
     if(0x01 == My_Hw_Version)
       digitalWrite(WIFI_LED(), LOW);
     wifi_connected_ = false;
-    incorrect_wifi_details_ = true;
+    could_not_connect_to_wifi_ = true;
   }
 
   return wifi_connected_;
@@ -298,11 +299,6 @@ bool WiFiStuff::GetTimeFromNtpServer() {
 
       // RTC::SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_mode, uint8_t dayOfWeek_Sun_is_1, uint8_t day, uint8_t month_Jan_is_1, uint16_t year)
       returnVal = rtc->SetRtcTimeAndDate(seconds, minutes, hours, dayOfWeekSunday0 + 1, today, month, year);
-
-      if(returnVal) {
-        last_ntp_server_time_update_time_ms = millis();
-        auto_updated_time_today_ = true;
-      }
 
     }
 

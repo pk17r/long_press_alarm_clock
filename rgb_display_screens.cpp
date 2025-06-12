@@ -1822,9 +1822,9 @@ void RGBDisplay::IncorrectTimeBanner() {
   my_canvas_->setCursor(kDisplayTextGap, 70);
   my_canvas_->print("Time Update Required!");
   my_canvas_->setCursor(kDisplayTextGap, 90);
-  if(!(wifi_stuff->incorrect_wifi_details_) && !(wifi_stuff->incorrect_zip_code))
+  if(!(wifi_stuff->could_not_connect_to_wifi_) && !(wifi_stuff->incorrect_zip_code))
     my_canvas_->print("Updating Time using WiFi..");
-  else if(wifi_stuff->incorrect_wifi_details_)
+  else if(wifi_stuff->could_not_connect_to_wifi_)
     my_canvas_->print("Could not connect to WiFi.");
   else if(wifi_stuff->weather_fetch_error_message.size() > 0)
     my_canvas_->print(wifi_stuff->weather_fetch_error_message.c_str());
