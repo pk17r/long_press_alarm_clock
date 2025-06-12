@@ -2025,8 +2025,12 @@ void ButtonClickAction() {
         AddSecondCoreTaskIfNotThere(kConnectWiFi);
         WaitForExecutionOfSecondCoreTask();
         ButtonClickUiFeedback(kTurnOff);
+        // LedFeedback(false);
+        // display->DisplayWiFiConnectionStatus();
+        display->DisplayCurrentPage();
+        // delay(kUserInputDelayMs);
+        display->DisplayCursorHighlight(/*highlight_On = */ true);
         LedFeedback(false);
-        display->DisplayWiFiConnectionStatus();
       }
       else if(current_cursor == kWiFiSettingsPageDisconnect) {
         LedFeedback(true);
@@ -2034,7 +2038,11 @@ void ButtonClickAction() {
         AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
         WaitForExecutionOfSecondCoreTask();
         ButtonClickUiFeedback(kTurnOff);
-        display->DisplayWiFiConnectionStatus();
+        // display->DisplayWiFiConnectionStatus();
+        // LedFeedback(false);
+        display->DisplayCurrentPage();
+        delay(kUserInputDelayMs);
+        display->DisplayCursorHighlight(/*highlight_On = */ true);
         LedFeedback(false);
       }
       else if(current_cursor == kPageBackButton) {
