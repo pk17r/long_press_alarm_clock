@@ -133,10 +133,17 @@ void RTC::RtcSetup() {
   // // make RTC class object _second equal to rtcHw second; + 2 seconds to let time synchronization happen on first time 60 seconds hitting
   // second_ = rtc_hw_.second() + 2;
 
+  // set seconds interrupt
+  SetSecondsInterrupt(/*set = */ true);
+}
+
+void RTC::SetSecondsInterrupt(bool set) {
   // seconds interrupt pin
   pinMode(SQW_INT_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(SQW_INT_PIN), SecondsUpdateInterruptISR, RISING);
-
+  if(set)
+    attachInterrupt(digitalPinToInterrupt(SQW_INT_PIN), SecondsUpdateInterruptISR, RISING);
+  else
+    detachInterrupt(digitalPinToInterrupt(SQW_INT_PIN));
 }
 
 // private function to refresh time from RTC HW and do basic power failure checks
@@ -146,7 +153,7 @@ void RTC::Refresh() {
   rtc_hw_.refresh();
   rtc_refresh_reqd_ = false;
 
-  // make _second equal to rtcHw seconds -> should be 0
+  // make _second equal to rtcHw seconds -> should be 0 at minute updates
   second_ = rtc_hw_.second();
 
   // PrintLn("__RTC Refresh__ ");
@@ -201,27 +208,67 @@ uint8_t RTC::hour() {
  * @param month_Jan_is_1 month with January = 1
  * @param year year
  */
-void RTC::SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_mode, uint8_t dayOfWeek_Sun_is_1, uint8_t day, uint8_t month_Jan_is_1, uint16_t year) {
-  // set RTC HW into 24 hour mode
-  #ifdef MORE_LOGS
-  PrintLn("Time Update Values:");
-  PrintLn("hour_24_hr_mode: ", hour_24_hr_mode);
-  PrintLn("minute: ", minute);
-  PrintLn("second: ", second);
-  PrintLn("dayOfWeek_Sun_is_1: ", dayOfWeek_Sun_is_1);
-  PrintLn("day: ", day);
-  PrintLn("month_Jan_is_1: ", month_Jan_is_1);
-  PrintLn("year: ", year);
-  #endif
-  // Set current time and date
+bool RTC::SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_mode, uint8_t dayOfWeek_Sun_is_1, uint8_t day, uint8_t month_Jan_is_1, uint16_t year) {
+  // unset seconds interrupt
+  SetSecondsInterrupt(/*set = */ false);
+
+  // Set current time and date and 24 hour mode on RTC
   // RTCLib::set(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOfMonth, byte month, byte year)
   rtc_hw_.set(second, minute, hour_24_hr_mode, dayOfWeek_Sun_is_1, day, month_Jan_is_1, year - 2000);
   // refresh time from RTC HW
   Refresh();
   // set RTC HW back into 12 hour mode
   rtc_hw_.set_12hour_mode(true);
-  PrintLn(__func__);
+  // refresh time from RTC HW
   Refresh();
+
+  uint8_t hour_12_hr_mode = 0;
+  if(hour_24_hr_mode == 0)
+    hour_12_hr_mode = 12;
+  else if(hour_24_hr_mode <= 12)
+    hour_12_hr_mode = hour_24_hr_mode;
+  else
+    hour_12_hr_mode = hour_24_hr_mode - 12;
+
+  // check correct updation of time
+  bool update_success = true;
+  uint8_t hr_updated = rtc_hw_.hour();
+  uint8_t min_updated = rtc_hw_.minute();
+  uint8_t sec_updated = rtc_hw_.second();
+  uint8_t doW_updated = rtc_hw_.dayOfWeek();
+  uint8_t day_updated = rtc_hw_.day();
+  uint8_t month_updated = rtc_hw_.month();
+  uint16_t yr_updated = rtc_hw_.year() + 2000;
+  if((hr_updated != hour_12_hr_mode) || (min_updated != minute) || (doW_updated != dayOfWeek_Sun_is_1) || (day_updated != day) || (month_updated != month_Jan_is_1) || (yr_updated != year))
+    update_success = false;
+
+  // re-set seconds interrupt
+  SetSecondsInterrupt(/*set = */ true);
+
+  #ifdef MORE_LOGS
+  if(!update_success) {
+    PrintLn("Time Update Entered:");
+    PrintLn("hour_24_hr_mode: ", hour_24_hr_mode);
+    PrintLn("hour_12_hr_mode: ", hour_12_hr_mode);
+    PrintLn("minute: ", minute);
+    PrintLn("second: ", second);
+    PrintLn("dayOfWeek_Sun_is_1: ", dayOfWeek_Sun_is_1);
+    PrintLn("day: ", day);
+    PrintLn("month_Jan_is_1: ", month_Jan_is_1);
+    PrintLn("year: ", year);
+
+    PrintLn("Time Update After Update:");
+    PrintLn("hr_updated: ", hr_updated);
+    PrintLn("min_updated: ", min_updated);
+    PrintLn("sec_updated: ", sec_updated);
+    PrintLn("doW_updated: ", doW_updated);
+    PrintLn("day_updated: ", day_updated);
+    PrintLn("month_updated: ", month_updated);
+    PrintLn("yr_updated: ", yr_updated);
+  }
+  #endif
+  PrintLn(__func__, (std::string("update_success=") + std::string(update_success ? "true":"false")));
+  return update_success;
 }
 
 void RTC::SetTodaysMinutes() {

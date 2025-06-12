@@ -29,7 +29,7 @@ public:
   * @param month_Jan_is_1 month with January = 1
   * @param year year
   */
-  void SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_mode, uint8_t dayOfWeek_Sun_is_1, uint8_t day, uint8_t month_Jan_is_1, uint16_t year);
+  bool SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_mode, uint8_t dayOfWeek_Sun_is_1, uint8_t day, uint8_t month_Jan_is_1, uint16_t year);
 
   uint8_t second() { return second_; }
   uint8_t minute();
@@ -111,6 +111,8 @@ private:
 
   // private function to refresh time from RTC HW and do basic power failure checks
   void Refresh();
+
+  void SetSecondsInterrupt(bool set = true);
 
   // clock seconds interrupt ISR
   static void IRAM_ATTR SecondsUpdateInterruptISR();

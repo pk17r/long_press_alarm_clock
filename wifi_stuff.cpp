@@ -283,7 +283,6 @@ bool WiFiStuff::GetTimeFromNtpServer() {
 
     ntpClient.begin();
     returnVal = ntpClient.update();
-    PrintLn(__func__, returnVal);
 
     if(returnVal) {
       unsigned long epoch_since_1970 = ntpClient.getEpochTime();
@@ -298,10 +297,13 @@ bool WiFiStuff::GetTimeFromNtpServer() {
       ConvertEpochIntoDate(epoch_since_1970, today, month, year);
 
       // RTC::SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_mode, uint8_t dayOfWeek_Sun_is_1, uint8_t day, uint8_t month_Jan_is_1, uint16_t year)
-      rtc->SetRtcTimeAndDate(seconds, minutes, hours, dayOfWeekSunday0 + 1, today, month, year);
+      returnVal = rtc->SetRtcTimeAndDate(seconds, minutes, hours, dayOfWeekSunday0 + 1, today, month, year);
 
-      last_ntp_server_time_update_time_ms = millis();
-      auto_updated_time_today_ = true;
+      if(returnVal) {
+        last_ntp_server_time_update_time_ms = millis();
+        auto_updated_time_today_ = true;
+      }
+
     }
 
     ntpClient.end();
@@ -328,6 +330,7 @@ bool WiFiStuff::GetTimeFromNtpServer() {
   // TurnWiFiOff();
 
   manual_time_update_successful_ = returnVal;
+  PrintLn(__func__, returnVal);
   return returnVal;
 }
 
