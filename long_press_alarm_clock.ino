@@ -294,11 +294,12 @@ void setup() {
 
   // rename old default owner name
   {
-    const std::string kOwnerName_old = "?";
-    const std::string kOwnerName_new = "<name>";
+    const std::string kOwnerName_old1 = "?";
+    const std::string kOwnerName_old2 = "<name>";
+    const std::string kOwnerName_new = "Adventurer";
     std::string OwnerName_current;
     nvs_preferences->RetrieveOwnerName(OwnerName_current);
-    if(OwnerName_current == kOwnerName_old)
+    if((OwnerName_current == kOwnerName_old1) || (OwnerName_current == kOwnerName_old2))
       nvs_preferences->SaveOwnerName(kOwnerName_new);
   }
 

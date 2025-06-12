@@ -91,10 +91,10 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
     // change the text color to the background color
     tft.setTextColor(kDisplayBackroundColor);
 
-    int16_t title_x0, title_y0;
+    int16_t alarm_time_x0, alarm_time_y0;
     uint16_t title_w, title_h;
     // get bounds of title on tft display (with background color as this causes a blink)
-    tft.getTextBounds(title, 0, 0, &title_x0, &title_y0, &title_w, &title_h);
+    tft.getTextBounds(title, 0, 0, &alarm_time_x0, &alarm_time_y0, &title_w, &title_h);
 
     int16_t title_x = (kTftWidth - title_w) / 2;
     int16_t title_y = kTftHeight * 2 / 9;
@@ -1083,11 +1083,12 @@ void RGBDisplay::DisplayWeatherInfo() {
   if(wifi_stuff->got_weather_info_) {
     tft.setFont(&FreeSans12pt7b);
     tft.setTextColor(kDisplayColorPurple);
-    tft.setCursor(city_x0, city_y0);
-    tft.print(wifi_stuff->city_.c_str());
+    // tft.setCursor(city_x0, city_y0);
+    // tft.print(wifi_stuff->city_.c_str());
 
     tft.setCursor(weather_x0, weather_main_y0);
-    tft.print(wifi_stuff->weather_main_.c_str()); tft.print(" : "); tft.print(wifi_stuff->weather_description_.c_str());
+    // tft.print(wifi_stuff->weather_main_.c_str()); tft.print(" : "); tft.print(wifi_stuff->weather_description_.c_str());
+    tft.print(wifi_stuff->city_.c_str()); tft.print(" : "); tft.print(wifi_stuff->weather_main_.c_str());
 
     tft.setFont(&FreeMono9pt7b);
     tft.setCursor(weather_x0, weather_row2_y0);
@@ -1147,41 +1148,29 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
 
   SetMaxBrightness();
 
-  int16_t title_x0 = 0, title_y0 = 40;
-  int16_t s_x0 = 220, s_y0 = title_y0 + 48;
-  
+  const int16_t alarm_time_x0 = 10, alarm_time_y0 = 90, seconds_y0 = 10;
+  static int16_t seconds_x0 = 220;
+
   if(firstTime) {
     tft.fillScreen(kDisplayBackroundColor);
-    tft.setFont(&Satisfy_Regular24pt7b);
+    tft.setFont(&FreeSansBold48pt7b);
     tft.setTextColor(kDisplayColorYellow);
-    tft.setCursor(title_x0, title_y0);
-    tft.print("WAKE");
-    tft.setCursor(tft.getCursorX() + 5, title_y0);
-    tft.print("UP!");
-    tft.setFont(&FreeSans24pt7b);
-    tft.setCursor(tft.getCursorX() + 5, title_y0);
-    tft.setTextColor(kDisplayDateColor);
+    tft.setCursor(alarm_time_x0, alarm_time_y0);
     if(rtc->hour() < 10)
       tft.print(kCharSpace);
     tft.print(new_display_data_.time_HHMM);
-    tft.setFont(&FreeMonoBold9pt7b);
-    int16_t cursor_x_ampmLabel = tft.getCursorX();
-    tft.print('M');
-    tft.setCursor(cursor_x_ampmLabel, title_y0 / 2);
-    tft.print((new_display_data_.pm_not_am ? 'P' : 'A'));
+    tft.setFont(&FreeSans18pt7b);
+    tft.print((new_display_data_.pm_not_am ? kPmLabel : kAmLabel));
 
     tft.setFont(&FreeMono9pt7b);
     tft.setTextColor(kDisplayColorCyan);
-    char press_button_text1[] = "To turn off Alarm,";
-    char press_button_text2[] = "press button for:";
-    tft.setCursor(10, s_y0 - 18);
-    tft.print(press_button_text1);
-    tft.setCursor(10, s_y0);
-    tft.print(press_button_text2);
-    
+    tft.setCursor(30, seconds_y0);
+    tft.print("Long Press for ");
+    seconds_x0 = tft.getCursorX();
+
     // show today's date
-    tft.setCursor(15, s_y0 + 40);
-    tft.setFont(&FreeSans18pt7b);
+    tft.setCursor(alarm_time_x0, alarm_time_y0 + 50);
+    tft.setFont(&FreeSansBold24pt7b);
     tft.setTextColor(kDisplayDateColor);
     tft.print(new_display_data_.date_str);
 
@@ -1201,10 +1190,10 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
   timer_str[charIndex] = '\0';
 
   // fill rect
-  tft.fillRect(s_x0 - 5, s_y0 - 40, kTftWidth - s_x0 + 5, 46, kDisplayBackroundColor);
+  tft.fillRect(seconds_x0 - 5, 0, kTftWidth - seconds_x0 + 5, seconds_y0 + 2, kDisplayBackroundColor);
 
   // set font
-  tft.setFont(&Satisfy_Regular24pt7b);
+  tft.setFont(&FreeMono9pt7b);
   tft.setTextColor(kDisplayColorCyan);
 
   // home the cursor
@@ -1212,7 +1201,7 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
   // int16_t x = 0, y = 0;
   // tft.getTextBounds(timer_str, 10, 150, &x, &y, &w, &h);
   // Serial.print("\nx "); Serial.print(x); Serial.print(" y "); Serial.print(y); Serial.print(" w "); Serial.print(w); Serial.print(" h "); Serial.println(h); 
-  tft.setCursor(s_x0, s_y0);
+  tft.setCursor(seconds_x0, seconds_y0);
   tft.print(timer_str);
 }
 

@@ -90,7 +90,7 @@ private:
   #endif
 
   const char* kOwnerNameKey = "OwnerName";
-  const std::string kOwnerName = "<name>";
+  const std::string kOwnerName = "Adventurer";
 
   const char* kCityNameKey = "City";
   const std::string kCityName = "";
