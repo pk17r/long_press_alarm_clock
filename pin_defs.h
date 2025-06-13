@@ -123,7 +123,10 @@ extern uint8_t My_Hw_Version;
   const uint8_t DEBUG_PIN = 12;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
   static uint8_t PHOTORESISTOR_PIN() { return 25; }
   static uint8_t RGB_LED_STRIP_PIN() { return 5; }
-
+  const uint8_t TOUCHSCREEN_XP = 16;
+  static uint8_t TOUCHSCREEN_XM_ADC() { return 39; }     // ADC1 GPIO
+  const uint8_t TOUCHSCREEN_YP_ADC = 36;   // ADC1 GPIO
+  const uint8_t TOUCHSCREEN_YM = 4;
 
 #endif
 
