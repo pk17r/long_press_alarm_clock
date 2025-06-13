@@ -674,24 +674,24 @@ void InitializeRgbLed() {
   rgb_strip_led_brightness = nvs_preferences->RetrieveRgbStripLedBrightness();
   rgb_led_strip = new Adafruit_NeoPixel(rgb_strip_led_count, RGB_LED_STRIP_PIN(), NEO_GRB + NEO_KHZ800);
   rgb_led_strip->begin();
-  autorun_rgb_led_strip_mode = nvs_preferences->RetrieveAutorunRgbLedStripMode();
+  autorun_rgb_led_strip_mode = (RgbLedMode)nvs_preferences->RetrieveAutorunRgbLedStripMode();
 }
 
 void RunRgbLedAccordingToSettings() {
   // set rgb led strip
-  if(autorun_rgb_led_strip_mode == 3) { // run rgb led strip all evening + night
+  if(autorun_rgb_led_strip_mode == RGB_LED_AUTO_SUN_DOWN) { // run rgb led strip all evening + night
     if(rtc->todays_minutes >= kEveningTimeMinutes || rtc->todays_minutes < kDayTimeMinutes)
       TurnOnRgbStrip();
     else
       TurnOffRgbStrip();
   }
-  else if(autorun_rgb_led_strip_mode == 2) {  // // run rgb led strip all evening only
+  else if(autorun_rgb_led_strip_mode == RGB_LED_AUTO_EVENING) {  // // run rgb led strip all evening only
     if(rtc->todays_minutes >= kEveningTimeMinutes && rtc->todays_minutes < night_time_minutes)
       TurnOnRgbStrip();
     else
       TurnOffRgbStrip();
   }
-  else if(autorun_rgb_led_strip_mode == 1)
+  else if(autorun_rgb_led_strip_mode == RGB_LED_MANUAL_ON)
     TurnOnRgbStrip();
   else
     TurnOffRgbStrip();
@@ -699,10 +699,10 @@ void RunRgbLedAccordingToSettings() {
 
 const char* RgbLedSettingString() {
   switch (autorun_rgb_led_strip_mode) {
-    case 0: return kManualOffStr;
-    case 1: return kManualOnStr;
-    case 2: return kEveningStr;
-    case 3: return kSunDownStr;
+    case RGB_LED_MANUAL_OFF: return kManualOffStr;
+    case RGB_LED_MANUAL_ON: return kManualOnStr;
+    case RGB_LED_AUTO_EVENING: return kEveningStr;
+    case RGB_LED_AUTO_SUN_DOWN: return kSunDownStr;
     default: return kManualOffStr;
   }
 }
@@ -715,11 +715,7 @@ bool use_photoresistor = false;
 
 int current_rgb_led_strip_index = 0;
 
-/* 0 = manual OFF
- 1 = manual ON
- 2 = autorun at evening
- 3 = autorun at sun-down */
-uint8_t autorun_rgb_led_strip_mode = 2;
+RgbLedMode autorun_rgb_led_strip_mode = RGB_LED_AUTO_EVENING;
 
 // minute of day at which to dim display to night time brightness if not using a LDR
 uint16_t night_time_minutes = 1320;
@@ -1470,11 +1466,11 @@ void SerialUserInput() {
       AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
       break;
     case 'x':   // toggle RGB LED Strip Mode
-      if(autorun_rgb_led_strip_mode < 3)
-        autorun_rgb_led_strip_mode++;
+      if((uint8_t)autorun_rgb_led_strip_mode < 3)
+        autorun_rgb_led_strip_mode = (RgbLedMode)((uint8_t)autorun_rgb_led_strip_mode + 1);
       else
-        autorun_rgb_led_strip_mode = 0;
-      nvs_preferences->SaveAutorunRgbLedStripMode(autorun_rgb_led_strip_mode);
+        autorun_rgb_led_strip_mode = RGB_LED_MANUAL_OFF;
+      nvs_preferences->SaveAutorunRgbLedStripMode((uint8_t)autorun_rgb_led_strip_mode);
       PrintLn(RgbLedSettingString());
       break;
     case 'y':   // Remove KEY NVS Preferences
@@ -2373,11 +2369,11 @@ void ButtonClickAction() {
         ButtonClickUiFeedback(kTurnOn_Delay_TurnOff);
       }
       else if(current_cursor == kRgbLedSettingsPageRgbLedStripMode) {
-        if(autorun_rgb_led_strip_mode < 3)
-          autorun_rgb_led_strip_mode++;
+        if((uint8_t)autorun_rgb_led_strip_mode < 3)
+          autorun_rgb_led_strip_mode = (RgbLedMode)((uint8_t)autorun_rgb_led_strip_mode + 1);
         else
-          autorun_rgb_led_strip_mode = 0;
-        nvs_preferences->SaveAutorunRgbLedStripMode(autorun_rgb_led_strip_mode);
+          autorun_rgb_led_strip_mode = RGB_LED_MANUAL_OFF;
+        nvs_preferences->SaveAutorunRgbLedStripMode((uint8_t)autorun_rgb_led_strip_mode);
         RunRgbLedAccordingToSettings();
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = RgbLedSettingString();
         ButtonClickUiFeedback(kTurnOn_Delay_TurnOff);

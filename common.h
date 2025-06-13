@@ -64,8 +64,13 @@ extern elapsedMillis inactivity_millis;
 extern void TurnOnRgbStrip();
 extern void TurnOffRgbStrip();
 extern bool rgb_led_strip_on;
-
-extern uint8_t autorun_rgb_led_strip_mode;
+enum RgbLedMode {
+  RGB_LED_MANUAL_OFF,
+  RGB_LED_MANUAL_ON,
+  RGB_LED_AUTO_EVENING,
+  RGB_LED_AUTO_SUN_DOWN
+};
+extern RgbLedMode autorun_rgb_led_strip_mode;
 extern int current_rgb_led_strip_index;
 extern uint16_t night_time_minutes;
 
@@ -176,7 +181,7 @@ enum SecondCoreTask {
   kDisconnectWiFi,
   kFirmwareVersionCheck,
   kNoTask    // needs to be last entry ibn the enum -> used to create second_core_task_added_flag_array
-  };
+};
 
 // second core current task
 // extern volatile SecondCoreTask second_core_task;
