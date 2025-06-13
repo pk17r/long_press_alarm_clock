@@ -1069,28 +1069,28 @@ void RGBDisplay::LocationInputsLocalServerPage() {
 
 void RGBDisplay::DisplayWeatherInfo() {
 
-  const int16_t alarm_triggered_page_title_y0 = 50;
-  const int16_t long_press_alarm_seconds_y0 = alarm_triggered_page_title_y0 + 48;
-  const int16_t city_x0 = 200;
-  const int16_t city_y0 = alarm_triggered_page_title_y0 + 88;
   const int16_t weather_x0 = 5;
-  const int16_t weather_main_y0 = long_press_alarm_seconds_y0 + 70;
-  const int16_t weather_row2_y0 = weather_main_y0 + 25;
-  const int16_t weather_row3_y0 = weather_row2_y0 + 20;
-  const int16_t weather_row4_y0 = weather_row3_y0 + 20;
+
+  bool this_page_is_alarm_triggered_page = (current_page == kAlarmTriggeredPage);
+  int16_t weather_main_y0 = (this_page_is_alarm_triggered_page ? 168 : 118);
+  int16_t weather_row1_hidden_y0 = (this_page_is_alarm_triggered_page ? (weather_main_y0 + 5) : (weather_main_y0 + 25));
+  int16_t weather_row2_y0 = weather_row1_hidden_y0 + 20;
+  int16_t weather_row3_y0 = weather_row2_y0 + 20;
+  int16_t weather_row4_y0 = weather_row3_y0 + 20;
 
   // show today's weather
   if(wifi_stuff->got_weather_info_) {
     tft.setFont(&FreeSans12pt7b);
     tft.setTextColor(kDisplayColorPurple);
-    // tft.setCursor(city_x0, city_y0);
-    // tft.print(wifi_stuff->city_.c_str());
 
     tft.setCursor(weather_x0, weather_main_y0);
-    // tft.print(wifi_stuff->weather_main_.c_str()); tft.print(" : "); tft.print(wifi_stuff->weather_description_.c_str());
     tft.print(wifi_stuff->city_.c_str()); tft.print(" : "); tft.print(wifi_stuff->weather_main_.c_str());
 
     tft.setFont(&FreeMono9pt7b);
+    if(!this_page_is_alarm_triggered_page) {
+      tft.setCursor(weather_x0, weather_row1_hidden_y0);
+      tft.print(wifi_stuff->weather_description_.c_str());
+    }
     tft.setCursor(weather_x0, weather_row2_y0);
     tft.print("Temp: "); tft.print(wifi_stuff->weather_temp_.c_str()); tft.print("  Feels: "); tft.print(wifi_stuff->weather_temp_feels_like_.c_str());
     tft.setCursor(weather_x0, weather_row3_y0);
