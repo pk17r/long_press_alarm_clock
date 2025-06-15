@@ -175,29 +175,30 @@ void setup() {
   pinMode(LED_PIN(), OUTPUT);
   LedFeedback(HIGH);
 
-  // WIFI_LED Low
-  if(0x01 == My_Hw_Version) {
-    pinMode(WIFI_LED(), OUTPUT);
-    digitalWrite(WIFI_LED(), LOW);
-  }
-
-  // make all spi CS pins high
-  pinMode(TFT_CS, OUTPUT);
-  digitalWrite(TFT_CS, HIGH);
-
-  pinMode(TS_CS_PIN, OUTPUT);
-  digitalWrite(TS_CS_PIN, HIGH);
-
   // make buzzer pin low
   pinMode(BUZZER_PIN(), OUTPUT);
   digitalWrite(BUZZER_PIN(), LOW);
 
-  // pullup debug pin
-  pinMode(DEBUG_PIN, INPUT_PULLUP);
+  // display spi CS pin high
+  pinMode(TFT_CS, OUTPUT);
+  digitalWrite(TFT_CS, HIGH);
 
   // TFT_RST - pull it low
   pinMode(TFT_RST, OUTPUT);
   digitalWrite(TFT_RST, LOW);
+
+  // pullup debug pin
+  pinMode(DEBUG_PIN, INPUT_PULLUP);
+
+  if(0x01 == My_Hw_Version) {
+    // WIFI_LED Low
+    pinMode(WIFI_LED(), OUTPUT);
+    digitalWrite(WIFI_LED(), LOW);
+
+    // XRP2046 spi CS pin high
+    pinMode(TS_CS_PIN, OUTPUT);
+    digitalWrite(TS_CS_PIN, HIGH);
+  }
 
   // check if in debug mode
   debug_mode = !digitalRead(DEBUG_PIN);
@@ -305,6 +306,10 @@ void setup() {
   }
 
   //////////////////////////////////////////////////
+
+  // audio feedback to user at start
+  alarm_clock->playNote(392, 183, true);
+  alarm_clock->playNote(523, 183, true);
 }
 
 // arduino loop function on core0 - High Priority one with time update tasks
