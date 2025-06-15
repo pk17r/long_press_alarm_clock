@@ -203,8 +203,9 @@ void setup() {
   debug_mode = !digitalRead(DEBUG_PIN);
   // debug_mode = true;
   if(debug_mode) {
+    delay(2000);
     // while(!Serial) { delay(20); };   // Do not uncomment during commit!
-    Serial.println(F("******** DEBUG MODE ******** : watchdog won't be activated!"));
+    Serial.println(F("\n\n******** DEBUG MODE ******** : watchdog won't be activated!"));
   }
   else {
     // enable watchdog reset if not in debug mode

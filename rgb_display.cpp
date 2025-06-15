@@ -204,10 +204,10 @@ uint16_t RGBDisplay::ColorPickerWheel(bool pick_new) {
       while(newIndex == current_random_color_index_)
         newIndex = random(0, kColorPickerWheelSize - 1);
       current_random_color_index_ = newIndex;
+      #ifdef MORE_LOGS
+      PrintLn("ColorPickerWheel newIndex = ", newIndex);
+      #endif
     }
-    #ifdef MORE_LOGS
-    PrintLn("current_random_color_index_ = ", current_random_color_index_);
-    #endif
     return kColorPickerWheelArray[current_random_color_index_];
   }
 }

@@ -175,7 +175,7 @@ void NvsPreferences::RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wi
   preferences.end();
   wifi_ssid = kWiFiSsidString.c_str();
   wifi_password = kWiFiPasswdString.c_str();
-  // if(debug_mode) PrintLn("NVS Memory wifi_password: ", wifi_password.c_str());
+  // PrintLn("NVS Memory wifi_password: ", wifi_password.c_str());
   // PrintLn("WiFi details retrieved from NVS Memory.");
   PrintLn(__func__, wifi_ssid);
 }
@@ -187,10 +187,8 @@ void NvsPreferences::SaveWiFiDetails(std::string wifi_ssid, std::string wifi_pas
   String kWiFiPasswdString = wifi_password.c_str();
   preferences.putString(kWiFiPasswdKey, kWiFiPasswdString);
   preferences.end();
-  // if(debug_mode) {
-  //   PrintLn("NVS Memory wifi_ssid: ", wifi_ssid.c_str());
-  //   PrintLn("NVS Memory wifi_password: ", wifi_password.c_str());
-  // }
+  // PrintLn("NVS Memory wifi_ssid: ", wifi_ssid.c_str());
+  // PrintLn("NVS Memory wifi_password: ", wifi_password.c_str());
   PrintLn(__func__, wifi_ssid);
 }
 

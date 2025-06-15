@@ -14,6 +14,14 @@ RTC::RTC() {
   // Wire.setPins(SDA_PIN(), SCL_PIN());
   URTCLIB_WIRE.begin(SDA_PIN(), SCL_PIN());
 
+  URTCLIB_WIRE.beginTransmission(URTCLIB_ADDRESS);
+  byte response = URTCLIB_WIRE.endTransmission();
+
+  char rtc_addr_hex_char_arr[5];
+  sprintf(rtc_addr_hex_char_arr, "0x%02X", URTCLIB_ADDRESS);
+  std::string print_str = "I2C RTC at " + std::string(rtc_addr_hex_char_arr) + std::string(response == 0 ? " found" : " NOT FOUND");
+  PrintLn(print_str);
+
   // setup DS1307/DS3231 rtc
   RtcSetup();
 
@@ -130,8 +138,10 @@ void RTC::RtcSetup() {
     PrintLn("Oscillator will use VBAT if VCC cuts off.");
   #endif
 
-  // // make RTC class object _second equal to rtcHw second; + 2 seconds to let time synchronization happen on first time 60 seconds hitting
-  // second_ = rtc_hw_.second() + 2;
+  #ifdef MORE_LOGS
+  std::string rtc_time_str = std::to_string(hour()) + ":" + (minute() < 10 ? "0" : "") + std::to_string(minute()) + ":" + (second() < 10 ? "0" : "") + std::to_string(second()) + (hourModeAndAmPm() == 1 ? kAmLabel : (hourModeAndAmPm() == 2 ? kPmLabel : "--")) + ", dayOfWeek(1=Sun)=" + std::to_string(dayOfWeek()) + ", " + std::to_string(month()) + "/" + std::to_string(day()) + "/" + std::to_string(year());
+  PrintLn("RTC Time:", rtc_time_str);
+  #endif
 
   // set seconds interrupt
   SetSecondsInterrupt(/*set = */ true);
