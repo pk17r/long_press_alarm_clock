@@ -125,19 +125,19 @@ public:
 
   // display object
   #if defined(DISPLAY_IS_ST7789V)
-    // Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST);
-    Adafruit_ST7789 tft = Adafruit_ST7789(spi_obj, TFT_CS, TFT_DC, TFT_RST);   // when multiple SPI Peripherals are present then only this works
+    // Adafruit_ST7789 tft = Adafruit_ST7789(DISPLAY_CS, DISPLAY_DC, SPI_MOSI, SPI_CLK, DISPLAY_RES);
+    Adafruit_ST7789 tft = Adafruit_ST7789(spi_obj, DISPLAY_CS, DISPLAY_DC, DISPLAY_RES);   // when multiple SPI Peripherals are present then only this works
   #elif defined(DISPLAY_IS_ST7796)
-    // Adafruit_ST7796 tft = Adafruit_ST7796(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST);
-    Adafruit_ST7796 tft = Adafruit_ST7796(spi_obj, TFT_CS, TFT_DC, TFT_RST);   // when multiple SPI Peripherals are present then only this works
+    // Adafruit_ST7796 tft = Adafruit_ST7796(DISPLAY_CS, DISPLAY_DC, SPI_MOSI, SPI_CLK, DISPLAY_RES);
+    Adafruit_ST7796 tft = Adafruit_ST7796(spi_obj, DISPLAY_CS, DISPLAY_DC, DISPLAY_RES);   // when multiple SPI Peripherals are present then only this works
   #elif defined(DISPLAY_IS_ST7735)
     // For 1.8" TFT with ST7735 using Hardware VSPI Pins COPI and SCK:
-    Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
+    Adafruit_ST7735 tft = Adafruit_ST7735(DISPLAY_CS, DISPLAY_DC, DISPLAY_RES);
   #elif defined(DISPLAY_IS_ILI9341)
-    Adafruit_ILI9341 tft = Adafruit_ILI9341(spi_obj, TFT_DC, TFT_CS, TFT_RST);
+    Adafruit_ILI9341 tft = Adafruit_ILI9341(spi_obj, DISPLAY_DC, DISPLAY_CS, DISPLAY_RES);
   #elif defined(DISPLAY_IS_ILI9488)
     // Use hardware SPI (#13, #12, #11) and the above for CS/DC
-    ILI9488_t3 tft = ILI9488_t3(spi_obj, TFT_CS, TFT_DC, TFT_RST, TFT_COPI, TFT_CLK, TFT_CIPO);
+    ILI9488_t3 tft = ILI9488_t3(spi_obj, DISPLAY_CS, DISPLAY_DC, DISPLAY_RES, SPI_MOSI, SPI_CLK, TFT_CIPO);
   #endif
 
   // redraw full display flag

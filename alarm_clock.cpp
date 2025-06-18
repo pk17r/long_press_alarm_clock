@@ -80,6 +80,7 @@ int16_t AlarmClock::MinutesToAlarm() {
 // If user does not end alarm by ALARM_MAX_ON_TIME_MS milliseconds,
 // it will end alarm on its own.
 void AlarmClock::BuzzAlarmFn() {
+  TurnOnPowerRail();
   // start alarm triggered page
   SetPage(kAlarmTriggeredPage);
   //start buzzer!
@@ -155,6 +156,7 @@ void IRAM_ATTR AlarmClock::PassiveBuzzerTimerISR() {
 }
 
 void AlarmClock::BuzzerEnable() {
+  TurnOnPowerRail();
   // Timer Enable
   #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
   // Code for version 3.x
@@ -242,6 +244,7 @@ void AlarmClock::celebrateSong(int &tone_note_index, unsigned long &next_tone_ch
   // logic.  Without this false value playNote will try to keep waiting for candles
   // to blow out during the celebration song!
 
+  TurnOnPowerRail();
   int duration = 0;
   switch(tone_note_index) {
     case 0: { duration = 183; playNote(392, duration, true); } break;

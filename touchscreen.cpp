@@ -18,7 +18,7 @@ Touchscreen::Touchscreen() {
   }
   #ifdef XPT2046_OPTION
   else if(touchscreen_type == 1) {   // XPT2046
-    touchscreen_ptr_ = new XPT2046_Touchscreen(TS_CS_PIN, TS_IRQ_PIN);
+    touchscreen_ptr_ = new XPT2046_Touchscreen(TS_CS, TS_IRQ);
     touchscreen_ptr_->begin(*spi_obj);
     SetTouchscreenCalibration(xMin, xMax, yMin, yMax);
   }

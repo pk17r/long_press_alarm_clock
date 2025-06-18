@@ -45,7 +45,7 @@ private:
 
 #ifdef XPT2046_OPTION
   // Param 2 - Touch IRQ Pin - interrupt enabled polling
-  // XPT2046_Touchscreen touchscreen_object_{ TS_CS_PIN, TS_IRQ_PIN };
+  // XPT2046_Touchscreen touchscreen_object_{ TS_CS, TS_IRQ };
   XPT2046_Touchscreen* touchscreen_ptr_ = NULL;
 #endif
 

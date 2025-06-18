@@ -255,5 +255,7 @@ extern void PrintLn();
 extern bool AnyButtonPressed();
 extern void LedFeedback(bool value);
 extern void LedFeedbackOnOff();
+extern void TurnOnPowerRail();
+extern void TurnOffPowerRail();
 
 #endif // COMMON_H

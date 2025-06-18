@@ -14,17 +14,17 @@ extern uint8_t My_Hw_Version;
   #define MCU_IS_ESP32
   #define ESP32_DUAL_CORE
 
-  const uint8_t TFT_COPI = 11;
-  const uint8_t TFT_CLK = 12;
-  const uint8_t TFT_CS = 10;
-  const uint8_t TFT_RST = 14;  // Or set to -1 and connect to Arduino RESET pin
-  const uint8_t TFT_DC = 21;
+  const uint8_t SPI_MOSI = 11;
+  const uint8_t SPI_CLK = 12;
+  const uint8_t DISPLAY_CS = 10;
+  const uint8_t DISPLAY_RES = 14;  // Or set to -1 and connect to Arduino RESET pin
+  const uint8_t DISPLAY_DC = 21;
   //  controls TFT Display backlight as output of PWM pin. analogWrite works on PWM not ADC.
-  const uint8_t TFT_BL = 47;
+  const uint8_t DISPLAY_BL = 47;
 
-  const uint8_t TS_CIPO = 13;    // don't connect CIPO (MISO) to Display
-  const uint8_t TS_CS_PIN = 17;
-  const uint8_t TS_IRQ_PIN = 48;
+  const uint8_t SPI_MISO = 13;    // don't connect CIPO (MISO) to Display
+  const uint8_t TS_CS = 17;
+  const uint8_t TS_IRQ = 48;
 
   // Sqw Alarm Interrupt Pin
   static uint8_t SDA_PIN() { return (My_Hw_Version == 0x01 ? 8 : (My_Hw_Version == 0x02 ? 16 : 0xff)); }
@@ -45,6 +45,7 @@ extern uint8_t My_Hw_Version;
   static uint8_t TOUCHSCREEN_XM_ADC() { return (My_Hw_Version == 0x01 ? 7 : (My_Hw_Version == 0x02 ? 9 : 0xff)); }     // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YP_ADC = 3;   // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YM = 20;
+  static uint8_t POWER_RAIL_5V_CONTROL() { return 0xff; }
 
 
 #elif defined(MCU_IS_ESP32_S2_MINI)
@@ -55,17 +56,18 @@ extern uint8_t My_Hw_Version;
   #define MCU_IS_ESP32
   #define ESP32_SINGLE_CORE
 
-  const uint8_t TFT_COPI = 35;
-  const uint8_t TFT_CLK = 36;
-  const uint8_t TFT_CS = 34;
-  const uint8_t TFT_RST = 33;  // Or set to -1 and connect to Arduino RESET pin
-  const uint8_t TFT_DC = 38;
-  //  controls TFT Display backlight as output of PWM pin. analogWrite works on PWM not ADC.
-  const uint8_t TFT_BL = 17;
+  const uint8_t SPI_MOSI = 35;
+  const uint8_t SPI_CLK = 36;
+  const uint8_t SPI_MISO = 37;    // don't connect MISO to Display
 
-  const uint8_t TS_CIPO = 37;    // don't connect CIPO (MISO) to Display
-  const uint8_t TS_CS_PIN = 2;
-  const uint8_t TS_IRQ_PIN = 3;
+  const uint8_t DISPLAY_CS = 34;
+  const uint8_t DISPLAY_RES = 33;  // Or set to -1 and connect to Arduino RESET pin
+  const uint8_t DISPLAY_DC = 38;
+  //  controls TFT Display backlight as output of PWM pin. analogWrite works on PWM not ADC.
+  const uint8_t DISPLAY_BL = 17;
+
+  const uint8_t TS_CS = 2;
+  const uint8_t TS_IRQ = 3;
 
   // Sqw Alarm Interrupt Pin
   static uint8_t SDA_PIN() { return (My_Hw_Version == 0x01 ? 8 : (My_Hw_Version == 0x02 ? 4 : 0xff)); }
@@ -86,6 +88,7 @@ extern uint8_t My_Hw_Version;
   static uint8_t TOUCHSCREEN_XM_ADC() { return 10; }     // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YP_ADC = 9;   // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YM = 13;
+  static uint8_t POWER_RAIL_5V_CONTROL() { return (My_Hw_Version == 0x02 ? 39 : 0xff); }
 
 
 #elif defined(MCU_IS_ESP32_WROOM_DA_MODULE)
@@ -96,17 +99,17 @@ extern uint8_t My_Hw_Version;
   #define MCU_IS_ESP32
   #define ESP32_DUAL_CORE
 
-  const uint8_t TFT_COPI = 23;
-  const uint8_t TFT_CLK = 18;
-  const uint8_t TFT_CS = 16;
-  const uint8_t TFT_RST = 27;  // Or set to -1 and connect to Arduino RESET pin
-  const uint8_t TFT_DC = 26;
+  const uint8_t SPI_MOSI = 23;
+  const uint8_t SPI_CLK = 18;
+  const uint8_t DISPLAY_CS = 16;
+  const uint8_t DISPLAY_RES = 27;  // Or set to -1 and connect to Arduino RESET pin
+  const uint8_t DISPLAY_DC = 26;
   //  controls TFT Display backlight as output of PWM pin. analogWrite works on PWM not ADC.
-  const uint8_t TFT_BL = 14;
+  const uint8_t DISPLAY_BL = 14;
 
-  const uint8_t TS_CIPO = 19;    // don't connect CIPO (MISO) to Display
-  const uint8_t TS_CS_PIN = 33;
-  const uint8_t TS_IRQ_PIN = 34;
+  const uint8_t SPI_MISO = 19;    // don't connect CIPO (MISO) to Display
+  const uint8_t TS_CS = 33;
+  const uint8_t TS_IRQ = 34;
 
   // Sqw Alarm Interrupt Pin
   static uint8_t SDA_PIN() { return 21; }
@@ -127,6 +130,7 @@ extern uint8_t My_Hw_Version;
   static uint8_t TOUCHSCREEN_XM_ADC() { return 39; }     // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YP_ADC = 36;   // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YM = 4;
+  static uint8_t POWER_RAIL_5V_CONTROL() { return 0xff; }
 
 #endif
 

@@ -179,13 +179,17 @@ void setup() {
   pinMode(BUZZER_PIN(), OUTPUT);
   digitalWrite(BUZZER_PIN(), LOW);
 
-  // display spi CS pin high
-  pinMode(TFT_CS, OUTPUT);
-  digitalWrite(TFT_CS, HIGH);
+  // make power rail control high
+  pinMode(POWER_RAIL_5V_CONTROL(), OUTPUT);
+  TurnOnPowerRail();
 
-  // TFT_RST - pull it low
-  pinMode(TFT_RST, OUTPUT);
-  digitalWrite(TFT_RST, LOW);
+  // display spi CS pin high
+  pinMode(DISPLAY_CS, OUTPUT);
+  digitalWrite(DISPLAY_CS, HIGH);
+
+  // DISPLAY_RES - pull it low
+  pinMode(DISPLAY_RES, OUTPUT);
+  digitalWrite(DISPLAY_RES, LOW);
 
   // pullup debug pin
   pinMode(DEBUG_PIN, INPUT_PULLUP);
@@ -196,8 +200,8 @@ void setup() {
     digitalWrite(WIFI_LED(), LOW);
 
     // XRP2046 spi CS pin high
-    pinMode(TS_CS_PIN, OUTPUT);
-    digitalWrite(TS_CS_PIN, HIGH);
+    pinMode(TS_CS, OUTPUT);
+    digitalWrite(TS_CS, HIGH);
   }
 
   // check if in debug mode
@@ -216,7 +220,7 @@ void setup() {
 
   // initialize hardware spi
   spi_obj = new SPIClass(HSPI);
-  spi_obj->begin(TFT_CLK, TS_CIPO, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
+  spi_obj->begin(SPI_CLK, SPI_MISO, SPI_MOSI, DISPLAY_CS); //SCLK, MISO, MOSI, SS
 
   // initialize push button
   push_button = new PushButtonTaps(BUTTON_PIN());
@@ -308,6 +312,7 @@ void setup() {
   //////////////////////////////////////////////////
 
   // audio feedback to user at start
+  TurnOnPowerRail();
   alarm_clock->playNote(392, 183, true);
   alarm_clock->playNote(523, 183, true);
 }
@@ -1565,7 +1570,16 @@ void SetRgbStripColor(uint16_t rgb565_color, bool set_color_sequentially) {
   rgb_led_strip->show();
 }
 
+void TurnOnPowerRail() {
+  digitalWrite(POWER_RAIL_5V_CONTROL(), HIGH);
+}
+
+void TurnOffPowerRail() {
+  digitalWrite(POWER_RAIL_5V_CONTROL(), LOW);
+}
+
 void TurnOnRgbStrip() {
+  TurnOnPowerRail();
   rgb_led_strip->setBrightness(rgb_strip_led_brightness);
   rgb_led_strip->fill(kDefaultLedStripColor, 0, 0);
   rgb_led_strip->show();
@@ -1579,6 +1593,7 @@ void TurnOffRgbStrip() {
   rgb_led_strip->show();
   rgb_led_strip_on = false;
   // PrintLn("TurnOffRgbStrip()");
+  TurnOffPowerRail();
 }
 
 bool AnyButtonPressed() {

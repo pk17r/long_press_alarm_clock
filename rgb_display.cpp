@@ -9,7 +9,7 @@ void RGBDisplay::Setup() {
   /* INITIALIZE DISPLAYS */
 
   // tft display backlight control PWM output pin
-  pinMode(TFT_BL, OUTPUT);
+  pinMode(DISPLAY_BL, OUTPUT);
 
 #if defined(DISPLAY_IS_ST7789V)
 
@@ -109,7 +109,7 @@ void RGBDisplay::RotateScreen() {
 // set display brightness function
 void RGBDisplay::SetBrightness(int brightness) {
   if(current_brightness_ != brightness) {
-    analogWrite(TFT_BL, brightness);
+    analogWrite(DISPLAY_BL, brightness);
     current_brightness_ = brightness;
     #ifdef MORE_LOGS
       PrintLn("Display Brightness set to ", brightness);
