@@ -53,7 +53,6 @@ private:
   // Hardware Timer
   hw_timer_t *passive_buzzer_timer_ptr_ = NULL;
 
-  static inline uint8_t buzzer_pin_ = 0xff;
   static inline uint16_t buzzer_frequency = 2048;
   static inline const unsigned long kBeepLengthMs = 800;
 

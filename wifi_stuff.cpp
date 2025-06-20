@@ -85,7 +85,7 @@ bool WiFiStuff::TurnWiFiOn() {
     PrintLn("WiFiStuff::TurnWiFiOn(): WiFi Connected.");
     #endif
     if(0x01 == My_Hw_Version)
-      digitalWrite(WIFI_LED(), HIGH);
+      digitalWrite(WIFI_LED, HIGH);
     wifi_connected_ = true;
     could_not_connect_to_wifi_ = false;
   }
@@ -94,7 +94,7 @@ bool WiFiStuff::TurnWiFiOn() {
     PrintLn("WiFiStuff::TurnWiFiOn(): Could NOT connect to WiFi.");
     #endif
     if(0x01 == My_Hw_Version)
-      digitalWrite(WIFI_LED(), LOW);
+      digitalWrite(WIFI_LED, LOW);
     wifi_connected_ = false;
     could_not_connect_to_wifi_ = true;
   }
@@ -110,7 +110,7 @@ void WiFiStuff::TurnWiFiOff() {
   delay(1);
   WiFi.disconnect();
   if(0x01 == My_Hw_Version)
-    digitalWrite(WIFI_LED(), LOW);
+    digitalWrite(WIFI_LED, LOW);
   wifi_connected_ = false;
 }
 
@@ -424,7 +424,7 @@ void WiFiStuff::StartSetWiFiSoftAP() {
 
   server->begin();
   if(0x01 == My_Hw_Version)
-    digitalWrite((WIFI_LED()), HIGH);
+    digitalWrite(WIFI_LED, HIGH);
 
   _SoftAPWiFiDetails();
 }
@@ -759,7 +759,7 @@ void WiFiStuff::UpdateFirmware() {
   else
     client.setInsecure();//skip verification
 
-  httpUpdate.setLedPin(LED_PIN(), HIGH);
+  httpUpdate.setLedPin(LED_PIN, HIGH);
 
   // increase watchdog timeout to 90s to accomodate OTA update
   if(!debug_mode) SetWatchdogTime(kWatchdogTimeoutOtaUpdateMs);

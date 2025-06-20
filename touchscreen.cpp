@@ -11,7 +11,7 @@ Touchscreen::Touchscreen() {
   nvs_preferences->RetrieveTouchScreenCalibration(xMin, xMax, yMin, yMax);
 
   if(touchscreen_type == 2) {       // MCU ADC
-    touchscreen_r_ptr_ = new TouchscreenResistive(TOUCHSCREEN_XP, TOUCHSCREEN_XM_ADC(), TOUCHSCREEN_YP_ADC, TOUCHSCREEN_YM, 310);
+    touchscreen_r_ptr_ = new TouchscreenResistive(TOUCHSCREEN_XP, TOUCHSCREEN_XM_ADC, TOUCHSCREEN_YP_ADC, TOUCHSCREEN_YM, 310);
     analogReadResolution(kAdcResolutionBits);
     touchscreen_r_ptr_->setAdcResolutionAndThreshold(kAdcResolutionBits);
     SetTouchscreenCalibration(xMin, xMax, yMin, yMax);

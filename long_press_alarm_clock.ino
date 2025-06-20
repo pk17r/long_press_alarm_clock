@@ -172,15 +172,15 @@ void setup() {
   }
 
   // LED Pin High
-  pinMode(LED_PIN(), OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
   LedFeedback(HIGH);
 
   // make buzzer pin low
-  pinMode(BUZZER_PIN(), OUTPUT);
-  digitalWrite(BUZZER_PIN(), LOW);
+  pinMode(BUZZER_PIN, OUTPUT);
+  digitalWrite(BUZZER_PIN, LOW);
 
   // make power rail control high
-  pinMode(POWER_RAIL_5V_CONTROL(), OUTPUT);
+  pinMode(POWER_RAIL_5V_CONTROL, OUTPUT);
   TurnOnPowerRail();
 
   // display spi CS pin high
@@ -196,8 +196,8 @@ void setup() {
 
   if(0x01 == My_Hw_Version) {
     // WIFI_LED Low
-    pinMode(WIFI_LED(), OUTPUT);
-    digitalWrite(WIFI_LED(), LOW);
+    pinMode(WIFI_LED, OUTPUT);
+    digitalWrite(WIFI_LED, LOW);
 
     // XRP2046 spi CS pin high
     pinMode(TS_CS, OUTPUT);
@@ -225,10 +225,10 @@ void setup() {
   spi_obj->setFrequency(kSpiFrequencyHz);
 
   // initialize push button
-  push_button = new PushButtonTaps(BUTTON_PIN());
+  push_button = new PushButtonTaps(BUTTON_PIN);
   if(My_Hw_Version == 0x01) {
-    inc_button = new PushButtonTaps(INC_BUTTON_PIN());
-    dec_button = new PushButtonTaps(DEC_BUTTON_PIN());
+    inc_button = new PushButtonTaps(INC_BUTTON_PIN);
+    dec_button = new PushButtonTaps(DEC_BUTTON_PIN);
   }
 
   // initialize modules
@@ -685,7 +685,7 @@ void InitializeRgbLed() {
   }
   rgb_strip_led_count = nvs_preferences->RetrieveRgbStripLedCount();
   rgb_strip_led_brightness = nvs_preferences->RetrieveRgbStripLedBrightness();
-  rgb_led_strip = new Adafruit_NeoPixel(rgb_strip_led_count, RGB_LED_STRIP_PIN(), NEO_GRB + NEO_KHZ800);
+  rgb_led_strip = new Adafruit_NeoPixel(rgb_strip_led_count, RGB_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
   rgb_led_strip->begin();
   autorun_rgb_led_strip_mode = (RgbLedMode)nvs_preferences->RetrieveAutorunRgbLedStripMode();
 }
@@ -1573,11 +1573,11 @@ void SetRgbStripColor(uint16_t rgb565_color, bool set_color_sequentially) {
 }
 
 void TurnOnPowerRail() {
-  digitalWrite(POWER_RAIL_5V_CONTROL(), HIGH);
+  digitalWrite(POWER_RAIL_5V_CONTROL, HIGH);
 }
 
 void TurnOffPowerRail() {
-  digitalWrite(POWER_RAIL_5V_CONTROL(), LOW);
+  digitalWrite(POWER_RAIL_5V_CONTROL, LOW);
 }
 
 void TurnOnRgbStrip() {
@@ -1917,7 +1917,7 @@ void LedFeedbackOnOff() {
 }
 
 void LedFeedback(bool value) {
-  digitalWrite(LED_PIN(), value);
+  digitalWrite(LED_PIN, value);
 }
 
 // takes in WiFi Password input using Touchscreen or by creating a SoftAP

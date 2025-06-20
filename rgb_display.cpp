@@ -83,7 +83,7 @@ void RGBDisplay::Setup() {
 
   if(use_photoresistor) {
     // configure Photoresistor pin
-    pinMode(PHOTORESISTOR_PIN(), INPUT);
+    pinMode(PHOTORESISTOR_PIN, INPUT);
     analogReadResolution(kAdcResolutionBits);
   }
   ReAdjustDisplayBrightness();
@@ -132,7 +132,7 @@ void RGBDisplay::SetMaxBrightness() {
 }
 
 void RGBDisplay::CheckPhotoresistorAndSetBrightness() {
-  int photodiode_light_raw = analogRead(PHOTORESISTOR_PIN());
+  int photodiode_light_raw = analogRead(PHOTORESISTOR_PIN);
   // int lcd_brightness_val = max(photodiode_light_raw * kBrightnessInactiveMax / kPhotodiodeLightRawMax, 1);
   int lcd_brightness_val2 = max((int)map(photodiode_light_raw, 0.2 / 3.3 * kPhotodiodeLightRawMax, kPhotodiodeLightRawMax, (kNightBrightness + min_brightness_adder), kBrightnessInactiveMax), (kNightBrightness + min_brightness_adder));
   if(rgb_led_strip_on)

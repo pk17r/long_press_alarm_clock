@@ -30,25 +30,25 @@ extern uint8_t My_Hw_Version;
   const uint8_t TS_IRQ = 3;
 
   // Sqw Alarm Interrupt Pin
-  static uint8_t SDA_PIN() { return 4; }
-  static uint8_t SCL_PIN() { return 5; }
+  const uint8_t SDA_PIN = 4;
+  const uint8_t SCL_PIN = 5;
   const uint8_t SQW_INT_PIN = 7;
-  static uint8_t BUTTON_PIN() { return 8; }
-  static uint8_t INC_BUTTON_PIN() { return 0xff; }
-  static uint8_t DEC_BUTTON_PIN() { return 0xff; }
+  const uint8_t BUTTON_PIN = 8;
+  const uint8_t INC_BUTTON_PIN = 0xff;
+  const uint8_t DEC_BUTTON_PIN = 0xff;
   // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  static uint8_t LED_PIN() { return 2; }
+  const uint8_t LED_PIN = 2;
   // const uint8_t LED_BUILTIN = 15;   // pre-defined
-  static uint8_t WIFI_LED() { return 15; }
-  static uint8_t BUZZER_PIN() { return 40; }
+  const uint8_t WIFI_LED = 15;
+  const uint8_t BUZZER_PIN = 40;
   const uint8_t DEBUG_PIN = 21;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug
-  static uint8_t PHOTORESISTOR_PIN() { return 3; }
-  static uint8_t RGB_LED_STRIP_PIN() { return 1; }
+  const uint8_t PHOTORESISTOR_PIN = 3;
+  const uint8_t RGB_LED_STRIP_PIN = 1;
   const uint8_t TOUCHSCREEN_XP = 12;
-  static uint8_t TOUCHSCREEN_XM_ADC() { return 10; }     // ADC1 GPIO
+  const uint8_t TOUCHSCREEN_XM_ADC = 10;     // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YP_ADC = 9;   // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YM = 13;
-  static uint8_t POWER_RAIL_5V_CONTROL() { return 39; }
+  const uint8_t POWER_RAIL_5V_CONTROL = 39;
 
 
 #elif defined(MCU_IS_ESP32_S3)
@@ -74,47 +74,47 @@ extern uint8_t My_Hw_Version;
   const uint8_t TS_IRQ = 48;
 
   // Sqw Alarm Interrupt Pin
-  static uint8_t SDA_PIN() { return 8; }
-  static uint8_t SCL_PIN() { return 9; }
+  const uint8_t SDA_PIN = 8;
+  const uint8_t SCL_PIN = 9;
   const uint8_t SQW_INT_PIN = 18;
-  static uint8_t BUTTON_PIN() { return 1; }
-  static uint8_t INC_BUTTON_PIN() { return 2; }
-  static uint8_t DEC_BUTTON_PIN() { return 42; }
+  const uint8_t BUTTON_PIN = 1;
+  const uint8_t INC_BUTTON_PIN = 2;
+  const uint8_t DEC_BUTTON_PIN = 42;
   // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  static uint8_t LED_PIN() { return 41; }
-  static uint8_t WIFI_LED() { return 39; }
-  static uint8_t BUZZER_PIN() { return 16; }
+  const uint8_t LED_PIN = 41;
+  const uint8_t WIFI_LED = 39;
+  const uint8_t BUZZER_PIN = 16;
   const uint8_t DEBUG_PIN = 40;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
-  static uint8_t PHOTORESISTOR_PIN() { return 4; }    // ADC1 GPIO
-  static uint8_t RGB_LED_STRIP_PIN() { return 15; }
+  const uint8_t PHOTORESISTOR_PIN = 4;    // ADC1 GPIO
+  const uint8_t RGB_LED_STRIP_PIN = 15;
   // const uint8_t TOUCH_PIN_5 = 5;
   const uint8_t TOUCHSCREEN_XP = 19;
-  static uint8_t TOUCHSCREEN_XM_ADC() { return 7; }     // ADC1 GPIO
+  const uint8_t TOUCHSCREEN_XM_ADC = 7;     // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YP_ADC = 3;   // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YM = 20;
-  static uint8_t POWER_RAIL_5V_CONTROL() { return 0xff; }
+  const uint8_t POWER_RAIL_5V_CONTROL = 0xff;
 
   // HW2 Pinout chosen on Easy EDA - for future reference
   // // Sqw Alarm Interrupt Pin
-  // static uint8_t SDA_PIN() { return 16; }
-  // static uint8_t SCL_PIN() { return 17; }
+  // const uint8_t SDA_PIN = 16;
+  // const uint8_t SCL_PIN = 17;
   // const uint8_t SQW_INT_PIN = 18;
-  // static uint8_t BUTTON_PIN() { return 8; }
-  // static uint8_t INC_BUTTON_PIN() { return 0xff; }
-  // static uint8_t DEC_BUTTON_PIN() { return 0xff; }
+  // const uint8_t BUTTON_PIN = 8;
+  // const uint8_t INC_BUTTON_PIN = 0xff;
+  // const uint8_t DEC_BUTTON_PIN = 0xff;
   // // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  // static uint8_t LED_PIN() { return 6; }
-  // static uint8_t WIFI_LED() { return 0xff; }
-  // static uint8_t BUZZER_PIN() { return 38; }
+  // const uint8_t LED_PIN = 6;
+  // const uint8_t WIFI_LED = 0xff;
+  // const uint8_t BUZZER_PIN = 38;
   // const uint8_t DEBUG_PIN = 40;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
-  // static uint8_t PHOTORESISTOR_PIN() { return 7; }    // ADC1 GPIO
-  // static uint8_t RGB_LED_STRIP_PIN() { return 5; }
+  // const uint8_t PHOTORESISTOR_PIN = 7;    // ADC1 GPIO
+  // const uint8_t RGB_LED_STRIP_PIN = 5;
   // // const uint8_t TOUCH_PIN_5 = 5;
   // const uint8_t TOUCHSCREEN_XP = 19;
-  // static uint8_t TOUCHSCREEN_XM_ADC() { return 9; }     // ADC1 GPIO
+  // const uint8_t TOUCHSCREEN_XM_ADC = 9;     // ADC1 GPIO
   // const uint8_t TOUCHSCREEN_YP_ADC = 3;   // ADC1 GPIO
   // const uint8_t TOUCHSCREEN_YM = 20;
-  // static uint8_t POWER_RAIL_5V_CONTROL() { return 0xff; }
+  // const uint8_t POWER_RAIL_5V_CONTROL = 0xff;
 
 
 #elif defined(MCU_IS_ESP32_S2_MINI)
@@ -141,25 +141,25 @@ extern uint8_t My_Hw_Version;
   const uint8_t TS_IRQ = 3;
 
   // Sqw Alarm Interrupt Pin
-  static uint8_t SDA_PIN() { return 8; }
-  static uint8_t SCL_PIN() { return 9; }
+  const uint8_t SDA_PIN = 8;
+  const uint8_t SCL_PIN = 9;
   const uint8_t SQW_INT_PIN = 7;
-  static uint8_t BUTTON_PIN() { return 6; }
-  static uint8_t INC_BUTTON_PIN() { return 10; }
-  static uint8_t DEC_BUTTON_PIN() { return 11; }
+  const uint8_t BUTTON_PIN = 6;
+  const uint8_t INC_BUTTON_PIN = 10;
+  const uint8_t DEC_BUTTON_PIN = 11;
   // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  static uint8_t LED_PIN() { return 5; }
+  const uint8_t LED_PIN = 5;
   // const uint8_t LED_BUILTIN = 15;   // pre-defined
-  static uint8_t WIFI_LED() { return 15; }
-  static uint8_t BUZZER_PIN() { return 4; }
+  const uint8_t WIFI_LED = 15;
+  const uint8_t BUZZER_PIN = 4;
   const uint8_t DEBUG_PIN = 21;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug
-  static uint8_t PHOTORESISTOR_PIN() { return 1; }
-  static uint8_t RGB_LED_STRIP_PIN() { return 14; }
+  const uint8_t PHOTORESISTOR_PIN = 1;
+  const uint8_t RGB_LED_STRIP_PIN = 14;
   const uint8_t TOUCHSCREEN_XP = 12;
-  static uint8_t TOUCHSCREEN_XM_ADC() { return 10; }     // ADC1 GPIO
+  const uint8_t TOUCHSCREEN_XM_ADC = 10;     // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YP_ADC = 9;   // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YM = 13;
-  static uint8_t POWER_RAIL_5V_CONTROL() { return 0xff; }
+  const uint8_t POWER_RAIL_5V_CONTROL = 0xff;
 
 
 #elif defined(MCU_IS_ESP32_WROOM_DA_MODULE)
@@ -185,25 +185,25 @@ extern uint8_t My_Hw_Version;
   const uint8_t TS_IRQ = 34;
 
   // Sqw Alarm Interrupt Pin
-  static uint8_t SDA_PIN() { return 21; }
-  static uint8_t SCL_PIN() { return 22; }
+  const uint8_t SDA_PIN = 21;
+  const uint8_t SCL_PIN = 22;
   const uint8_t SQW_INT_PIN = 4;
-  static uint8_t BUTTON_PIN() { return 35; }
+  const uint8_t BUTTON_PIN = 35;
   #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  static uint8_t INC_BUTTON_PIN() { return 34; }
-  static uint8_t DEC_BUTTON_PIN() { return 33; }
-  static uint8_t LED_PIN() { return 32; }
+  const uint8_t INC_BUTTON_PIN = 34;
+  const uint8_t DEC_BUTTON_PIN = 33;
+  const uint8_t LED_PIN = 32;
   // const uint8_t LED_BUILTIN = 2;
-  static uint8_t WIFI_LED() { return 2; }
-  static uint8_t BUZZER_PIN() { return 13; }
+  const uint8_t WIFI_LED = 2;
+  const uint8_t BUZZER_PIN = 13;
   const uint8_t DEBUG_PIN = 12;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
-  static uint8_t PHOTORESISTOR_PIN() { return 25; }
-  static uint8_t RGB_LED_STRIP_PIN() { return 5; }
+  const uint8_t PHOTORESISTOR_PIN = 25;
+  const uint8_t RGB_LED_STRIP_PIN = 5;
   const uint8_t TOUCHSCREEN_XP = 16;
-  static uint8_t TOUCHSCREEN_XM_ADC() { return 39; }     // ADC1 GPIO
+  const uint8_t TOUCHSCREEN_XM_ADC = 39;     // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YP_ADC = 36;   // ADC1 GPIO
   const uint8_t TOUCHSCREEN_YM = 4;
-  static uint8_t POWER_RAIL_5V_CONTROL() { return 0xff; }
+  const uint8_t POWER_RAIL_5V_CONTROL = 0xff;
 
 #endif
 
