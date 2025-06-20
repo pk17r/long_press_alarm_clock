@@ -10,7 +10,11 @@
 #include "SPI.h"
 #include <elapsedMillis.h>
 
-#if defined(MCU_IS_ESP32_S3)
+#if defined(MCU_IS_ESP32_S2)
+  const std::string kFirmwareVersion = ESP32_S2_FIRMWARE_VERSION;
+  const std::string kFwSearchStr = "ESP32_S2_FIRMWARE_VERSION";
+  #define CONFIG_FREERTOS_NUMBER_OF_CORES 1       // watchdog timer usage https://iotassistant.io/esp32/fixing-error-hardware-wdt-arduino-esp32/
+#elif defined(MCU_IS_ESP32_S3)
   const std::string kFirmwareVersion = ESP32_S3_FIRMWARE_VERSION;
   const std::string kFwSearchStr = "ESP32_S3_FIRMWARE_VERSION";
   #define CONFIG_FREERTOS_NUMBER_OF_CORES 2

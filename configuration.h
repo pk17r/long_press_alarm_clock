@@ -5,8 +5,9 @@
 
 // SELECT MCU
 
+#define MCU_IS_ESP32_S2
 // #define MCU_IS_ESP32_S3
-#define MCU_IS_ESP32_S2_MINI
+// #define MCU_IS_ESP32_S2_MINI
 // #define MCU_IS_ESP32_WROOM_DA_MODULE
 
 
@@ -26,6 +27,7 @@
 
 // FIRMWARE VERSION   (update these when pushing new MCU specific binaries to github)
 
+#define ESP32_S2_FIRMWARE_VERSION                 "v3.9"
 #define ESP32_S3_FIRMWARE_VERSION                 "v3.9"
 #define ESP32_S2_MINI_FIRMWARE_VERSION            "v3.9"
 #define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "v3.9"

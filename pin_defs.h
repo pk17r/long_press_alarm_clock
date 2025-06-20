@@ -6,7 +6,50 @@
 extern uint8_t My_Hw_Version;
 
 // define pins
-#if defined(MCU_IS_ESP32_S3)
+#if defined(MCU_IS_ESP32_S2)
+
+  // FOR ESP32 S2 with PSRAM MODULE, 4Mb flash gets used upto around 93% with ESP_ARDUINO_VERSION 2.x.x
+  // single core
+
+  #define MCU_IS_ESP32
+  #define ESP32_SINGLE_CORE
+
+  const uint8_t SPI_MOSI = 35;
+  const uint8_t SPI_CLK = 36;
+  const uint8_t SPI_MISO = 37;    // don't connect MISO to Display
+
+  const uint8_t DISPLAY_CS = 34;
+  const uint8_t DISPLAY_RES = 33;  // Or set to -1 and connect to Arduino RESET pin
+  const uint8_t DISPLAY_DC = 38;
+  //  controls TFT Display backlight as output of PWM pin. analogWrite works on PWM not ADC.
+  const uint8_t DISPLAY_BL = 17;
+
+  const uint8_t TS_CS = 2;
+  const uint8_t TS_IRQ = 3;
+
+  // Sqw Alarm Interrupt Pin
+  static uint8_t SDA_PIN() { return (My_Hw_Version == 0x01 ? 8 : (My_Hw_Version == 0x02 ? 4 : 0xff)); }
+  static uint8_t SCL_PIN() { return (My_Hw_Version == 0x01 ? 9 : (My_Hw_Version == 0x02 ? 5 : 0xff)); }
+  const uint8_t SQW_INT_PIN = 7;
+  static uint8_t BUTTON_PIN() { return (My_Hw_Version == 0x01 ? 6 : (My_Hw_Version == 0x02 ? 8 : 0xff)); }
+  static uint8_t INC_BUTTON_PIN() { return (My_Hw_Version == 0x01 ? 10 : 0xff); }
+  static uint8_t DEC_BUTTON_PIN() { return (My_Hw_Version == 0x01 ? 11 : 0xff); }
+  // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
+  static uint8_t LED_PIN() { return (My_Hw_Version == 0x01 ? 5 : (My_Hw_Version == 0x02 ? 2 : 0xff)); }
+  // const uint8_t LED_BUILTIN = 15;   // pre-defined
+  static uint8_t WIFI_LED() { return 15; }
+  static uint8_t BUZZER_PIN() { return (My_Hw_Version == 0x01 ? 4 : (My_Hw_Version == 0x02 ? 40 : 0xff)); }
+  const uint8_t DEBUG_PIN = 21;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug
+  static uint8_t PHOTORESISTOR_PIN() { return (My_Hw_Version == 0x01 ? 1 : (My_Hw_Version == 0x02 ? 3 : 0xff)); }
+  static uint8_t RGB_LED_STRIP_PIN() { return (My_Hw_Version == 0x01 ? 14 : (My_Hw_Version == 0x02 ? 1 : 0xff)); }
+  const uint8_t TOUCHSCREEN_XP = 12;
+  static uint8_t TOUCHSCREEN_XM_ADC() { return 10; }     // ADC1 GPIO
+  const uint8_t TOUCHSCREEN_YP_ADC = 9;   // ADC1 GPIO
+  const uint8_t TOUCHSCREEN_YM = 13;
+  static uint8_t POWER_RAIL_5V_CONTROL() { return (My_Hw_Version == 0x02 ? 39 : 0xff); }
+
+
+#elif defined(MCU_IS_ESP32_S3)
 
   // FOR ESP32 S3 MODULE, with/out OPSI PSRAM, 4Mb flash gets used up around 90% with ESP_ARDUINO_VERSION 2.x.x
   // dual core

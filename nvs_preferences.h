@@ -81,7 +81,9 @@ private:
    *  ESP32 DevKit HW Versions: 1
    */
   const char* kHwVersionKey = "HwVersion";
-  #if defined(MCU_IS_ESP32_S3)
+  #if defined(MCU_IS_ESP32_S2)
+    const uint8_t kHwVersion = 0x02;
+  #elif defined(MCU_IS_ESP32_S3)
     const uint8_t kHwVersion = 0x02;
   #elif defined(MCU_IS_ESP32_S2_MINI)
     const uint8_t kHwVersion = 0x02;
