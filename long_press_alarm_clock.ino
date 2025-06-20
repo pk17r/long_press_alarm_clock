@@ -180,8 +180,10 @@ void setup() {
   digitalWrite(BUZZER_PIN, LOW);
 
   // make power rail control high
-  pinMode(POWER_RAIL_5V_CONTROL, OUTPUT);
-  TurnOnPowerRail();
+  if(0x01 != My_Hw_Version) {
+    pinMode(POWER_RAIL_5V_CONTROL, OUTPUT);
+    TurnOnPowerRail();
+  }
 
   // display spi CS pin high
   pinMode(DISPLAY_CS, OUTPUT);
@@ -1573,11 +1575,13 @@ void SetRgbStripColor(uint16_t rgb565_color, bool set_color_sequentially) {
 }
 
 void TurnOnPowerRail() {
-  digitalWrite(POWER_RAIL_5V_CONTROL, HIGH);
+  if(0x01 != My_Hw_Version)
+    digitalWrite(POWER_RAIL_5V_CONTROL, HIGH);
 }
 
 void TurnOffPowerRail() {
-  digitalWrite(POWER_RAIL_5V_CONTROL, LOW);
+  if(0x01 != My_Hw_Version)
+    digitalWrite(POWER_RAIL_5V_CONTROL, LOW);
 }
 
 void TurnOnRgbStrip() {
