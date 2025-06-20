@@ -24,6 +24,9 @@
   #define CONFIG_FREERTOS_NUMBER_OF_CORES 2
 #endif
 
+const uint32_t kI2CFrequencyHz = 100000;
+const uint32_t kSpiFrequencyHz = 80000000;
+
 // forward decleration of classes
 class RTC;
 class RGBDisplay;

@@ -15,9 +15,8 @@ void RGBDisplay::Setup() {
 
   // OR use this initializer (uncomment) if using a 2.0" 320x240 TFT:
   // tft.init(TFT_HEIGHT, TFT_WIDTH);           // Init ST7789 320x240
-  uint32_t SPI_Speed = 80000000;
   tft.init(kTftHeight, kTftWidth);           // Init ST7789 320x240
-  tft.setSPISpeed(SPI_Speed);
+  tft.setSPISpeed(kSpiFrequencyHz);
   tft.invertDisplay(false);
   screen_orientation_ = nvs_preferences->RetrieveScreenOrientation();
   tft.setRotation(screen_orientation_);

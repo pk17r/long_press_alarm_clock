@@ -221,6 +221,8 @@ void setup() {
   // initialize hardware spi
   spi_obj = new SPIClass(HSPI);
   spi_obj->begin(SPI_CLK, SPI_MISO, SPI_MOSI, DISPLAY_CS); //SCLK, MISO, MOSI, SS
+  spi_obj->setHwCs(true);
+  spi_obj->setFrequency(kSpiFrequencyHz);
 
   // initialize push button
   push_button = new PushButtonTaps(BUTTON_PIN());

@@ -12,7 +12,7 @@ RTC::RTC() {
   // URTCLIB_WIRE.setPins(SDA_PIN(), SCL_PIN());
   // URTCLIB_WIRE = Wire;
   // Wire.setPins(SDA_PIN(), SCL_PIN());
-  URTCLIB_WIRE.begin(SDA_PIN(), SCL_PIN());
+  URTCLIB_WIRE.begin(SDA_PIN(), SCL_PIN(), kI2CFrequencyHz);
 
   URTCLIB_WIRE.beginTransmission(URTCLIB_ADDRESS);
   byte response = URTCLIB_WIRE.endTransmission();
