@@ -76,17 +76,18 @@ private:
 
   /*      HARDWARE VERSION
    *  Sets My_Hw_Version and controls Pin Selection in pin_defs.h for following hardwares:
-   *  ESP32 S3 HW Versions: 1
-   *  ESP32 S2 HW Versions: 1
-   *  ESP32 DevKit HW Versions: 1
+   *  ESP32 S2 (ESP32-S2-MINI-2 N4R2) HW Version: 2
+   *  ESP32 S3 (ESP32-S3-WROOM-1 N8R2) HW Version: 1
+   *  ESP32 S2 (Lolin S2 Mini N4R2) HW Version: 1
+   *  ESP32 DevKit HW Version: 1
    */
   const char* kHwVersionKey = "HwVersion";
   #if defined(MCU_IS_ESP32_S2)
     const uint8_t kHwVersion = 0x02;
   #elif defined(MCU_IS_ESP32_S3)
-    const uint8_t kHwVersion = 0x02;
+    const uint8_t kHwVersion = 0x01;
   #elif defined(MCU_IS_ESP32_S2_MINI)
-    const uint8_t kHwVersion = 0x02;
+    const uint8_t kHwVersion = 0x01;
   #elif defined(MCU_IS_ESP32_WROOM_DA_MODULE)
     const uint8_t kHwVersion = 0x01;
   #endif
