@@ -148,7 +148,7 @@ void WiFiPasswordInputTouchAndNonTouch();
 // setup core1
 void setup() {
 
-  // a delay to let currents stabalize and not have phantom serial inputs
+  // a small delay to let dcdc currents stabalize and not have phantom serial prints
   delay(200);
   Serial.begin(115200);
   // while (!Serial) {
@@ -539,7 +539,7 @@ void loop() {
     #endif
   }
 
-  // accept user serial inputs
+  // accept user inputs
   if (Serial.available() != 0)
     SerialUserInput();
 
@@ -785,17 +785,28 @@ int MinFreeRam() {
 void SerialInputWait() {
   while (Serial.available() == 0) // delay until something is received via serial
     delay(20);
-  delay(20);  // give sometime to MCU to read serial input
+  delay(20);  // give sometime to MCU to read serial
 }
 
 void SerialInputFlush() {
-  delay(20);  // give sometime to MCU to read serial input
+  delay(20);  // give sometime to MCU to read serial
   // if MCU received something, get all of it and discard it
   while (Serial.available()) {
     Serial.read();
-    delay(20);  // give sometime to MCU to read next serial input
+    delay(20);  // give sometime to MCU to read next serial
   }
   // nothing arrived for 20 ms, break off
+}
+
+std::string SerialReadLine() {
+  std::string serial_str;
+  while (Serial.available()) {
+    char c = Serial.read();
+    // only take in human readable text based ASCII characters  https://www.asciitable.com/
+    if((c >= 32)&&(c <= 126))
+      serial_str += c;
+  }
+  return serial_str;
 }
 
 void SerialTimeStampPrefix() {
@@ -1219,20 +1230,63 @@ bool TestTouchscreenCalibrationFn() {
   return false;
 }
 
-/* Take user inputs and configure
+/* Take user inputs, serial inputs and configure
 
   Mostly made for debug purpose
 
   To enable more logs, enable #define MORE_LOGS in configuration.h file
 */
 void SerialUserInput() {
+
   // take user input
-  char input = Serial.read();
-  SerialInputFlush();
-  // acceptable user input
-  std::string s = "User input: ";
-  s += input;
-  PrintLn(s);
+  std::string input_str = SerialReadLine();
+
+  // split string into command and value
+  std::string cmd_str;
+  int32_t val = -1;
+
+  bool bad_input = false;
+  if(input_str.size() > 0) {
+    std::string val_str;
+    bool cmd_chars = true;
+    int char_index = 0;
+    while(char_index < input_str.size()) {
+      char this_char = input_str.at(char_index);
+      // cmd chars
+      if(cmd_chars) {
+        // convert upper case letters to lower case
+        if((this_char >= 65)&&(this_char <= 90))
+          this_char += 32;
+        // check if it is a letter
+        if((this_char >= 97)&&(this_char <= 122)) {
+          cmd_str += this_char;
+        }
+        else {
+          cmd_chars = false;
+        }
+      }
+      // val chars
+      if(!cmd_chars) {
+        // check if it is a number
+        if((this_char >= 48)&&(this_char <= 57)) {
+          val_str += this_char;
+        }
+        else {
+          bad_input = true;
+          break;
+        }
+      }
+      char_index++;
+    }
+    if(val_str.size() > 0)
+      val = std::stoi(val_str);
+  }
+
+  PrintLn("User input:", (input_str + ", cmd:" + cmd_str + ", val:" + std::to_string(val) + std::string(bad_input ? " BadInput!" : "")));
+  if(bad_input)
+    return;
+
+  char input = cmd_str[0];
 
   // process user input
   switch (input) {

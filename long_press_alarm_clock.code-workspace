@@ -1,0 +1,82 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../libraries/uRTCLib"
+		},
+		{
+			"path": "../../.arduino15/packages/esp32/hardware/esp32/2.0.17"
+		},
+		{
+			"path": "../libraries/Adafruit_ST7735_and_ST7789_Library"
+		},
+		{
+			"path": "../libraries/Adafruit_GFX_Library"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"xstring": "cpp",
+			"vector": "cpp",
+			"algorithm": "cpp",
+			"array": "cpp",
+			"bit": "cpp",
+			"cctype": "cpp",
+			"compare": "cpp",
+			"concepts": "cpp",
+			"cstddef": "cpp",
+			"cstdint": "cpp",
+			"cstdio": "cpp",
+			"cstdlib": "cpp",
+			"cstring": "cpp",
+			"cwchar": "cpp",
+			"deque": "cpp",
+			"exception": "cpp",
+			"initializer_list": "cpp",
+			"iosfwd": "cpp",
+			"iterator": "cpp",
+			"limits": "cpp",
+			"new": "cpp",
+			"optional": "cpp",
+			"queue": "cpp",
+			"ranges": "cpp",
+			"span": "cpp",
+			"string": "cpp",
+			"tuple": "cpp",
+			"type_traits": "cpp",
+			"utility": "cpp",
+			"xmemory": "cpp",
+			"xtr1common": "cpp",
+			"xutility": "cpp",
+			"unordered_map": "cpp",
+			"string_view": "cpp",
+			"atomic": "cpp",
+			"clocale": "cpp",
+			"cmath": "cpp",
+			"cstdarg": "cpp",
+			"cwctype": "cpp",
+			"functional": "cpp",
+			"memory": "cpp",
+			"memory_resource": "cpp",
+			"numeric": "cpp",
+			"random": "cpp",
+			"system_error": "cpp",
+			"fstream": "cpp",
+			"istream": "cpp",
+			"ostream": "cpp",
+			"sstream": "cpp",
+			"stdexcept": "cpp",
+			"streambuf": "cpp",
+			"cinttypes": "cpp",
+			"typeinfo": "cpp",
+			"list": "cpp",
+			"unordered_set": "cpp",
+			"format": "cpp",
+			"regex": "cpp",
+			"chrono": "cpp",
+			"mutex": "cpp"
+		}
+	}
+}
