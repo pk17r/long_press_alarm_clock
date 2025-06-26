@@ -1,0 +1,11 @@
+Long Press Alarm Clock
+Power Consumption with Anker Charger (Efficiency ~85%)
+
+Average Electricity Cost per kWh: $0.45
+Daytime - RGB LEDs OFF - 12 hr - $0.0648
+Evening - RGB LEDs ON  -  4 hr - $0.0594
+Night   - RGB LEDs OFF -  8 hr - $0.0270
+
+Monthly Cost @$0.45/kWhr Electricity = $0.1512  (High Cost Electricity Regions)
+Monthly Cost @$0.30/kWhr Electricity = $0.1008  (Medium-High Cost Electricity Regions)
+Monthly Cost @$0.15/kWhr Electricity = $0.0504  (Low-Medium Cost Electricity Regions)
