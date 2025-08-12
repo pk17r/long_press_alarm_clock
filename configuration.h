@@ -30,7 +30,7 @@
 #define ESP32_S2_FIRMWARE_VERSION                 "v4.0"
 #define ESP32_S3_FIRMWARE_VERSION                 "v4.0"
 #define ESP32_S2_MINI_FIRMWARE_VERSION            "v4.0"
-#define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "v3.9"
+#define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "v4.0"
 const std::string kFirmwareDate = "Aug 11, 2025";
 
 const std::string kChangeLog = "- Auto-Fetch of TimeZone!\n- DST Bug Correction\n- Other Improvements";
