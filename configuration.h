@@ -27,9 +27,9 @@
 
 // FIRMWARE VERSION   (update these when pushing new MCU specific binaries to github)
 
-#define ESP32_S2_FIRMWARE_VERSION                 "v4.0"
-#define ESP32_S3_FIRMWARE_VERSION                 "v4.0"
-#define ESP32_S2_MINI_FIRMWARE_VERSION            "v4.0"
+#define ESP32_S2_FIRMWARE_VERSION                 "v4.1"
+#define ESP32_S3_FIRMWARE_VERSION                 "v4.1"
+#define ESP32_S2_MINI_FIRMWARE_VERSION            "v4.1"
 #define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "v4.0"
 const std::string kFirmwareDate = "Aug 11, 2025";
 
