@@ -5,9 +5,9 @@
 
 // SELECT MCU
 
-// #define MCU_IS_ESP32_S2
+#define MCU_IS_ESP32_S2
 // #define MCU_IS_ESP32_S3
-#define MCU_IS_ESP32_S2_MINI
+// #define MCU_IS_ESP32_S2_MINI
 // #define MCU_IS_ESP32_WROOM_DA_MODULE
 
 
@@ -27,11 +27,11 @@
 
 // FIRMWARE VERSION   (update these when pushing new MCU specific binaries to github)
 
-#define ESP32_S2_FIRMWARE_VERSION                 "v4.1"
-#define ESP32_S3_FIRMWARE_VERSION                 "v4.1"
-#define ESP32_S2_MINI_FIRMWARE_VERSION            "v4.1"
-#define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "v4.0"
-const std::string kFirmwareDate = "Aug 11, 2025";
+#define ESP32_S2_FIRMWARE_VERSION                 "v4.0.1"
+#define ESP32_S3_FIRMWARE_VERSION                 "v4.0.1"
+#define ESP32_S2_MINI_FIRMWARE_VERSION            "v4.0.1"
+#define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "v4.0.1"
+const std::string kFirmwareDate = "Aug 20, 2025";
 
 const std::string kChangeLog = "- Auto-Fetch of TimeZone!\n- DST Bug Correction\n- Other Improvements";
 
