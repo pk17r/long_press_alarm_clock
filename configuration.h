@@ -27,7 +27,7 @@
 
 // FIRMWARE VERSION   (update these when pushing new MCU specific binaries to github)
 
-#define ESP32_S2_FIRMWARE_VERSION                 "v4.2.2"
+#define ESP32_S2_FIRMWARE_VERSION                 "v4.2.3"
 #define ESP32_S3_FIRMWARE_VERSION                 "v4.2.1"
 #define ESP32_S2_MINI_FIRMWARE_VERSION            "v4.2.1"
 #define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "v4.2.1"
