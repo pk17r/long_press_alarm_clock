@@ -27,13 +27,13 @@
 
 // FIRMWARE VERSION   (update these when pushing new MCU specific binaries to github)
 
-#define ESP32_S2_FIRMWARE_VERSION                 "v4.2.3"
-#define ESP32_S3_FIRMWARE_VERSION                 "v4.2.1"
-#define ESP32_S2_MINI_FIRMWARE_VERSION            "v4.2.1"
+#define ESP32_S2_FIRMWARE_VERSION                 "v4.3.0"
+#define ESP32_S3_FIRMWARE_VERSION                 "v4.3.0"
+#define ESP32_S2_MINI_FIRMWARE_VERSION            "v4.3.0"
 #define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "v4.2.1"
-const std::string kFirmwareDate = "Aug 25, 2025";
+const std::string kFirmwareDate = "Oct 12, 2025";
 
-const std::string kChangeLog = "- Auto Daylight Savings Time\n- Update WITHOUT WIFI!!\n- POSIX TimeZone Str Fetch!";
+const std::string kChangeLog = "- Busy Symbol, No-WiFi Symbol!\n- Keyboard Enhancements!\n- UI & Software Enhancements";
 
 
 // #define MORE_LOGS
