@@ -65,5 +65,5 @@
 "Etc/Greenwich":"Etc/GMT",
 "Etc/UCT":"Etc/UTC",
 "Etc/Universal":"Etc/UTC",
-"Etc/Zulu":"Etc/UTC",
+"Etc/Zulu":"Etc/UTC"
 }
