@@ -1,0 +1,14 @@
+{
+"Antarctica/Casey":"<+08>-8",
+"Antarctica/Davis":"<+07>-7",
+"Antarctica/DumontDUrville":"<+10>-10",
+"Antarctica/Macquarie":"AEST-10AEDT,M10.1.0,M4.1.0/3",
+"Antarctica/Mawson":"<+05>-5",
+"Antarctica/McMurdo":"NZST-12NZDT,M9.5.0,M4.1.0/3",
+"Antarctica/Palmer":"<-03>3",
+"Antarctica/Rothera":"<-03>3",
+"Antarctica/Syowa":"<+03>-3",
+"Antarctica/Troll":"<+00>0<+02>-2,M3.5.0/1,M10.5.0/3",
+"Antarctica/Vostok":"<+05>-5",
+"Arctic/Longyearbyen":"CET-1CEST,M3.5.0,M10.5.0/3",
+}
